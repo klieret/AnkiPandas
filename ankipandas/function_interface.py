@@ -27,8 +27,10 @@ def get_cards_df(
         Pandas dataframe
     """
     ap = AnkiPandas(path)
-    return ap.cards(
+    df = ap.cards(
         deck_names=deck_names,
         merge_notes=merge_notes,
         expand_fields=expand_fields
     )
+    del ap
+    return df

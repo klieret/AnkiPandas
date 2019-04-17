@@ -126,3 +126,12 @@ class AnkiPandas(object):
 
     def field_names(self, *args, **kwargs):
         return [field["name"] for field in self.fields(*args, **kwargs)]
+
+    def close(self):
+        # Important, so that database doesn't stay locked...
+        self.db.close()
+
+    # Magic methods
+
+    def __del__(self):
+        self.close()
