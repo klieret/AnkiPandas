@@ -27,8 +27,9 @@ class AnkiPandas(object):
             rename_dict = {
                 col: "n_" + col for col in col_clash
             }
-            notes.rename(columns=rename_dict)
-            df = df.merge(notes, left_on="nid", right_on="id")
+            notes.rename(columns=rename_dict, inplace=True)
+            df = df.merge(notes, left_on="nid", right_on="n_id")
+            df.drop(["n_id"], axis=1)
         return df
 
     # todo
