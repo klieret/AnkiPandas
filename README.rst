@@ -1,6 +1,8 @@
 AnkiPandas
 ==========
 
+.. start-body
+
 Installation
 ------------
 
@@ -18,3 +20,5 @@ It's as easy as this:
 Example output:
 
     ...
+
+.. end-body
