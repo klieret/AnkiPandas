@@ -24,18 +24,18 @@ class AnkiPandas(object):
         if merge_notes:
             notes = self.notes(**kwargs)
             col_clash = set(notes.columns) & set(df.columns)
-            col_nonclash = set(notes.columns) - col_clash
-            for col in col_clash:
-                df["n_" + col] = notes[col]
-            for col in col_nonclash:
-                df[col] = notes[col]
+            rename_dict = {
+                col: "n_" + col for col in col_clash
+            }
+            notes.rename(columns=rename_dict)
+            df = df.merge(notes, left_on="nid", right_on="id")
         return df
 
     # todo
     def card(self, cid=None, nid=None, mid=None, *kwargs):
         raise NotImplementedError
 
-    def notes(self, expand_fields=False):
+    def notes(self, expand_fields=True):
         df = pd.read_sql_query("SELECT * FROM notes ", self.db)
         if expand_fields:
             mids = df["mid"].unique()
