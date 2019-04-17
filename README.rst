@@ -1,10 +1,15 @@
-# AnkiPandas
+AnkiPandas
+==========
 
-## Installation
+Installation
+------------
 
-## Usage
+Usage
+-----
 
 It's as easy as this:
+
+.. code:: python
 
     from ankipandas import *
 
