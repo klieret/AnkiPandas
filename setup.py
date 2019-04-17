@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-#!/usr/bin/env python3
-
 # std
 from distutils.core import setup
 # noinspection PyUnresolvedReferences
@@ -24,19 +22,16 @@ this_dir = Path(__file__).resolve().parent
 
 packages = setuptools.find_packages()
 
-# todo: add readme as long_description
-# with (this_dir / "README.rst").open() as fh:
-#     long_description = fh.read()
+with (this_dir / "README.rst").open() as fh:
+    long_description = fh.read()
 
-# todo: add versioning
-# with (this_dir / "clusterking" / "version.txt").open() as vf:
-#     version = vf.read()
+with (this_dir / "ankipandas" / "version.txt").open() as vf:
+    version = vf.read()
 
 setup(
     name='ankipandas',
-    # version=version,
+    version=version,
     packages=packages,
-    # install_requires=install_requires,
     url="https://github.com/klieret/ankipandas",
     project_urls={
         "Bug Tracker": "https://github.com/klieret/ankipandas/issues",
@@ -50,14 +45,14 @@ setup(
     license="MIT",
     keywords=keywords,
     description=description,
-    # long_description=long_description,
-    # long_description_content_type="text/x-rst",
-    # todo: add classifiers
-    # classifiers=[
-    #     "Programming Language :: Python :: 3",
-    #     "License :: OSI Approved :: MIT License",
-    #     "Operating System :: OS Independent",
-    #     "Topic :: Scientific/Engineering :: Physics",
-    #     "Topic :: Scientific/Engineering :: Visualization"
-    # ],
+    long_description=long_description,
+    long_description_content_type="text/x-rst",
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Topic :: Database",
+        "Topic :: Education",
+        "Topic :: Utilities"
+    ],
 )
