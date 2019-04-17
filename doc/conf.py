@@ -148,13 +148,13 @@ print("html_theme='{}'".format(html_theme))
 # documentation.
 # html_theme_options = {}
 
-if html_theme == "sphinx_rtd_theme":
-    html_theme_options = {
-        'logo_only': True
-    }
-else:
-    html_theme_options = {}
-print("html_theme_options={}".format(html_theme_options))
+# if html_theme == "sphinx_rtd_theme":
+#     html_theme_options = {
+#         'logo_only': True
+#     }
+# else:
+#     html_theme_options = {}
+# print("html_theme_options={}".format(html_theme_options))
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -174,7 +174,7 @@ print("html_theme_options={}".format(html_theme_options))
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 
 # Output file base name for HTML help builder.

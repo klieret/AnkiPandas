@@ -5,9 +5,9 @@ Load your anki database as a pandas DataFrame with just one
 line of code!
 
 .. toctree::
-    :maxdepth: 2
-    :caption: First steps
+  :maxdepth: 2
 
-    readme
-
+  readme
+  functions
+  classes
 
