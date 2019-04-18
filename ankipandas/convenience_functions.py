@@ -15,7 +15,6 @@ from typing import Iterable
 import ankipandas.core_functions as apd
 
 
-# todo: automatically find database
 def load_notes(
     path,
     expand_fields=True
@@ -30,6 +29,8 @@ def load_notes(
     Returns:
         Pandas dataframe
     """
+    if not path:
+        path = find_database()
     db = apd.load_db(path)
     df = apd.get_notes(db)
     apd.add_model_names(db, df, inplace=True)
@@ -38,7 +39,6 @@ def load_notes(
     return df
 
 
-# todo: automatically find database
 def load_cards(
     path,
     merge_notes=True,
@@ -56,6 +56,8 @@ def load_cards(
     Returns:
         Pandas dataframe
     """
+    if not path:
+        path = find_database()
     db = apd.load_db(path)
     df = apd.get_cards(db)
     apd.add_deck_names(db, df, inplace=True)
@@ -68,7 +70,6 @@ def load_cards(
     return df
 
 
-# todo: automatically find database
 def load_revs(
     path,
     merge_cards=True,
@@ -89,6 +90,8 @@ def load_revs(
     Returns:
         Pandas dataframe
     """
+    if not path:
+        path = find_database()
     db = apd.load_db(path)
     df = apd.get_revlog(db)
     if merge_cards:
@@ -102,9 +105,17 @@ def load_revs(
     return df
 
 
+# todo: decorator messes up sphinx signature
 @lru_cache(32)
 def _find_database(search_path, maxdepth=6, filename="collection.anki2",
                    break_on_first=False, user=None):
+    """
+    Like find_database but only for one search_path at a time. Also doesn't
+    raise any error, even if the search_path doesn't exist.
+
+    Returns:
+        collection.defaultdict({user: [list of results]})
+    """
     if not os.path.exists(str(search_path)):
         return collections.defaultdict(list)
     found = collections.defaultdict(list)
@@ -121,6 +132,7 @@ def _find_database(search_path, maxdepth=6, filename="collection.anki2",
     return found
 
 
+# todo: decorator messes up sphinx signature
 @lru_cache(32)
 def find_database(
         search_paths=None,
@@ -129,7 +141,22 @@ def find_database(
         user=None,
         break_on_first=True,
         quiet=False
-):
+) -> pathlib.Path:
+    """
+    Find path to anki2 database.
+
+    Args:
+        search_paths: Search path as string or pathlib object or list/iterable
+            thereof. If None, some search paths are set by default.
+        maxdepth: Maximal search depth.
+        filename: Filename of the collection.
+        user: Username to which the collection belongs. If None, search for
+            databases of any user.
+        break_on_first: Stop searching once a database is found.
+
+    Returns:
+        pathlib.Path to the anki2 database
+    """
     if not search_paths:
         # todo: rather use log
         if not quiet:
@@ -191,11 +218,10 @@ def find_database(
     return found
 
 
-def table_help():
+def table_help() -> pd.DataFrame:
     """
     Return a pandas dataframe containing descriptions of every field in the
     anki database.
-
     """
     help_path = pathlib.Path(__file__).parent / "anki_fields.csv"
     df = pd.read_csv(help_path)
