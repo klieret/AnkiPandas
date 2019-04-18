@@ -3,18 +3,18 @@ AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 
 |Build Status| |Coveralls| |Doc Status| |Pypi status| |Chat| |License|
 
-.. |Build Status| image:: https://travis-ci.org/klieret/ankipandas.svg?branch=master
-   :target: https://travis-ci.org/clusterking/clusterking
+.. |Build Status| image:: https://travis-ci.org/klieret/AnkiPandas.svg?branch=master
+   :target: https://travis-ci.org/klieret/AnkiPandas
 
-.. |Coveralls| image:: https://coveralls.io/repos/github/klieret/ankipandas/badge.svg?branch=master
-   :target: https://coveralls.io/github/clusterking/clusterking?branch=master
+.. |Coveralls| image:: https://coveralls.io/repos/github/klieret/AnkiPandas/badge.svg?branch=master
+   :target: https://coveralls.io/github/klieret/AnkiPandas?branch=master
 
 .. |Doc Status| image:: https://readthedocs.org/projects/ankipandas/badge/?version=latest
    :target: https://ankipandas.readthedocs.io/
    :alt: Documentation Status
 
-.. |Pypi Status| image:: https://badge.fury.io/py/clusterking.svg
-    :target: https://badge.fury.io/py/clusterking
+.. |Pypi Status| image:: https://badge.fury.io/py/ankipandas.svg
+    :target: https://badge.fury.io/py/ankipandas
     :alt: Pypi status
 
 .. |Chat| image:: https://img.shields.io/gitter/room/ankipandas/community.svg
