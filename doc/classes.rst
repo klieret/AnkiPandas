@@ -1,7 +1,7 @@
 Classes
 =======
 
-.. autoclass:: ankipandas.AnkiPandas
+.. automodule:: ankipandas.ankipandas
     :members:
     :undoc-members:
 

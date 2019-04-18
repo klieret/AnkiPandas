@@ -43,7 +43,7 @@ def close_db(db):
 # Basic getters
 # ==============================================================================
 
-def get_cards(db):
+def get_cards(db: sqlite3.Connection):
     """
     Get all cards as a dataframe.
 
@@ -56,7 +56,7 @@ def get_cards(db):
     return pd.read_sql_query("SELECT * FROM cards ", db)
 
 
-def get_notes(db):
+def get_notes(db: sqlite3.Connection):
     """
     Get all notes as a dataframe.
 
@@ -69,7 +69,7 @@ def get_notes(db):
     return pd.read_sql_query("SELECT * FROM notes ", db)
 
 
-def get_revlog(db):
+def get_revlog(db: sqlite3.Connection):
     """
     Get the revision log as a dataframe.
 
@@ -83,7 +83,7 @@ def get_revlog(db):
 
 
 @lru_cache(cache_size)
-def get_info(db):
+def get_info(db: sqlite3.Connection):
     """
     Get all other information from the databse, e.g. information about models,
     decks etc.
@@ -111,12 +111,28 @@ def get_info(db):
 
 
 @lru_cache(cache_size)
-def get_deck_info(db):
+def get_deck_info(db: sqlite3.Connection):
+    """ Get information about decks.
+
+    Args:
+        db: Database
+
+    Returns:
+        Nested dictionary
+    """
     return get_info(db)["decks"]
 
 
 @lru_cache(cache_size)
-def get_deck_names(db):
+def get_deck_names(db: sqlite3.Connection):
+    """ Mapping of deck IDs (did) to deck names.
+
+    Args:
+        db: Database
+
+    Returns:
+        Dictionary mapping ``{<did (deck id)>: <deck name>}``
+    """
     dinfo = get_deck_info(db)
     return {
         did: dinfo[did]["name"]
@@ -125,12 +141,28 @@ def get_deck_names(db):
 
 
 @lru_cache(cache_size)
-def get_model_info(db):
+def get_model_info(db: sqlite3.Connection):
+    """ Get information about models.
+
+    Args:
+        db: Database
+
+    Returns:
+        Nested dictionary
+    """
     return get_info(db)["models"]
 
 
 @lru_cache(cache_size)
-def get_model_names(db):
+def get_model_names(db: sqlite3.Connection):
+    """ Mapping of model IDs (mid) to model names.
+
+    Args:
+        db: Database
+
+    Returns:
+        Dictionary mapping ``{<mid (model id)>: <model name>}``
+    """
     minfo = get_model_info(db)
     return {
         mid: minfo[mid]["name"]
@@ -139,7 +171,16 @@ def get_model_names(db):
 
 
 @lru_cache(cache_size)
-def get_field_names(db):
+def get_field_names(db: sqlite3.Connection):
+    """ Get names of the fields in the notes
+
+    Args:
+        db: Databse
+
+    Returns:
+        Dictionary mapping ``{<mid (model id)>: [<field name 1>, ...
+        <field name n>}``
+    """
     minfo = get_model_info(db)
     return {
         mid: [
@@ -155,15 +196,17 @@ def get_field_names(db):
 
 
 def _replace_inplace(df, df_new):
+    """ Replace dataframe 'in place'. """
     df.drop(df.index, inplace=True)
     for col in df_new.columns:
         df[col] = df_new[col]
 
 
-def merge_dfs(df, df_add, id_df, inplace=False, id_add="id", prepend="",
+def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df:str,
+              inplace=False, id_add="id", prepend="",
               prepend_clash_only=True, columns=None, drop_columns=None):
     """
-    Merge information from two dataframes
+    Merge information from two dataframes.
 
     Args:
         df: Original dataframe
@@ -205,8 +248,25 @@ def merge_dfs(df, df_add, id_df, inplace=False, id_add="id", prepend="",
         return df_merge
 
 
-def merge_note_info(db, df, inplace=False, columns=None, drop_columns=None,
+def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
+                    inplace=False, columns=None, drop_columns=None,
                     id_column="nid", prepend="n", prepend_clash_only=True):
+    """ Merge note table into existing dataframe
+
+    Args:
+        db: Database
+        df: Dataframe to merge information into
+        inplace: If False, return new dataframe, else update old one
+        columns: Columns to merge
+        drop_columns: Columns to ignore when merging
+        id_column: Column to match note id onto
+        prepend: Prepend this string to fields from note table
+        prepend_clash_only: Only prepend the ``prepend`` string when column
+            names would otherwise clash.
+
+    Returns:
+        New dataframe if inplace==True, else None
+    """
     return merge_dfs(
         df=df,
         df_add=get_notes(db),
@@ -220,8 +280,24 @@ def merge_note_info(db, df, inplace=False, columns=None, drop_columns=None,
     )
 
 
-def merge_card_info(db, df, inplace=False, columns=None, drop_columns=None,
+def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False, columns=None, drop_columns=None,
                     id_column="cid", prepend="c", prepend_clash_only=True):
+    """
+
+    Args:
+        db: Database
+        df: Dataframe to merge information into
+        inplace: If False, return new dataframe, else update old one
+        columns:  Columns to merge
+        drop_columns:  Columns to ignore when merging
+        id_column: Column to match card id onto
+        prepend: Prepend this string to fields from card table
+        prepend_clash_only: Only prepend the ``prepend`` string when column
+            names would otherwise clash.
+
+    Returns:
+        New dataframe if inplace==True, else None
+    """
     return merge_dfs(
         df=df,
         df_add=get_cards(db),
@@ -235,8 +311,19 @@ def merge_card_info(db, df, inplace=False, columns=None, drop_columns=None,
     )
 
 
-def add_nids(db, df, inplace=False, id_column="cid"):
-    """ Add note IDs to a dataframe that only contains card ids. """
+def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+             id_column="cid"):
+    """ Add note IDs to a dataframe that only contains card ids.
+
+    Args:
+        db: Database
+        df: Dataframe to merge information into
+        inplace: If False, return new dataframe, else update old one
+        id_column: Column with card ID
+
+    Returns:
+        New dataframe if inplace==True, else None
+    """
     if "nid" in df.columns:
         if inplace:
             return
@@ -253,8 +340,18 @@ def add_nids(db, df, inplace=False, id_column="cid"):
     )
 
 
-def add_mids(db, df, inplace=False, id_column="cid"):
-    """ Add note IDs to a dataframe that only contains card ids. """
+def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False, id_column="cid"):
+    """ Add note IDs to a dataframe that only contains note ids.
+
+    Args:
+        db: Database
+        df: Dataframe to merge information into
+        inplace: If False, return new dataframe, else update old one
+        id_column: Column with note ID
+
+    Returns:
+        New dataframe if inplace==True, else None
+    """
     if "mid" in df.columns:
         if inplace:
             return
@@ -277,7 +374,20 @@ def add_mids(db, df, inplace=False, id_column="cid"):
 # Models
 # ------------------------------------------------------------------------------
 
-def add_model_names(db, df, inplace=False, id_column="mid", new_column="mname"):
+def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+                    id_column="mid", new_column="mname"):
+    """
+
+    Args:
+        db: Database
+        df: Dataframe to merge information into
+        inplace: If False, return new dataframe, else update old one
+        id_column: Column with model ID
+        new_column: Name of new column to be added
+
+    Returns:
+        New dataframe if inplace==True, else None
+    """
     if not id_column in df.columns:
         raise ValueError(
             "Could not find id column '{}'. You can specify a custom one using"
@@ -294,7 +404,20 @@ def add_model_names(db, df, inplace=False, id_column="mid", new_column="mname"):
 # ------------------------------------------------------------------------------
 
 
-def add_deck_names(db, df, inplace=False, id_column="did", new_column="dname"):
+def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+                   id_column="did", new_column="dname"):
+    """
+
+    Args:
+        db: Database
+        df: Dataframe to merge information into
+        inplace: If False, return new dataframe, else update old one
+        id_column: Column with deck ID (did)
+        new_column: Name of new column to be added
+
+    Returns:
+        New dataframe if inplace==True, else None
+    """
     if not id_column in df.columns:
         raise ValueError(
             "Could not find id column '{}'. You can specify a custom one using"
@@ -312,7 +435,19 @@ def add_deck_names(db, df, inplace=False, id_column="did", new_column="dname"):
 # ------------------------------------------------------------------------------
 
 
-def add_fields_as_columns(db, df, inplace=False, id_column="mid", prepend=""):
+def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame, inplace=False, id_column="mid", prepend=""):
+    """
+
+    Args:
+        db: Database
+        df: Dataframe to merge information into
+        inplace: If False, return new dataframe, else update old one
+        id_column: Column with note ID
+        prepend: Prepend string to all new column names
+
+    Returns:
+        New dataframe if inplace==True, else None
+    """
     if not id_column in df.columns:
         raise ValueError(
             "Could not find id column '{}'. You can specify a custom one using"
