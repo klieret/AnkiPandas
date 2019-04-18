@@ -41,6 +41,7 @@ setup(
     package_data={
         'ankipandas': ['anki_fields.csv', 'version.txt'],
     },
+    install_requires=["pandas"],
     license="MIT",
     keywords=keywords,
     description=description,
