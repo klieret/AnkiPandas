@@ -3,6 +3,7 @@
 # std
 import os
 import pathlib
+import pandas as pd
 
 # ours
 from ankipandas.ankipandas import AnkiPandas
@@ -113,3 +114,30 @@ def find_database(basepath=None, user=None, search_home=True,
 
     # Everything good
     return anki_path / users[0] / collection_filename
+
+
+def table_help():
+    """
+    Return a pandas dataframe containing descriptions of every field in the
+    anki database.
+
+    """
+    # Display help text on column
+    help_path = pathlib.Path(__file__).parent / "anki_fields.csv"
+    df = pd.read_csv(help_path)
+    return df
+    # fields = df["Name"].unique()
+    # if field:
+    #     if field not in fields:
+    #         print("Field '{}' does not exist.".format(field))
+    #         df = pd.DataFrame()
+    #     else:
+    #         df = df[df["Name"] == field]
+    # tables = [string.split(",") for string in df["Tables"].unique()]
+    # if table:
+    #     if table not in tables:
+    #         print("Table '{}' does not exist.".format(table))
+    #         df = pd.DataFrame()
+    #     else:
+    #         df = df[df["Tables"].str.contains(table)]
+    # return df

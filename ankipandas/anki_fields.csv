@@ -1,0 +1,32 @@
+Name,Tables,Description,Native
+*,Note,Field,FALSE
+csum,Note,Field checksum used for duplicate check: Integer representation of first 8 digits of sha1 hash of the first field,TRUE
+data,"Card, Note",Currently unused,TRUE
+did ,Card,ID of the deck,TRUE
+dname,Card,Name of the card,FALSE
+due,Card," Due is used differently for different card types: new: note id or random int, due: integer day, relative to the collection's creation time, learning: integer timestamp",TRUE
+ease,Revlog,"Which button you pushed to score your recall: review:  1(wrong), 2(hard), 3(ok), 4(easy), learn/relearn:   1(wrong), 2(ok), 3(easy)",TRUE
+factor,"Card, Revlog","The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE
+flags,"Card, Note",Currently unused,TRUE
+flds,Note,Fields of the card as a concatenated string with fields separated by the ``\x1f`` character. The field names can be retrieved from the corresponding model.,TRUE
+guid,Note,"Globally unique id, almost certainly used for syncing",TRUE
+id  ,"Card, Note, Revlog","ID of the card, note or review in the card, note or revlog table (this corresponds to a epoch millisecond time stamp from the creating time)",TRUE
+ivl,"Card, Revlog",The new interval that the card was pushed to after the review. Positive values are in days; negative values are in seconds (for learning cards).,TRUE
+lapses,Card,"The number of times the card went from a ""was answered correctly"" to ""was answered incorrectly"" state",TRUE
+lastIvl,Revlog,Last interval,TRUE
+left,Card,"Of the form ``a*1000+b``, with: ``b`` the number of reps left till graduation and ``a`` the number of reps left today",TRUE
+mid,Note,Model ID,TRUE
+mname,Note,Name of the model,FALSE
+mod,Card,Modification time [epoch seconds],TRUE
+mod,Note,"Modification timestamp, epoch seconds",TRUE
+nid ,Card,ID of the note,TRUE
+odid,Card,Original did: only used when the card is currently in filtered deck,TRUE
+odue,Card,Original due: only used when the card is currently in filtered deck,TRUE
+ord,Card,Identifies which of the card templates the card corresponds to. Valid values are from 0 to num templates – 1,TRUE
+queue,Card,"3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review",TRUE
+reps,Card,Number of reviews,TRUE
+sfld,Note,Content of the sort field.,TRUE
+tags,Note,Tags of the note as space-separated string,TRUE
+time,Revlog,"How many milliseconds your review took, up to 60000 (60s)",TRUE
+type,"Card, Revlog","This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
+usn,"Card, Note",This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE

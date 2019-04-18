@@ -57,9 +57,18 @@ It's as easy as this:
 
     ankipandas.get_cards_df("/path/to/your/anki/adatabase/collection.anki2")
 
-Example output:
+Columns
+-------
 
-    ...
+Get information about the fields in the table:
+
+.. code:: python
+
+    ankipandas.table_help()
+
+Most of this information is from the `ankidroid documentation`_.
+
+.. _ankidroid documentation: https://github.com/ankidroid/Anki-Android/wiki/Database-Structure
 
 Common problems
 ---------------
