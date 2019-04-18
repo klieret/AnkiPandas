@@ -5,7 +5,7 @@ import unittest
 import pathlib
 
 # ours
-from ankipandas.function_interface import get_cards_df, find_database
+from ankipandas.convenience_functions import get_cards_df, find_database
 
 
 class TestDbFinder(unittest.TestCase):

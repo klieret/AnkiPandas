@@ -1,2 +1,2 @@
-from ankipandas.ankipandas import *
-from ankipandas.function_interface import *
+from ankipandas.core_functions import *
+from ankipandas.convenience_functions import *

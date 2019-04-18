@@ -1,5 +1,7 @@
-Functions
-=========
+Convenience Functions
+=====================
 
-.. autofunction:: ankipandas.get_cards_df
+.. automodule:: ankipandas.convenience_functions
+    :members:
+    :undoc-members:
 

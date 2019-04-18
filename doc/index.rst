@@ -8,6 +8,6 @@ line of code!
   :maxdepth: 2
 
   readme
-  functions
-  classes
+  convenience_functions
+  core_functions
 

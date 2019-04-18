@@ -35,12 +35,11 @@ setup(
     url="https://github.com/klieret/ankipandas",
     project_urls={
         "Bug Tracker": "https://github.com/klieret/ankipandas/issues",
-        # todo: add docs
         "Documentation": "https://ankipandas.readthedocs.io/",
         "Source Code": "https://github.com/klieret/ankipandas/",
     },
     package_data={
-        'clusterking': ['git_info.json', 'version.txt'],
+        'ankipandas': ['anki_fields.csv', 'version.txt'],
     },
     license="MIT",
     keywords=keywords,

@@ -1,7 +1,7 @@
-Classes
-=======
+Core Functions
+==============
 
-.. automodule:: ankipandas.ankipandas
+.. automodule:: ankipandas.core_functions
     :members:
     :undoc-members:
 
