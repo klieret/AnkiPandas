@@ -156,9 +156,8 @@ def get_field_names(db):
 
 def _replace_inplace(df, df_new):
     df.drop(df.index, inplace=True)
-    print("new", df_new)
-    df.update(df_new)
-    print("updated", df)
+    for col in df_new.columns:
+        df[col] = df_new[col]
 
 
 def merge_dfs(df, df_add, id_df, inplace=False, id_add="id", prepend="",
@@ -197,10 +196,7 @@ def merge_dfs(df, df_add, id_df, inplace=False, id_add="id", prepend="",
         df_add.drop(set(df_add.columns)-set(columns), axis=1, inplace=True)
     if drop_columns:
         df_add.drop(drop_columns, axis=1, inplace=True)
-    print("original", df)
-    print("add", df_add)
     df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
-    print("merge", df_merge)
     if inplace:
         _replace_inplace(df, df_merge)
     else:
