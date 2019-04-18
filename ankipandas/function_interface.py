@@ -69,7 +69,6 @@ def load_revs(
     return df
 
 
-
 def _find_anki_path(start_path=None):
     raise NotImplementedError
 

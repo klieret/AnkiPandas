@@ -193,8 +193,10 @@ def merge_dfs(df, df_add, id_df, inplace=False, id_add="id", prepend="",
         }
     df_add = df_add.rename(columns=rename_dict)
     if columns:
-        df_add.drop(set(df_add.columns)-set(columns), axis=1, inplace=True)
+        columns = set(columns) | {id_add}
+        df_add.drop(set(df_add.columns)-columns, axis=1, inplace=True)
     if drop_columns:
+        drop_columns = set(drop_columns) - {id_add}
         df_add.drop(drop_columns, axis=1, inplace=True)
     df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
     if inplace:
@@ -235,6 +237,11 @@ def merge_card_info(db, df, inplace=False, columns=None, drop_columns=None,
 
 def add_nids(db, df, inplace=False, id_column="cid"):
     """ Add note IDs to a dataframe that only contains card ids. """
+    if "nid" in df.columns:
+        if inplace:
+            return
+        else:
+            return df
     return merge_dfs(
         df=df,
         df_add=get_cards(db),
@@ -248,6 +255,11 @@ def add_nids(db, df, inplace=False, id_column="cid"):
 
 def add_mids(db, df, inplace=False, id_column="cid"):
     """ Add note IDs to a dataframe that only contains card ids. """
+    if "mid" in df.columns:
+        if inplace:
+            return
+        else:
+            return df
     return merge_dfs(
         df=df,
         df_add=get_notes(db),
