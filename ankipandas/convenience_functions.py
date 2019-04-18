@@ -121,13 +121,13 @@ def _find_database(search_path, maxdepth=6, filename="collection.anki2",
     found = collections.defaultdict(list)
     for root, dirs, files in os.walk(str(search_path)):
         if filename in files:
-            if user and not os.path.basename(root) == user:
+            _user = os.path.basename(root)
+            if user and not _user == user:
                 continue
-            user = os.path.basename(root)
-            found[user].append(pathlib.Path(root) / filename)
+            found[_user].append(pathlib.Path(root) / filename)
             if break_on_first:
                 break
-        if root.count(os.sep) >= maxdepth:
+        if maxdepth and root.count(os.sep) >= maxdepth:
             del dirs[:]
     return found
 
@@ -170,7 +170,7 @@ def find_database(
             "~/Anki2/",
             pathlib.Path.home()
         ]
-    if not isinstance(search_paths, Iterable):
+    if isinstance(search_paths, (str, pathlib.PurePath)):
         search_paths = [search_paths]
     found = {}
     for search_path in search_paths:
@@ -200,19 +200,19 @@ def find_database(
                     ", ".join(found.keys())
                 )
             )
+        elif len(found.keys()) == 0:
+            raise ValueError(
+                "No database found. You might increase the search depth or "
+                "specify search paths to find more."
+            )
         else:
-            found = list(found.values())
+            found = list(found.values())[0]
     if len(found) >= 2:
         raise ValueError(
             "Found more than one database belonging to user {} at {}".format(
                 user,
                 ", ".join(found)
             )
-        )
-    elif len(found) == 0:
-        raise ValueError(
-            "No database found. You might increase the search depth or specify "
-            "search paths to find more."
         )
     found = found[0]
     return found
