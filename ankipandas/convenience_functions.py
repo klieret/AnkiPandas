@@ -6,7 +6,7 @@ import pathlib
 import pandas as pd
 
 # ours
-import ankipandas.ankipandas as apd
+import ankipandas.core_functions as apd
 
 
 def load_notes(

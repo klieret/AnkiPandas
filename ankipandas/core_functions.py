@@ -280,7 +280,8 @@ def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
     )
 
 
-def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False, columns=None, drop_columns=None,
+def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+                    columns=None, drop_columns=None,
                     id_column="cid", prepend="c", prepend_clash_only=True):
     """
 
@@ -340,7 +341,8 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     )
 
 
-def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False, id_column="cid"):
+def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+             id_column="cid"):
     """ Add note IDs to a dataframe that only contains note ids.
 
     Args:
@@ -435,7 +437,8 @@ def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 # ------------------------------------------------------------------------------
 
 
-def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame, inplace=False, id_column="mid", prepend=""):
+def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
+                          inplace=False, id_column="mid", prepend=""):
     """
 
     Args:

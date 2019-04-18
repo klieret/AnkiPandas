@@ -1,4 +1,4 @@
-.swp
+*.swp
 .idea/**
 doc/_build/**
 
