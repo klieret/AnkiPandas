@@ -10,7 +10,8 @@ import pandas as pd
 
 class AnkiPandas(object):
     def __init__(self, path):
-        self.db = sqlite3.connect(path)
+        # str(path) so that we can also give pathlib.Path objects
+        self.db = sqlite3.connect(str(path))
 
     def cards(self, deck_names=True, merge_notes=True, custom_query=None,
               **kwargs):

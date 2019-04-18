@@ -55,7 +55,7 @@ It's as easy as this:
 
     import ankipandas
 
-    ankipandas.get_cards_df("/path/to/your/anki/adatabase")
+    ankipandas.get_cards_df("/path/to/your/anki/adatabase/collection.anki2")
 
 Example output:
 
