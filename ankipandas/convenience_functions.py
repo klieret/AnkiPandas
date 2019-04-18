@@ -102,26 +102,6 @@ def load_revs(
     return df
 
 
-def _find_anki_path(start_path=None):
-    raise NotImplementedError
-
-
-def _find_users(anki_path: pathlib.Path, user=None,
-                collection_filename="collection.anki2"):
-    if user:
-        potential_users = [user]
-    else:
-        potential_users = [
-            f.name for f in os.scandir(str(anki_path)) if f.is_dir()
-        ]
-    users = []
-    for potential_user in potential_users:
-        p = anki_path / potential_user / collection_filename
-        if p.is_file():
-            users.append(potential_user)
-    return users
-
-
 @lru_cache(32)
 def _find_database(search_path, maxdepth=6, filename="collection.anki2",
                    break_on_first=False, user=None):
@@ -188,7 +168,8 @@ def find_database(
     else:
         if len(found.keys()) >= 2:
             raise ValueError(
-                "Found databases for more than one user: {}".format(
+                "Found databases for more than one user: {}. Please specify "
+                "the user.".format(
                     ", ".join(found.keys())
                 )
             )
@@ -216,22 +197,6 @@ def table_help():
     anki database.
 
     """
-    # Display help text on column
     help_path = pathlib.Path(__file__).parent / "anki_fields.csv"
     df = pd.read_csv(help_path)
     return df
-    # fields = df["Name"].unique()
-    # if field:
-    #     if field not in fields:
-    #         print("Field '{}' does not exist.".format(field))
-    #         df = pd.DataFrame()
-    #     else:
-    #         df = df[df["Name"] == field]
-    # tables = [string.split(",") for string in df["Tables"].unique()]
-    # if table:
-    #     if table not in tables:
-    #         print("Table '{}' does not exist.".format(table))
-    #         df = pd.DataFrame()
-    #     else:
-    #         df = df[df["Tables"].str.contains(table)]
-    # return df
