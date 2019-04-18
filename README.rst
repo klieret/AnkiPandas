@@ -1,7 +1,7 @@
 AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 ===========================================================================
 
-|Build Status| |Coveralls| |Doc Status| |Pypi status|
+|Build Status| |Coveralls| |Doc Status| |Pypi status| |Chat| |License|
 
 .. |Build Status| image:: https://travis-ci.org/klieret/ankipandas.svg?branch=master
    :target: https://travis-ci.org/clusterking/clusterking
@@ -16,6 +16,14 @@ AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 .. |Pypi Status| image:: https://badge.fury.io/py/clusterking.svg
     :target: https://badge.fury.io/py/clusterking
     :alt: Pypi status
+
+.. |Chat| image:: https://img.shields.io/gitter/room/ankipandas/community.svg
+   :target: https://gitter.im/ankipandas/community
+   :alt: Gitter
+
+.. |License| image:: https://img.shields.io/github/license/klieret/ankipandas.svg
+   :target: https://github.com/klieret/ankipandas/blob/master/LICENSE.txt
+   :alt: License
 
 .. start-body
 
