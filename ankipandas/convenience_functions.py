@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+""" Convenience functions that allow to load pandas dataframe with all the
+desired columns in just one line of code."""
+
 # std
 import os
 import pathlib

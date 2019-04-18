@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+""" Most of the actual implementation is done with these functions that allow
+a finer control over what is happenin than the convenience functions.
+"""
+
 # std
 import sqlite3
 import json
@@ -9,7 +13,6 @@ import copy
 
 # 3rd
 import pandas as pd
-
 
 cache_size = 32
 
@@ -109,6 +112,8 @@ def get_info(db: sqlite3.Connection):
 # Trivially derived getters
 # ==============================================================================
 
+# todo: Using decorators here causes the function signatures to be messed up
+#  with sphinx but oh well.
 
 @lru_cache(cache_size)
 def get_deck_info(db: sqlite3.Connection):
@@ -131,7 +136,8 @@ def get_deck_names(db: sqlite3.Connection):
         db: Database
 
     Returns:
-        Dictionary mapping ``{<did (deck id)>: <deck name>}``
+        Dictionary mapping of deck id to deck name
+
     """
     dinfo = get_deck_info(db)
     return {
@@ -161,7 +167,7 @@ def get_model_names(db: sqlite3.Connection):
         db: Database
 
     Returns:
-        Dictionary mapping ``{<mid (model id)>: <model name>}``
+        Dictionary mapping of model id to model name
     """
     minfo = get_model_info(db)
     return {
@@ -178,8 +184,7 @@ def get_field_names(db: sqlite3.Connection):
         db: Databse
 
     Returns:
-        Dictionary mapping ``{<mid (model id)>: [<field name 1>, ...
-        <field name n>}``
+        Dictionary mapping of model id to list of field names
     """
     minfo = get_model_info(db)
     return {
