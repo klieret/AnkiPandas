@@ -1,12 +1,16 @@
 AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 ===========================================================================
 
-|Doc Status|
+|Doc Status| |Pypi status|
 
 
 .. |Doc Status| image:: https://readthedocs.org/projects/ankipandas/badge/?version=latest
    :target: https://ankipandas.readthedocs.io/
    :alt: Documentation Status
+
+.. |Pypi Status| image:: https://badge.fury.io/py/clusterking.svg
+    :target: https://badge.fury.io/py/clusterking
+    :alt: Pypi status
 
 .. start-body
 
