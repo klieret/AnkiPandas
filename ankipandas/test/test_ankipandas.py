@@ -5,7 +5,7 @@ import unittest
 import pathlib
 
 # ours
-from ankipandas.convenience_functions import get_cards_df, find_database
+from ankipandas.convenience_functions import get_cards_df, get_database
 
 
 class TestDbFinder(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestDbFinder(unittest.TestCase):
 
     def testFindDb(self):
         self.assertEqual(
-            str(find_database(self.basepath, "few_basic_cards").relative_to(self.basepath)),
+            str(get_database(self.basepath, "few_basic_cards").relative_to(self.basepath)),
             "few_basic_cards/collection.anki2"
         )
 
