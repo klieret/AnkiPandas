@@ -1,6 +1,13 @@
 AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 ===========================================================================
 
+|Doc Status|
+
+
+.. |Doc Status| image:: https://readthedocs.org/projects/ankipandas/badge/?version=latest
+   :target: https://ankipandas.readthedocs.io/
+   :alt: Documentation Status
+
 .. start-body
 
 Description
@@ -9,7 +16,7 @@ Description
 With this small python package, you can easily load all of your Anki flashcards
 as a all-in-one pandas DataFrame!
 
-Pros:
+**Pros**:
 
 * Use all of your mighty pandas tools to data science the heck out of
   your Anki collection
@@ -20,10 +27,9 @@ Pros:
   note model just to find out the field names and contents.
 * Easy installation (does not depend on any anki installation)
 
-Cons:
+**Cons**:
 
-* This package does not aim to write back to your database, there's other
-  (more complex) packages out there that help with that!
+* This package does not aim to write back to your database (yet)
 
 Installation
 ------------
@@ -43,7 +49,7 @@ of this repository:
 .. code:: sh
 
     git clone https://github.com/klieret/ankipandas/
-    cd clusterking
+    cd ankipandas
     pip3 install --user .
 
 Usage
@@ -55,7 +61,22 @@ It's as easy as this:
 
     import ankipandas
 
-    ankipandas.get_cards_df("/path/to/your/anki/adatabase/collection.anki2")
+    ankipandas.load_cards()
+
+And you have a dataframe containing all cards (with all the information from the
+notes, such as all the fields already added to it).
+
+Take a look at the documentation_ to find out more about the parameters.
+
+.. _documentation: https://ankipandas.readthedocs.io/
+
+Similarly there are the functions ``load_notes()`` (just load notes) and
+``load_reflog()`` (to load the dataframe that contains information about
+every review that was ever done). Again, these can be tweaked with parameters,
+but by default include as much information as possible in one dataframe.
+
+If you want to fine-tweak this, take a look at the core functions, which are
+slightly more low-level, but allow you to get to your dataframe step by step.
 
 Columns
 -------
@@ -83,3 +104,4 @@ This software is lienced under the `MIT license`_.
 .. _MIT  license: https://github.com/klieret/ankipandas/blob/master/LICENSE.txt
 
 .. end-body
+
