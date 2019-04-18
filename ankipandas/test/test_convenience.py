@@ -131,5 +131,19 @@ class TestFindDatabase(unittest.TestCase):
         for dir in self.dirs.values():
             dir.cleanup()
 
+
+class TestHelp(unittest.TestCase):
+    def test_table_help(self):
+        df = convenience.table_help()
+        self.assertListEqual(
+            list(df.columns),
+            ["Name", "Tables", "Description", "Native"]
+        )
+        self.assertGreater(
+            len(df),
+            10
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
