@@ -3,6 +3,7 @@
 # std
 import sqlite3
 import json
+import pathlib
 
 # 3rd
 import pandas as pd
@@ -10,8 +11,13 @@ import pandas as pd
 
 class AnkiPandas(object):
     def __init__(self, path):
+        path = pathlib.Path(path)
+        if not path.is_file():
+            raise FileNotFoundError(
+                "Not a file/file not found: {}".format(path)
+            )
         # str(path) so that we can also give pathlib.Path objects
-        self.db = sqlite3.connect(str(path))
+        self.db = sqlite3.connect(str(path.resolve()))
 
     def cards(self, deck_names=True, merge_notes=True, custom_query=None,
               **kwargs):
