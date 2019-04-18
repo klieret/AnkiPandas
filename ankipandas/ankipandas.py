@@ -4,141 +4,321 @@
 import sqlite3
 import json
 import pathlib
+from functools import lru_cache
+import copy
 
 # 3rd
 import pandas as pd
 
 
-class AnkiPandas(object):
-    def __init__(self, path):
-        path = pathlib.Path(path)
-        if not path.is_file():
-            raise FileNotFoundError(
-                "Not a file/file not found: {}".format(path)
-            )
-        # str(path) so that we can also give pathlib.Path objects
-        self.db = sqlite3.connect(str(path.resolve()))
+cache_size = 32
 
-    def cards(self, deck_names=True, merge_notes=True, custom_query=None,
-              **kwargs):
-        if not custom_query:
-            query = "SELECT * FROM cards "
+
+# Open/Close db
+# ==============================================================================
+
+def load_db(path):
+    """
+    Load database from path
+
+    Args:
+        path: String or pathlib path.
+
+    Returns:
+        sqlite connection
+    """
+    path = pathlib.Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(
+            "Not a file/file not found: {}".format(path)
+        )
+    return sqlite3.connect(str(path.resolve()))
+
+
+def close_db(db):
+    """ Close the database. """
+    db.close()
+
+
+# Basic getters
+# ==============================================================================
+
+def get_cards(db):
+    """
+    Get all cards as a dataframe.
+
+    Args:
+        db: Database
+
+    Returns:
+        pandas.DataFrame
+    """
+    return pd.read_sql_query("SELECT * FROM cards ", db)
+
+
+def get_notes(db):
+    """
+    Get all notes as a dataframe.
+
+    Args:
+        db: Database
+
+    Returns:
+        pandas.DataFrame
+    """
+    return pd.read_sql_query("SELECT * FROM notes ", db)
+
+
+def get_revlog(db):
+    """
+    Get the revision log as a dataframe.
+
+    Args:
+        db: Database
+
+    Returns:
+        pandas.DataFrame
+    """
+    return pd.read_sql_query("SELECT * FROM revlog ", db)
+
+
+@lru_cache(cache_size)
+def get_info(db):
+    """
+    Get all other information from the databse, e.g. information about models,
+    decks etc.
+
+    Args:
+        db: Databse
+
+    Returns:
+        Nested dictionary.
+    """
+    _df = pd.read_sql_query("SELECT * FROM col ", db)
+    assert(len(_df) == 1)
+    ret = {}
+    for col in _df.columns:
+        val = _df[col][0]
+        if isinstance(val, str):
+            ret[col] = json.loads(val)
         else:
-            query = custom_query
-        df = pd.read_sql_query(query, self.db)
-        if deck_names:
-            df["deck_name"] = df["did"].map(self.did2name())
-        if merge_notes:
-            notes = self.notes(**kwargs)
-            col_clash = set(notes.columns) & set(df.columns)
-            rename_dict = {
-                col: "n_" + col for col in col_clash
-            }
-            notes.rename(columns=rename_dict, inplace=True)
-            df = df.merge(notes, left_on="nid", right_on="n_id")
-            df.drop(["n_id"], axis=1)
-        return df
+            ret[col] = val
+    return ret
 
-    # todo
-    def card(self, cid=None, nid=None, mid=None, *kwargs):
-        raise NotImplementedError
 
-    def notes(self, expand_fields=True):
-        df = pd.read_sql_query("SELECT * FROM notes ", self.db)
-        if expand_fields:
-            mids = df["mid"].unique()
-            for mid in mids:
-                df_model = df[df["mid"] == mid]
-                fields = df_model["flds"].str.split("\x1f", expand=True)
-                for ifield, field in enumerate(self.field_names(mid=mid)):
-                    df.loc[df["mid"] == mid, field] = fields[ifield]
-            df.drop(["flds"], axis=1)
-        return df
+# Trivially derived getters
+# ==============================================================================
 
-    def note(self, nid=None, cid=None):
-        if len([x for x in [nid, cid] if x is not None]) != 1:
-            raise ValueError(
-                "Please specify either nid (note id) or "
-                "cid (card id)."
-            )
 
-        if nid:
-            return pd.read_sql_query(
-                "SELECT * FROM notes where id == {}".format(nid),
-                self.db
-            )
-        if cid:
-            # todo
-            raise NotImplementedError
+@lru_cache(cache_size)
+def get_deck_info(db):
+    return get_info(db)["decks"]
 
-    def decks(self):
-        _df = pd.read_sql_query("SELECT * FROM col ", self.db)
-        assert(len(_df) == 1)
-        return json.loads(_df["decks"][0])
 
-    def models(self):
-        _df = pd.read_sql_query("SELECT * FROM col ", self.db)
-        assert(len(_df) == 1)
-        return json.loads(_df["models"][0])
+@lru_cache(cache_size)
+def get_deck_names(db):
+    dinfo = get_deck_info(db)
+    return {
+        did: dinfo[did]["name"]
+        for did in dinfo
+    }
 
-    def model(self, mid=None, nid=None, cid=None):
-        """
 
-        Args:
-            mid:
-            nid:
-            cid:
+@lru_cache(cache_size)
+def get_model_info(db):
+    return get_info(db)["models"]
 
-        Returns:
 
-        """
-        if len([x for x in [mid, nid, cid] if x is not None]) != 1:
-            raise ValueError(
-                "Please specify either mid (model id), nid (note id) or "
-                "cid (card id)."
-            )
+@lru_cache(cache_size)
+def get_model_names(db):
+    minfo = get_model_info(db)
+    return {
+        mid: minfo[mid]["name"]
+        for mid in minfo
+    }
 
-        if mid:
-            pass
 
-        if nid:
-            mid = self.note(nid=nid)["mid"][0]
+@lru_cache(cache_size)
+def get_field_names(db):
+    minfo = get_model_info(db)
+    return {
+        mid: [
+            flds["name"] for flds in minfo[mid]["flds"]
+        ]
+        for mid in minfo
+    }
 
-        if cid:
-            mid = self.note(cid=cid)["mid"][0]
 
-        return self.models()[str(mid)]
+# Merging information
+# ==============================================================================
+# todo: inplace passible decorator
 
-    def did2name(self):
-        decks = self.decks()
-        return {
-            int(key): decks[key]["name"]
-            for key in decks
+
+def _replace_inplace(df, df_new):
+    df.drop(df.index, inplace=True)
+    print("new", df_new)
+    df.update(df_new)
+    print("updated", df)
+
+
+def merge_dfs(df, df_add, id_df, inplace=False, id_add="id", prepend="",
+              prepend_clash_only=True, columns=None, drop_columns=None):
+    """
+    Merge information from two dataframes
+
+    Args:
+        df: Original dataframe
+        df_add: Dataframe to be merged with original dataframe
+        id_df: Column of original dataframe that contains the id along which
+            we merge.
+        inplace: If False, return new dataframe, else update old one
+        id_add: Column of the new dataframe that contains the id along which
+            we merge
+        prepend: Prepend a string to the column names from the new dataframe
+        prepend_clash_only: Only prepend string to the column names from the
+            new dataframe if there is a name clash.
+        columns: Keep only these columns
+        drop_columns: Drop these columns
+
+    Returns:
+        New merged dataframe
+    """
+    if prepend_clash_only:
+        col_clash = set(df.columns) & set(df_add.columns)
+        rename_dict = {
+            col: prepend + col for col in col_clash
         }
+    else:
+        rename_dict = {
+            col: prepend + col for col in df_add.columns
+        }
+    df_add = df_add.rename(columns=rename_dict)
+    if columns:
+        df_add.drop(set(df_add.columns)-set(columns), axis=1, inplace=True)
+    if drop_columns:
+        df_add.drop(drop_columns, axis=1, inplace=True)
+    print("original", df)
+    print("add", df_add)
+    df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
+    print("merge", df_merge)
+    if inplace:
+        _replace_inplace(df, df_merge)
+    else:
+        return df_merge
 
-    def fields(self, mid=None, nid=None, cid=None):
-        """
-        Return the fields based on either mid, nid or cid
 
-        Args:
-            mid:
-            nid:
-            cid:
+def merge_note_info(db, df, inplace=False, columns=None, drop_columns=None,
+                    id_column="nid", prepend="n", prepend_clash_only=True):
+    return merge_dfs(
+        df=df,
+        df_add=get_notes(db),
+        id_df=id_column,
+        id_add="nid",
+        inplace=inplace,
+        prepend=prepend,
+        prepend_clash_only=prepend_clash_only,
+        columns=columns,
+        drop_columns=drop_columns
+    )
 
-        Returns:
 
-        """
-        m = self.model(mid=mid, nid=nid, cid=cid)
-        return m["flds"]
+def merge_card_info(db, df, inplace=False, columns=None, drop_columns=None,
+                    id_column="cid", prepend="c", prepend_clash_only=True):
+    return merge_dfs(
+        df=df,
+        df_add=get_cards(db),
+        id_df=id_column,
+        inplace=inplace,
+        columns=columns,
+        drop_columns=drop_columns,
+        id_add="cid",
+        prepend=prepend,
+        prepend_clash_only=prepend_clash_only
+    )
 
-    def field_names(self, *args, **kwargs):
-        return [field["name"] for field in self.fields(*args, **kwargs)]
 
-    def close(self):
-        # Important, so that database doesn't stay locked...
-        self.db.close()
+def add_nids(db, df, inplace=False, id_column="cid"):
+    """ Add note IDs to a dataframe that only contains card ids. """
+    return merge_dfs(
+        df=df,
+        df_add=get_cards(db),
+        id_df=id_column,
+        inplace=inplace,
+        columns=["nid"],
+        id_add="id",
+        prepend="",
+    )
 
-    # Magic methods
 
-    def __del__(self):
-        self.close()
+def add_mids(db, df, inplace=False, id_column="cid"):
+    """ Add note IDs to a dataframe that only contains card ids. """
+    return merge_dfs(
+        df=df,
+        df_add=get_notes(db),
+        id_df=id_column,
+        inplace=inplace,
+        columns=["mid"],
+        id_add="nid",
+        prepend="",
+    )
+
+
+# Predigesting information
+# ==============================================================================
+
+# Models
+# ------------------------------------------------------------------------------
+
+def add_model_names(db, df, inplace=False, id_column="mid", new_column="mname"):
+    if not id_column in df.columns:
+        raise ValueError(
+            "Could not find id column '{}'. You can specify a custom one using"
+            " the id_column option.".format(id_column)
+        )
+    if inplace:
+        df[new_column] = df[id_column].map(get_model_names(db))
+    else:
+        df = copy.deepcopy(df)
+        add_model_names(db, df, inplace=True)
+        return df
+
+# Cards
+# ------------------------------------------------------------------------------
+
+
+def add_deck_names(db, df, inplace=False, id_column="did", new_column="dname"):
+    if not id_column in df.columns:
+        raise ValueError(
+            "Could not find id column '{}'. You can specify a custom one using"
+            " the id_column option.".format(id_column)
+        )
+    if inplace:
+        df[new_column] = df[id_column].map(get_deck_names(db))
+    else:
+        df = copy.deepcopy(df)
+        add_model_names(db, df, id_column=id_column, new_column=new_column,
+                        inplace=True)
+        return df
+
+# Notes
+# ------------------------------------------------------------------------------
+
+
+def add_fields_as_columns(db, df, inplace=False, id_column="mid", prepend=""):
+    if not id_column in df.columns:
+        raise ValueError(
+            "Could not find id column '{}'. You can specify a custom one using"
+            " the id_column option.".format(id_column)
+        )
+    mids = df["mid"].unique()
+    if inplace:
+        for mid in mids:
+            df_model = df[df["mid"] == mid]
+            fields = df_model["flds"].str.split("\x1f", expand=True)
+            for ifield, field in enumerate(get_field_names(db)[str(mid)]):
+                df.loc[df["mid"] == mid, prepend + field] = fields[ifield]
+    else:
+        df = copy.deepcopy(df)
+        add_fields_as_columns(db, df, id_column=id_column, prepend=prepend,
+                              inplace=True)
+        return df

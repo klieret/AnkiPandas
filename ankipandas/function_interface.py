@@ -6,13 +6,23 @@ import pathlib
 import pandas as pd
 
 # ours
-from ankipandas.ankipandas import AnkiPandas
+import ankipandas.ankipandas as apd
 
+
+def load_notes(
+    path,
+    expand_fields=True
+):
+    db = apd.load_db(path)
+    df = apd.get_notes(db)
+    apd.add_model_names(db, df, inplace=True)
+    if expand_fields:
+        apd.add_fields_as_columns(db, df, inplace=True)
+    return df
 
 # todo: automatically find database
-def get_cards_df(
+def load_cards(
     path,
-    deck_names=True,
     merge_notes=True,
     expand_fields=True
 ):
@@ -23,22 +33,41 @@ def get_cards_df(
         path: Path to database
         merge_notes: Merge information from the notes (default True), e.g. all
             of the fields.
-        deck_names: Add a column "deck_names" in addition to the did (deck id)
-            column (default True)
-        expand_fields:
-            When merging notes, epxand the 'flds' column to have a column for
-            every field.
+        expand_fields: When merging notes, epxand the 'flds' column to have a
+            column for every field.
     Returns:
         Pandas dataframe
     """
-    ap = AnkiPandas(path)
-    df = ap.cards(
-        deck_names=deck_names,
-        merge_notes=merge_notes,
-        expand_fields=expand_fields
-    )
-    del ap
+    db = apd.load_db(path)
+    df = apd.get_cards(db)
+    apd.add_deck_names(db, df, inplace=True)
+    if merge_notes:
+        apd.merge_note_info(db, df, inplace=True)
+        apd.add_model_names(db, df, inplace=True)
+    if expand_fields:
+        apd.add_fields_as_columns(db, df, inplace=True)
+    apd.close_db(db)
     return df
+
+
+def load_revs(
+    path,
+    merge_cards=True,
+    merge_notes=True,
+    expand_fields=True
+):
+    db = apd.load_db(path)
+    df = apd.get_revlog(db)
+    if merge_cards:
+        apd.merge_card_info(db, df, inplace=True)
+    if merge_notes:
+        apd.add_nids(db, df, id_column="cid", inplace=True)
+        apd.merge_note_info(db, df, inplace=True)
+        if expand_fields:
+            apd.add_fields_as_columns(db, df, inplace=True)
+    apd.close_db(db)
+    return df
+
 
 
 def _find_anki_path(start_path=None):
