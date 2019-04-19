@@ -10,9 +10,10 @@ import os
 
 # ours
 import ankipandas.convenience_functions as convenience
+from ankipandas.test.shared import *
 
 
-def get_random_string(min_length=5, max_length=10):
+def random_string(min_length=5, max_length=10):
     """
     Get a random string
 
@@ -30,34 +31,44 @@ def get_random_string(min_length=5, max_length=10):
     )
 
 
-def create_random_tree(basedir, prob_file=0.9, prob_folder=0.5, repeat=1,
-                       maxdepth=None):
+
+def create_random_tree(basedir, nfiles=2, nfolders=1, repeat=1,
+                       maxdepth=None, sigma_folders=1, sigma_files=1):
     """
     Create a random set of files and folders by repeatedly walking through the
-    current tree and creating random files or subfolders with a certain kind
-    of probability
-
+    current tree and creating random files or subfolders (the number of files
+    and folders created is chosen from a Gaussian distribution).
     Args:
         basedir: Directory to create files and folders in
-        prob_file: Probability to create a file in a directory
-        prob_folder: Probability to create a
+        nfiles: Average number of files to create
+        nfolders: Average number of folders to create
         repeat: Walk this often through the directory tree to create new
             subdirectories and files
-        maxdepth: Maximum depth to descend into current file tree
-
+        maxdepth: Maximum depth to descend into current file tree. If None,
+            infinity.
+        sigma_folders: Spread of number of folders
+        sigma_files: Spread of number of files
     Returns:
-        None
+       (List of dirs, List of files), all as pathlib.Path objects.
     """
+    alldirs = []
+    allfiles = []
     for i in range(repeat):
         for root, dirs, files in os.walk(str(basedir)):
-            if random.random() < prob_folder:
-                p = Path(root) / get_random_string()
+            for _ in range(int(random.gauss(nfolders, sigma_folders))):
+                p = Path(root) / random_string()
                 p.mkdir(exist_ok=True)
-            if random.random() < prob_file:
-                p = Path(root) / get_random_string()
+                alldirs.append(p)
+            for _ in range(int(random.gauss(nfiles, sigma_files))):
+                p = Path(root) / random_string()
                 p.touch(exist_ok=True)
-            if maxdepth and root.count(os.sep) >= maxdepth:
+                allfiles.append(p)
+            depth = os.path.relpath(root, str(basedir)).count(os.sep)
+            if maxdepth and depth >= maxdepth - 1:
                 del dirs[:]
+    alldirs = list(set(alldirs))
+    allfiles = list(set(allfiles))
+    return alldirs, allfiles
 
 
 def select_random_folders(basedir, n=1):
@@ -122,6 +133,7 @@ class TestFindDatabase(unittest.TestCase):
             convenience.find_database(self.dirs["nothing"].name, break_on_first=False)
         with self.assertRaises(ValueError):
             convenience.find_database(self.dirs["multiple"].name, break_on_first=False)
+            self.dbs["multiple"]
         self.assertEqual(
             str(convenience.find_database(self.dirs["perfect"].name, break_on_first=False)),
             str(self.dbs["perfect"][0])
@@ -144,6 +156,24 @@ class TestHelp(unittest.TestCase):
             10
         )
 
+
+class TestLoaders(unittest.TestCase):
+    def setUp(self):
+        self.path = Path(__file__).parent / "data" / "few_basic_cards" / "collection.anki2"
+
+    def test_load_notes_no_expand(self):
+        notes = convenience.load_notes(self.path, expand_fields=False)
+        self.assertEqual(
+            sorted(list(notes.columns)),
+            sorted(note_cols + ["mname"])
+        )
+
+    def test_load_notes_expand(self):
+        notes = convenience.load_notes(self.path, expand_fields=True)
+        self.assertEqual(
+            sorted(list(notes.columns)),
+            sorted(note_cols + ["mname", "Front", "Back"])
+        )
 
 if __name__ == "__main__":
     unittest.main()

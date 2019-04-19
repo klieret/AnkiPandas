@@ -9,6 +9,7 @@ import copy
 from ankipandas.core_functions import *
 # for hidden
 import ankipandas.core_functions as core_functions
+from ankipandas.test.shared import revlog_cols, note_cols, card_cols
 
 
 class TestCoreFunctions(unittest.TestCase):
@@ -18,52 +19,6 @@ class TestCoreFunctions(unittest.TestCase):
             "collection.anki2"
         )
 
-        # todo: could also get this from anki_fields.txt
-        self.card_cols = [
-            'id',
-            'nid',
-            'did',
-            'ord',
-            'mod',
-            'usn',
-            'type',
-            'queue',
-            'due',
-            'ivl',
-            'factor',
-            'reps',
-            'lapses',
-            'left',
-            'odue',
-            'odid',
-            'flags',
-            'data'
-        ]
-        self.note_cols = [
-            'id',
-            'guid',
-            'mid',
-            'mod',
-            'usn',
-            'tags',
-            'flds',
-            'sfld',
-            'csum',
-            'flags',
-            'data',
-        ]
-        self.revlog_cols = [
-            'id',
-            'cid',
-            'usn',
-            'ease',
-            'ivl',
-            'lastIvl',
-            'factor',
-            'time',
-            'type'
-        ]
-
     def tearDown(self):
         close_db(self.db)
 
@@ -72,7 +27,7 @@ class TestCoreFunctions(unittest.TestCase):
         self.assertEqual(len(cards), 3)
         self.assertEqual(
             list(sorted(cards.columns)),
-            sorted(self.card_cols)
+            sorted(card_cols)
         )
 
     def test_get_notes(self):
@@ -80,7 +35,7 @@ class TestCoreFunctions(unittest.TestCase):
         self.assertEqual(len(notes), 2)
         self.assertEqual(
             list(sorted(notes.columns)),
-            sorted(self.note_cols)
+            sorted(note_cols)
         )
 
     def test_get_revlog(self):
@@ -88,7 +43,7 @@ class TestCoreFunctions(unittest.TestCase):
         # todo assert length
         self.assertEqual(
             list(sorted(revlog.columns)),
-            sorted(self.revlog_cols)
+            sorted(revlog_cols)
         )
 
     def test_get_deck_info(self):
@@ -130,7 +85,7 @@ class TestCoreFunctions(unittest.TestCase):
         self.assertListEqual(
             sorted(list(merged.columns)),
             sorted(list(
-                set(self.card_cols) | set(self.note_cols) |
+                set(card_cols) | set(note_cols) |
                 {"ndata", "nflags", "nmod", "nusn"}  # clashes
             ))
         )
@@ -141,7 +96,7 @@ class TestCoreFunctions(unittest.TestCase):
         self.assertListEqual(
             sorted(list(merged.columns)),
             sorted(list(
-                set(self.revlog_cols) | set(self.card_cols) |
+                set(revlog_cols) | set(card_cols) |
                 {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
             ))
         )
@@ -186,7 +141,7 @@ class TestCoreFunctions(unittest.TestCase):
         notes = add_model_names(self.db, notes)
         self.assertEqual(
             sorted(list(notes.columns)),
-            sorted(self.note_cols + ["mname", "Front", "Back"])
+            sorted(note_cols + ["mname", "Front", "Back"])
         )
         self.assertEqual(
             list(notes.query("mname=='Basic'")["Front"].unique()),
