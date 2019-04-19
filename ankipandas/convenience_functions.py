@@ -64,8 +64,8 @@ def load_cards(
     if merge_notes:
         apd.merge_note_info(db, df, inplace=True)
         apd.add_model_names(db, df, inplace=True)
-    if expand_fields:
-        apd.add_fields_as_columns(db, df, inplace=True)
+        if expand_fields:
+            apd.add_fields_as_columns(db, df, inplace=True)
     apd.close_db(db)
     return df
 

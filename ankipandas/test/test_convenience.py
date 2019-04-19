@@ -175,5 +175,23 @@ class TestLoaders(unittest.TestCase):
             sorted(note_cols + ["mname", "Front", "Back"])
         )
 
+    def test_load_cards(self):
+        cards = convenience.load_cards(self.path)
+        self.assertEqual(
+            sorted(list(cards.columns)),
+            sorted(list(set(
+                card_cols + note_cols + ["dname", "mname", "Front", "Back"] +
+                ["ndata", "nflags", "nmod", "nusn"]
+            )))  # clashes
+        )
+
+    def test_load_cards_nomerge(self):
+        cards = convenience.load_cards(self.path, merge_notes=False)
+        self.assertEqual(
+            sorted(list(cards.columns)),
+            sorted(card_cols + ["dname"])
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
