@@ -200,14 +200,16 @@ def get_field_names(db: sqlite3.Connection):
 # todo: inplace passible decorator
 
 
-def _replace_inplace(df, df_new):
+def _replace_df_inplace(df, df_new):
     """ Replace dataframe 'in place'. """
     df.drop(df.index, inplace=True)
     for col in df_new.columns:
         df[col] = df_new[col]
+    drop_cols = set(df.columns) - set(df_new.columns)
+    df.drop(drop_cols, axis=1, inplace=True)
 
 
-def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df:str,
+def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
               inplace=False, id_add="id", prepend="",
               prepend_clash_only=True, columns=None, drop_columns=None):
     """
@@ -230,6 +232,16 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df:str,
     Returns:
         New merged dataframe
     """
+    # Careful: Do not drop the id column until later (else we can't merge)
+    # Still, we want to remove as much as possible here, because it's probably
+    # better performing
+    if columns:
+        df_add = df_add.drop(
+            set(df_add.columns)-(set(columns) | {id_add}), axis=1
+        )
+    if drop_columns:
+        df_add = df_add.drop(set(drop_columns) - {id_add}, axis=1)
+    # Careful: Rename columns after dropping unwanted ones
     if prepend_clash_only:
         col_clash = set(df.columns) & set(df_add.columns)
         rename_dict = {
@@ -240,15 +252,17 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df:str,
             col: prepend + col for col in df_add.columns
         }
     df_add = df_add.rename(columns=rename_dict)
-    if columns:
-        columns = set(columns) | {id_add}
-        df_add.drop(set(df_add.columns)-columns, axis=1, inplace=True)
-    if drop_columns:
-        drop_columns = set(drop_columns) - {id_add}
-        df_add.drop(drop_columns, axis=1, inplace=True)
+    # Careful: Might have renamed id_add as well
+    if id_add in rename_dict:
+        id_add = rename_dict[id_add]
     df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
+    # Now remove id_add if it was to be removed
+    # Careful: 'in' doesn't work with None
+    if (columns and id_add not in columns) or \
+            (drop_columns and id_add in drop_columns):
+        df_merge.drop(id_add, axis=1, inplace=True)
     if inplace:
-        _replace_inplace(df, df_merge)
+        _replace_df_inplace(df, df_merge)
     else:
         return df_merge
 
@@ -461,6 +475,7 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
             "Could not find id column '{}'. You can specify a custom one using"
             " the id_column option.".format(id_column)
         )
+    # fixme: What if one field column is one that is already in use?
     mids = df["mid"].unique()
     if inplace:
         for mid in mids:
