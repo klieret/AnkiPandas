@@ -18,35 +18,61 @@ class TestCoreFunctions(unittest.TestCase):
             "collection.anki2"
         )
 
+        # todo: could also get this from anki_fields.txt
+        self.card_cols = [
+            'id',
+            'nid',
+            'did',
+            'ord',
+            'mod',
+            'usn',
+            'type',
+            'queue',
+            'due',
+            'ivl',
+            'factor',
+            'reps',
+            'lapses',
+            'left',
+            'odue',
+            'odid',
+            'flags',
+            'data'
+        ]
+        self.note_cols = [
+            'id',
+            'guid',
+            'mid',
+            'mod',
+            'usn',
+            'tags',
+            'flds',
+            'sfld',
+            'csum',
+            'flags',
+            'data',
+        ]
+        self.revlog_cols = [
+            'id',
+            'cid',
+            'usn',
+            'ease',
+            'ivl',
+            'lastIvl',
+            'factor',
+            'time',
+            'type'
+        ]
+
     def tearDown(self):
         close_db(self.db)
 
     def test_get_cards(self):
         cards = get_cards(self.db)
         self.assertEqual(len(cards), 3)
-        # todo: could also get this from anki_fields.txt
         self.assertEqual(
             list(sorted(cards.columns)),
-            sorted([
-                'id',
-                'nid',
-                'did',
-                'ord',
-                'mod',
-                'usn',
-                'type',
-                'queue',
-                'due',
-                'ivl',
-                'factor',
-                'reps',
-                'lapses',
-                'left',
-                'odue',
-                'odid',
-                'flags',
-                'data'
-            ])
+            sorted(self.card_cols)
         )
 
     def test_get_notes(self):
@@ -54,19 +80,7 @@ class TestCoreFunctions(unittest.TestCase):
         self.assertEqual(len(notes), 2)
         self.assertEqual(
             list(sorted(notes.columns)),
-            sorted([
-                'id',
-                'guid',
-                'mid',
-                'mod',
-                'usn',
-                'tags',
-                'flds',
-                'sfld',
-                'csum',
-                'flags',
-                'data',
-            ])
+            sorted(self.note_cols)
         )
 
     def test_get_revlog(self):
@@ -74,21 +88,11 @@ class TestCoreFunctions(unittest.TestCase):
         # todo assert length
         self.assertEqual(
             list(sorted(revlog.columns)),
-            sorted([
-                'id',
-                'cid',
-                'usn',
-                'ease',
-                'ivl',
-                'lastIvl',
-                'factor',
-                'time',
-                'type'
-            ])
+            sorted(self.revlog_cols)
         )
 
     def test_get_deck_info(self):
-        dinfo = get_deck_info(self.db)
+        get_deck_info(self.db)
         # todo
 
     def test_get_deck_names(self):
@@ -99,7 +103,7 @@ class TestCoreFunctions(unittest.TestCase):
         )
 
     def test_get_model_info(self):
-        minfo = get_model_info(self.db)
+        get_model_info(self.db)
         # todo
 
     def test_get_model_names(self):
@@ -120,6 +124,77 @@ class TestCoreFunctions(unittest.TestCase):
             fnames["Basic"], ["Front", "Back"]
         )
 
+    def test_merge_note_info(self):
+        cards = get_cards(self.db)
+        merged = merge_note_info(self.db, cards)
+        self.assertListEqual(
+            sorted(list(merged.columns)),
+            sorted(list(
+                set(self.card_cols) | set(self.note_cols) |
+                {"ndata", "nflags", "nmod", "nusn"}  # clashes
+            ))
+        )
+
+    def test_merge_card_info(self):
+        revlog = get_revlog(self.db)
+        merged = merge_card_info(self.db, revlog)
+        self.assertListEqual(
+            sorted(list(merged.columns)),
+            sorted(list(
+                set(self.revlog_cols) | set(self.card_cols) |
+                {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
+            ))
+        )
+
+    def test_add_nids(self):
+        cards = get_cards(self.db)
+        cards = add_nids(self.db, cards)
+        self.assertIn("nid", list(cards.columns))
+        self.assertListEqual(
+            sorted(list(cards["nid"].unique())),
+            sorted(list(get_notes(self.db)["id"].unique()))
+        )
+
+    def test_add_mids(self):
+        notes = get_notes(self.db)
+        notes = add_mids(self.db, notes)
+        self.assertEqual(
+            len(notes["mid"].unique()),
+            2  # we don't have notesfor every model
+        )
+
+    def test_add_model_names(self):
+        notes = get_notes(self.db)
+        notes = add_mids(self.db, notes)
+        notes = add_model_names(self.db, notes)
+        self.assertEqual(
+            sorted(list(notes["mname"].unique())),
+            ["Basic", 'Basic (and reversed card)']
+        )
+
+    def test_add_deck_names(self):
+        cards = get_cards(self.db)
+        cards = add_deck_names(self.db, cards)
+        self.assertEqual(
+            sorted(list(cards["dname"].unique())),
+            ["Default"]
+        )
+
+    def test_add_fields_as_columns(self):
+        notes = get_notes(self.db)
+        notes = add_fields_as_columns(self.db, notes)
+        notes = add_model_names(self.db, notes)
+        self.assertEqual(
+            sorted(list(notes.columns)),
+            sorted(self.note_cols + ["mname", "Front", "Back"])
+        )
+        self.assertEqual(
+            list(notes.query("mname=='Basic'")["Front"].unique()),
+            ["Basic: Front"]
+        )
+
+
+class TestUtils(unittest.TestCase):
     def test__replace_df_inplace(self):
         df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
         df_new = pd.DataFrame({"a": [1]})

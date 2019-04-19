@@ -332,8 +332,9 @@ def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 
 def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-             id_column="cid"):
+             id_column="nid"):
     """ Add note IDs to a dataframe that only contains card ids.
+    Example: ``add_nids(db, cards, id_column="nid")``
 
     Args:
         db: Database
@@ -361,8 +362,11 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 
 def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-             id_column="cid"):
+             id_column="nid"):
     """ Add note IDs to a dataframe that only contains note ids.
+
+    Example: ``add_mids(db, notes, id_column="id")``,
+    ``add_mids(db, cards_with_merged_notes, id_column="nid")``.
 
     Args:
         db: Database
@@ -397,7 +401,7 @@ def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
                     id_column="mid", new_column="mname"):
-    """
+    """ Add model names to a dataframe that contains model IDs.
 
     Args:
         db: Database
@@ -409,16 +413,17 @@ def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     Returns:
         New dataframe if inplace==True, else None
     """
-    if not id_column in df.columns:
+    if id_column not in df.columns:
         raise ValueError(
             "Could not find id column '{}'. You can specify a custom one using"
             " the id_column option.".format(id_column)
         )
     if inplace:
-        df[new_column] = df[id_column].map(get_model_names(db))
+        df[new_column] = df[id_column].astype(str).map(get_model_names(db))
     else:
         df = copy.deepcopy(df)
-        add_model_names(db, df, inplace=True)
+        add_model_names(db, df, inplace=True, id_column=id_column,
+                        new_column=new_column)
         return df
 
 # Cards
@@ -428,6 +433,7 @@ def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
                    id_column="did", new_column="dname"):
     """
+    Add deck names to a dataframe that contains deck IDs.
 
     Args:
         db: Database
@@ -439,16 +445,16 @@ def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     Returns:
         New dataframe if inplace==True, else None
     """
-    if not id_column in df.columns:
+    if id_column not in df.columns:
         raise ValueError(
             "Could not find id column '{}'. You can specify a custom one using"
             " the id_column option.".format(id_column)
         )
     if inplace:
-        df[new_column] = df[id_column].map(get_deck_names(db))
+        df[new_column] = df[id_column].astype(str).map(get_deck_names(db))
     else:
         df = copy.deepcopy(df)
-        add_model_names(db, df, id_column=id_column, new_column=new_column,
+        add_deck_names(db, df, id_column=id_column, new_column=new_column,
                         inplace=True)
         return df
 
@@ -470,7 +476,7 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
     Returns:
         New dataframe if inplace==True, else None
     """
-    if not id_column in df.columns:
+    if id_column not in df.columns:
         raise ValueError(
             "Could not find id column '{}'. You can specify a custom one using"
             " the id_column option.".format(id_column)
