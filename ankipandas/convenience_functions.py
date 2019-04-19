@@ -15,11 +15,11 @@ import ankipandas.core_functions as apd
 
 
 def load_notes(
-    path,
+    path=None,
     expand_fields=True
 ) -> pd.DataFrame:
     """
-    Load all ntoes as a pandas DataFrame.
+    Load all notes as a pandas DataFrame.
 
     Args:
         path: Path to database
@@ -39,7 +39,7 @@ def load_notes(
 
 
 def load_cards(
-    path,
+    path=None,
     merge_notes=True,
     expand_fields=True
 ) -> pd.DataFrame:
@@ -70,7 +70,7 @@ def load_cards(
 
 
 def load_revs(
-    path,
+    path=None,
     merge_cards=True,
     merge_notes=True,
     expand_fields=True
