@@ -25,6 +25,9 @@ rm -rf "dist/"
 version=$(cat ankipandas/version.txt)
 echo "Version is: " $version
 
+# just to be sure we don't forget to commit it
+git add ankipanas/version.txt
+
 python3 setup.py sdist bdist_wheel
 python3 -m twine upload --verbose --repository-url https://upload.pypi.org/legacy/ dist/*
 git tag -a "v${version}" -m "Release version ${version}"
