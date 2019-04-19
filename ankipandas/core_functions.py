@@ -46,6 +46,13 @@ def close_db(db):
 # Basic getters
 # ==============================================================================
 
+def _get_table(db: sqlite3.Connection, table):
+    df = pd.read_sql_query("SELECT * FROM {}".format(table), db)
+    # print(df.columns)
+    # df.set_index("id", inplace=True)
+    return df
+
+
 def get_cards(db: sqlite3.Connection):
     """
     Get all cards as a dataframe.
@@ -56,7 +63,7 @@ def get_cards(db: sqlite3.Connection):
     Returns:
         pandas.DataFrame
     """
-    return pd.read_sql_query("SELECT * FROM cards ", db)
+    return _get_table(db, "cards")
 
 
 def get_notes(db: sqlite3.Connection):
@@ -69,7 +76,7 @@ def get_notes(db: sqlite3.Connection):
     Returns:
         pandas.DataFrame
     """
-    return pd.read_sql_query("SELECT * FROM notes ", db)
+    return _get_table(db, "notes")
 
 
 def get_revlog(db: sqlite3.Connection):
@@ -82,7 +89,7 @@ def get_revlog(db: sqlite3.Connection):
     Returns:
         pandas.DataFrame
     """
-    return pd.read_sql_query("SELECT * FROM revlog ", db)
+    return _get_table(db, "revlog")
 
 
 @lru_cache(cache_size)
@@ -108,6 +115,41 @@ def get_info(db: sqlite3.Connection):
             ret[col] = val
     return ret
 
+
+# Basic Setters
+# ==============================================================================
+
+def _write_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
+                 mode: str, id_column="id") -> None:
+    """
+
+    Args:
+        db: Database
+        df: The dataframe to write
+        table: Table to write to: 'notes', 'cards', 'revlog'
+        mode: 'update': Update only existing entries, 'append': Only append new
+            entries, but do not modify, 'replace': Append, modify and delete
+
+    Returns:
+
+    """
+    if table not in ["notes", "cards", "revlog"]:
+        raise ValueError(
+            "Writing to table '{}' is not supported.".format(table)
+        )
+
+    df_old = pd.read_sql_query("SELECT * FROM {}".format(table), db)
+    old_indices = set(df_old[id_column])
+    new_indices = set(df[id_column])
+    if mode == "update":
+        indices = set(old_indices)
+    elif mode == "append":
+        indices = set(new_indices) - set(old_indices)
+    elif mode == "replace":
+        indices = set(new_indices)
+    else:
+        raise ValueError("Unknown mode '{}'.".format(mode))
+    # df = df[df[id_column]]
 
 # Trivially derived getters
 # ==============================================================================
