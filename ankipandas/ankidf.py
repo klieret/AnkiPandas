@@ -9,6 +9,16 @@ import pandas as pd
 # ours
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
+from ankipandas.docstring_utils import *
+
+
+def adapt_docstring(method, replace_desc=None):
+    docs = method.__doc__
+    desc, args, ret = parse_docstring(docs)
+    if replace_desc:
+        desc = replace_desc
+    return format_docstring(desc, args, ret, drop_arg=["df", "db"])
+
 
 
 # todo: inplace == false as default
@@ -36,14 +46,14 @@ class AnkiDataFrame(pd.DataFrame):
         self.table = table
 
     @property
-    def nid_column(self):
+    def _nid_column(self):
         if self.table == "notes":
             return "id"
         else:
             return "nid"
 
     @property
-    def cid_column(self):
+    def _cid_column(self):
         if self.table == "cards":
             return "id"
         else:
@@ -61,92 +71,91 @@ class AnkiDataFrame(pd.DataFrame):
         for attr in self._attributes:
             df.__dict__[attr] = getattr(self, attr, None)
 
-    def merge_note_info(self, columns=None, drop_columns=None, prepend="n",
-                        prepend_clash_only=True, nid_column="nid"):
-        core.merge_note_info(
+    def merge_note_info(self, *args, **kwargs):
+        return core.merge_note_info(
             db=self.db,
             df=self,
-            inplace=True,
-            columns=columns,
-            drop_columns=drop_columns,
-            nid_column=nid_column,
-            prepend=prepend,
-            prepend_clash_only=prepend_clash_only
+            *args,
+            **kwargs
         )
+    merge_note_info.__doc__ = adapt_docstring(core.merge_note_info)
 
-    def merge_card_info(self, columns=None, drop_columns=None, prepend="c",
-                        prepend_clash_only=True, cid_column="cid"):
-        core.merge_card_info(
+    def merge_card_info(self, *args, **kwargs):
+        return core.merge_card_info(
             db=self.db,
             df=self,
-            inplace=True,
-            prepend=prepend,
-            prepend_clash_only=prepend_clash_only,
-            columns=columns,
-            drop_columns=drop_columns,
-            cid_column=cid_column
+            *args,
+            **kwargs
         )
+    merge_card_info.__doc__ = adapt_docstring(core.merge_card_info)
 
-    def add_nids(self, cid_column=None):
+    def add_nids(self, cid_column=None, *args, **kwargs):
         if not cid_column:
-            cid_column = self.cid_column
-        core.add_nids(
+            cid_column = self._cid_column
+        return core.add_nids(
             db=self.db,
             df=self,
-            inplace=True,
-            cid_column=cid_column
+            *args,
+            **kwargs
         )
+    add_nids.__doc__ = adapt_docstring(
+        core.add_nids,
+        "Add note IDs"
+    )
 
-    def add_mids(self, nid_column=None):
+    def add_mids(self, nid_column=None, *args, **kwargs):
         if not nid_column:
-            nid_column = self.nid_column
+            nid_column = self._nid_column
         # Todo: Perhaps call add_nids, if nid column not found
-        core.add_mids(
+        return core.add_mids(
             db=self.db,
             df=self,
-            inplace=True,
-            nid_column=nid_column
+            *args,
+            **kwargs
         )
+    add_mids.__doc__ = adapt_docstring(
+        core.add_mids,
+        "Add model IDs"
+    )
 
-    def add_model_names(self, mid_column="mid", new_column="mname"):
+    def add_model_names(self, *args, **kwargs):
         # Todo: Perhaps call add_mids, if nid column not found
-        core.add_model_names(
+        return core.add_model_names(
             db=self.db,
             df=self.df,
             inplace=True,
-            mid_column=mid_column,
-            new_column=new_column
+            *args,
+            **kwargs
         )
+    add_model_names.__doc__ = adapt_docstring(core.add_model_names)
 
-    def add_deck_names(self, new_column="dname", did_column="did"):
-        core.add_deck_names(
+    def add_deck_names(self, *args, **kwargs):
+        return core.add_deck_names(
             self.db,
             self,
-            inplace=True,
-            did_column=did_column,
-            new_column=new_column
+            *args,
+            **kwargs
         )
+    add_deck_names.__doc__ = adapt_docstring(core.add_deck_names)
 
-    def add_fields_as_columns(self, mid_column="mid", prepend="",
-                              flds_column="flds"):
-        core.add_fields_as_columns(
+    def add_fields_as_columns(self, *args, **kwargs):
+        return core.add_fields_as_columns(
             db=self.db,
             df=self,
-            inplace=True,
-            mid_column=mid_column,
-            prepend=prepend,
-            flds_column=flds_column
+            *args,
+            **kwargs
         )
+    add_fields_as_columns.__doc__ = adapt_docstring(core.add_fields_as_columns)
 
-    def fields_as_columns_to_flds(self, mid_column="mid", prepended="",
-                                  drop=False):
+    def fields_as_columns_to_flds(self, *args, **kwargs):
         core.fields_as_columns_to_flds(
             db=self.db,
             df=self,
-            mid_column=mid_column,
-            prepended=prepended,
-            drop=drop
+            *args,
+            **kwargs
         )
+    fields_as_columns_to_flds.__doc__ = \
+        adapt_docstring(core.fields_as_columns_to_flds)
 
 
 class Cards(AnkiDataFrame):

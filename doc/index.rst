@@ -9,5 +9,6 @@ line of code!
 
   readme
   convenience_functions
+  ankidf
   core_functions
 
