@@ -267,11 +267,13 @@ def get_field_names(db: sqlite3.Connection):
 
 def _replace_df_inplace(df, df_new):
     """ Replace dataframe 'in place'. """
-    df.drop(df.index, inplace=True)
+    if df.index.any():
+        df.drop(df.index, inplace=True)
     for col in df_new.columns:
         df[col] = df_new[col]
     drop_cols = set(df.columns) - set(df_new.columns)
-    df.drop(drop_cols, axis=1, inplace=True)
+    if drop_cols:
+        df.drop(drop_cols, axis=1, inplace=True)
 
 
 def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
@@ -397,7 +399,7 @@ def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 
 def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-             nid_column="nid"):
+             cid_column="cid"):
     """ Add note IDs to a dataframe that only contains card ids.
     Example: ``add_nids(db, cards, id_column="nid")``
 
@@ -405,7 +407,7 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
         db: Database
         df: Dataframe to merge information into
         inplace: If False, return new dataframe, else update old one
-        nid_column: Column with card ID
+        cid_column: Column with card ID
 
     Returns:
         New dataframe if inplace==True, else None
@@ -418,7 +420,7 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     return merge_dfs(
         df=df,
         df_add=get_cards(db),
-        id_df=nid_column,
+        id_df=cid_column,
         inplace=inplace,
         columns=["nid"],
         id_add="id",
@@ -528,7 +530,8 @@ def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 
 def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
-                          inplace=False, mid_column="mid", prepend=""):
+                          inplace=False, mid_column="mid", prepend="",
+                          flds_column="flds"):
     """
 
     Args:
@@ -537,6 +540,7 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
         inplace: If False, return new dataframe, else update old one
         mid_column: Column with model ID
         prepend: Prepend string to all new column names
+        flds_column: Column that contains the joined fields
 
     Returns:
         New dataframe if inplace==True, else None
@@ -546,21 +550,27 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
             "Could not find model id column '{}'. You can specify a custom one "
             "using the mid_column option.".format(mid_column)
         )
+    if flds_column not in df.columns:
+        raise ValueError(
+            "Could not find fields column '{}'. You can specify a custom one "
+            "using the flds_column option.".format(flds_column)
+        )
     # fixme: What if one field column is one that is already in use?
     if inplace:
         mids = df["mid"].unique()
         for mid in mids:
-            df_model = df[df["mid"] == mid]
-            fields = df_model["flds"].str.split("\x1f", expand=True)
+            df_model = df[df[mid_column] == mid]
+            fields = df_model[flds_column].str.split("\x1f", expand=True)
             for ifield, field in enumerate(get_field_names(db)[str(mid)]):
-                df.loc[df["mid"] == mid, prepend + field] = fields[ifield]
+                df.loc[df[mid_column] == mid, prepend + field] = fields[ifield]
     else:
         df = copy.deepcopy(df)
         add_fields_as_columns(db, df, mid_column=mid_column, prepend=prepend,
-                              inplace=True)
+                              inplace=True, flds_column=flds_column)
         return df
 
 
+# todo: docstring
 # fixme: what if fields aren't found?
 def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
                               inplace=False, mid_column="mid", prepended="",
@@ -571,13 +581,13 @@ def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
             "using the mid_column option.".format(mid_column)
         )
     if inplace:
-        mids = df["mid"].unique()
+        mids = df[mid_column].unique()
         to_drop = []
         for mid in mids:
             fields = get_field_names(db)[str(mid)]
             if prepended:
                 fields = [prepended + field for field in fields]
-            df.loc[df["mid"] == mid, "flds"] = \
+            df.loc[df[mid_column] == mid, "flds"] = \
                 pd.Series(df[fields].values.tolist()).str.join("\x1f")
             if drop:
                 # Careful: Do not delete the fields here yet, other models

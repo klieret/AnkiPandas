@@ -96,7 +96,7 @@ def load_revs(
     if merge_cards:
         apd.merge_card_info(db, df, inplace=True)
     if merge_notes:
-        apd.add_nids(db, df, nid_column="cid", inplace=True)
+        apd.add_nids(db, df, cid_column="cid", inplace=True)
         apd.merge_note_info(db, df, inplace=True)
         if expand_fields:
             apd.add_fields_as_columns(db, df, inplace=True)
