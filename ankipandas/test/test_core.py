@@ -161,6 +161,22 @@ class TestCoreFunctions(unittest.TestCase):
             list(flds),
             list(notes["flds"].values)
         )
+        self.assertListEqual(
+            sorted(list(notes.columns)),
+            sorted(note_cols)
+        )
+
+    def test_fields_as_columns_to_flds_2(self):
+        notes = get_notes(self.db)
+        notes = add_fields_as_columns(self.db, notes, prepend="fld_")
+        flds = copy.copy(notes["flds"].values)
+        notes["flds"] = ""
+        notes = fields_as_columns_to_flds(self.db, notes, drop=True,
+                                          prepended="fld_")
+        self.assertListEqual(
+            list(flds),
+            list(notes["flds"].values)
+        )
 
 
 class TestUtils(unittest.TestCase):

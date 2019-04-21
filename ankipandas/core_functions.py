@@ -334,7 +334,7 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
 
 def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
                     inplace=False, columns=None, drop_columns=None,
-                    id_column="nid", prepend="n", prepend_clash_only=True):
+                    nid_column="nid", prepend="n", prepend_clash_only=True):
     """ Merge note table into existing dataframe
 
     Args:
@@ -343,7 +343,7 @@ def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
         inplace: If False, return new dataframe, else update old one
         columns: Columns to merge
         drop_columns: Columns to ignore when merging
-        id_column: Column to match note id onto
+        nid_column: Column to match note id onto
         prepend: Prepend this string to fields from note table
         prepend_clash_only: Only prepend the ``prepend`` string when column
             names would otherwise clash.
@@ -354,7 +354,7 @@ def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
     return merge_dfs(
         df=df,
         df_add=get_notes(db),
-        id_df=id_column,
+        id_df=nid_column,
         id_add="nid",
         inplace=inplace,
         prepend=prepend,
@@ -366,7 +366,7 @@ def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
 
 def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
                     columns=None, drop_columns=None,
-                    id_column="cid", prepend="c", prepend_clash_only=True):
+                    cid_column="cid", prepend="c", prepend_clash_only=True):
     """
 
     Args:
@@ -375,7 +375,7 @@ def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
         inplace: If False, return new dataframe, else update old one
         columns:  Columns to merge
         drop_columns:  Columns to ignore when merging
-        id_column: Column to match card id onto
+        cid_column: Column to match card id onto
         prepend: Prepend this string to fields from card table
         prepend_clash_only: Only prepend the ``prepend`` string when column
             names would otherwise clash.
@@ -386,7 +386,7 @@ def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     return merge_dfs(
         df=df,
         df_add=get_cards(db),
-        id_df=id_column,
+        id_df=cid_column,
         inplace=inplace,
         columns=columns,
         drop_columns=drop_columns,
@@ -397,7 +397,7 @@ def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 
 def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-             id_column="nid"):
+             nid_column="nid"):
     """ Add note IDs to a dataframe that only contains card ids.
     Example: ``add_nids(db, cards, id_column="nid")``
 
@@ -405,7 +405,7 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
         db: Database
         df: Dataframe to merge information into
         inplace: If False, return new dataframe, else update old one
-        id_column: Column with card ID
+        nid_column: Column with card ID
 
     Returns:
         New dataframe if inplace==True, else None
@@ -418,7 +418,7 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     return merge_dfs(
         df=df,
         df_add=get_cards(db),
-        id_df=id_column,
+        id_df=nid_column,
         inplace=inplace,
         columns=["nid"],
         id_add="id",
@@ -427,7 +427,7 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 
 def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-             id_column="nid"):
+             nid_column="nid"):
     """ Add note IDs to a dataframe that only contains note ids.
 
     Example: ``add_mids(db, notes, id_column="id")``,
@@ -437,7 +437,7 @@ def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
         db: Database
         df: Dataframe to merge information into
         inplace: If False, return new dataframe, else update old one
-        id_column: Column with note ID
+        nid_column: Column with note ID
 
     Returns:
         New dataframe if inplace==True, else None
@@ -450,7 +450,7 @@ def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     return merge_dfs(
         df=df,
         df_add=get_notes(db),
-        id_df=id_column,
+        id_df=nid_column,
         inplace=inplace,
         columns=["mid"],
         id_add="nid",
@@ -465,29 +465,29 @@ def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 # ------------------------------------------------------------------------------
 
 def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-                    id_column="mid", new_column="mname"):
+                    mid_column="mid", new_column="mname"):
     """ Add model names to a dataframe that contains model IDs.
 
     Args:
         db: Database
         df: Dataframe to merge information into
         inplace: If False, return new dataframe, else update old one
-        id_column: Column with model ID
+        mid_column: Column with model ID
         new_column: Name of new column to be added
 
     Returns:
         New dataframe if inplace==True, else None
     """
-    if id_column not in df.columns:
+    if mid_column not in df.columns:
         raise ValueError(
-            "Could not find id column '{}'. You can specify a custom one using"
-            " the id_column option.".format(id_column)
+            "Could not find model id column '{}'. You can specify a custom one "
+            "using the mid_column option.".format(mid_column)
         )
     if inplace:
-        df[new_column] = df[id_column].astype(str).map(get_model_names(db))
+        df[new_column] = df[mid_column].astype(str).map(get_model_names(db))
     else:
         df = copy.deepcopy(df)
-        add_model_names(db, df, inplace=True, id_column=id_column,
+        add_model_names(db, df, inplace=True, mid_column=mid_column,
                         new_column=new_column)
         return df
 
@@ -496,7 +496,7 @@ def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 
 def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-                   id_column="did", new_column="dname"):
+                   did_column="did", new_column="dname"):
     """
     Add deck names to a dataframe that contains deck IDs.
 
@@ -504,22 +504,22 @@ def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
         db: Database
         df: Dataframe to merge information into
         inplace: If False, return new dataframe, else update old one
-        id_column: Column with deck ID (did)
+        did_column: Column with deck ID (did)
         new_column: Name of new column to be added
 
     Returns:
         New dataframe if inplace==True, else None
     """
-    if id_column not in df.columns:
+    if did_column not in df.columns:
         raise ValueError(
-            "Could not find id column '{}'. You can specify a custom one using"
-            " the id_column option.".format(id_column)
+            "Could not find deck id column '{}'. You can specify a custom one "
+            "using the did_column option.".format(did_column)
         )
     if inplace:
-        df[new_column] = df[id_column].astype(str).map(get_deck_names(db))
+        df[new_column] = df[did_column].astype(str).map(get_deck_names(db))
     else:
         df = copy.deepcopy(df)
-        add_deck_names(db, df, id_column=id_column, new_column=new_column,
+        add_deck_names(db, df, did_column=did_column, new_column=new_column,
                        inplace=True)
         return df
 
@@ -528,23 +528,23 @@ def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 
 def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
-                          inplace=False, id_column="mid", prepend=""):
+                          inplace=False, mid_column="mid", prepend=""):
     """
 
     Args:
         db: Database
         df: Dataframe to merge information into
         inplace: If False, return new dataframe, else update old one
-        id_column: Column with note ID
+        mid_column: Column with model ID
         prepend: Prepend string to all new column names
 
     Returns:
         New dataframe if inplace==True, else None
     """
-    if id_column not in df.columns:
+    if mid_column not in df.columns:
         raise ValueError(
-            "Could not find id column '{}'. You can specify a custom one using"
-            " the id_column option.".format(id_column)
+            "Could not find model id column '{}'. You can specify a custom one "
+            "using the mid_column option.".format(mid_column)
         )
     # fixme: What if one field column is one that is already in use?
     if inplace:
@@ -556,19 +556,19 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
                 df.loc[df["mid"] == mid, prepend + field] = fields[ifield]
     else:
         df = copy.deepcopy(df)
-        add_fields_as_columns(db, df, id_column=id_column, prepend=prepend,
+        add_fields_as_columns(db, df, mid_column=mid_column, prepend=prepend,
                               inplace=True)
         return df
 
 
 # fixme: what if fields aren't found?
 def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
-                              inplace=False, id_column="mid", prepended="",
+                              inplace=False, mid_column="mid", prepended="",
                               drop=False):
-    if id_column not in df.columns:
+    if mid_column not in df.columns:
         raise ValueError(
-            "Could not find id column '{}'. You can specify a custom one using"
-            " the id_column option.".format(id_column)
+            "Could not find model id column '{}'. You can specify a custom one "
+            "using the mid_column option.".format(mid_column)
         )
     if inplace:
         mids = df["mid"].unique()
@@ -590,7 +590,7 @@ def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
             db,
             df,
             inplace=True,
-            id_column=id_column,
+            mid_column=mid_column,
             prepended=prepended,
             drop=drop,
         )
