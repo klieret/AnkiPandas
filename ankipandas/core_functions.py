@@ -577,14 +577,12 @@ def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
             fields = get_field_names(db)[str(mid)]
             if prepended:
                 fields = [prepended + field for field in fields]
-            df["tmplistdeleteme"] = df[fields].values.tolist()
             df.loc[df["mid"] == mid, "flds"] = \
-                df["tmplistdeleteme"].str.join("\x1f")
+                pd.Series(df[fields].values.tolist()).str.join("\x1f")
             if drop:
                 # Careful: Do not delete the fields here yet, other models
                 # might still use them
                 to_drop.extend(fields)
-            df.drop("tmplistdeleteme", axis=1, inplace=True)
         df.drop(to_drop, axis=1, inplace=True)
     else:
         df = copy.deepcopy(df)
