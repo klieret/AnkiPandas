@@ -140,8 +140,8 @@ class TestFindDatabase(unittest.TestCase):
         )
 
     def tearDown(self):
-        for dir in self.dirs.values():
-            dir.cleanup()
+        for d in self.dirs.values():
+            d.cleanup()
 
 
 class TestHelp(unittest.TestCase):

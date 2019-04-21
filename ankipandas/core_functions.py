@@ -48,8 +48,6 @@ def close_db(db):
 
 def _get_table(db: sqlite3.Connection, table):
     df = pd.read_sql_query("SELECT * FROM {}".format(table), db)
-    # print(df.columns)
-    # df.set_index("id", inplace=True)
     return df
 
 
@@ -119,8 +117,10 @@ def get_info(db: sqlite3.Connection):
 # Basic Setters
 # ==============================================================================
 
-def _write_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
-                 mode: str, id_column="id") -> None:
+def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
+               mode: str, id_column="id", same_columns=True,
+               drop_new_columns=True
+               ) -> None:
     """
 
     Args:
@@ -129,15 +129,13 @@ def _write_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
         table: Table to write to: 'notes', 'cards', 'revlog'
         mode: 'update': Update only existing entries, 'append': Only append new
             entries, but do not modify, 'replace': Append, modify and delete
+        same_columns: Check that the columns will stay exactly the same
+        drop_new_columns: Drop any columns that are in the new dataframe
+            but not in the old table.
 
     Returns:
 
     """
-    if table not in ["notes", "cards", "revlog"]:
-        raise ValueError(
-            "Writing to table '{}' is not supported.".format(table)
-        )
-
     df_old = pd.read_sql_query("SELECT * FROM {}".format(table), db)
     old_indices = set(df_old[id_column])
     new_indices = set(df[id_column])
@@ -149,7 +147,32 @@ def _write_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
         indices = set(new_indices)
     else:
         raise ValueError("Unknown mode '{}'.".format(mode))
-    # df = df[df[id_column]]
+    # Remove everything not indices
+    df = df[df["id_column"].isin[indices]]
+    old_cols = list(df_old.columns)
+    new_cols = list(df.columns)
+    if drop_new_columns:
+        df.drop(set(new_cols) - set(old_cols), axis=1, inplace=True)
+    if same_columns:
+        if not set(df.columns) == set(df_old.columns):
+            raise ValueError("Columns do not match: Old: {}, New: {}".format(
+                ", ".join(df_old.columns), ", ".join(df.columns)
+            ))
+    df.to_sql(table, db, if_exists="replace")
+
+
+# NOTE: fields as columns will not get merged!
+def set_notes(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+    _set_table(db, df, "notes", mode)
+
+
+def set_cards(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+    _set_table(db, df, "cards", mode)
+
+
+def set_revlog(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+    _set_table(db, df, "cards", mode)
+
 
 # Trivially derived getters
 # ==============================================================================
@@ -497,7 +520,7 @@ def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     else:
         df = copy.deepcopy(df)
         add_deck_names(db, df, id_column=id_column, new_column=new_column,
-                        inplace=True)
+                       inplace=True)
         return df
 
 # Notes
@@ -524,8 +547,8 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
             " the id_column option.".format(id_column)
         )
     # fixme: What if one field column is one that is already in use?
-    mids = df["mid"].unique()
     if inplace:
+        mids = df["mid"].unique()
         for mid in mids:
             df_model = df[df["mid"] == mid]
             fields = df_model["flds"].str.split("\x1f", expand=True)
@@ -535,4 +558,42 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
         df = copy.deepcopy(df)
         add_fields_as_columns(db, df, id_column=id_column, prepend=prepend,
                               inplace=True)
+        return df
+
+
+# fixme: what if fields aren't found?
+def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
+                              inplace=False, id_column="mid", prepended="",
+                              drop=False):
+    if id_column not in df.columns:
+        raise ValueError(
+            "Could not find id column '{}'. You can specify a custom one using"
+            " the id_column option.".format(id_column)
+        )
+    if inplace:
+        mids = df["mid"].unique()
+        to_drop = []
+        for mid in mids:
+            fields = get_field_names(db)[str(mid)]
+            if prepended:
+                fields = [prepended + field for field in fields]
+            df["tmplistdeleteme"] = df[fields].values.tolist()
+            df.loc[df["mid"] == mid, "flds"] = \
+                df["tmplistdeleteme"].str.join("\x1f")
+            if drop:
+                # Careful: Do not delete the fields here yet, other models
+                # might still use them
+                to_drop.extend(fields)
+            df.drop("tmplistdeleteme", axis=1, inplace=True)
+        df.drop(to_drop, axis=1, inplace=True)
+    else:
+        df = copy.deepcopy(df)
+        fields_as_columns_to_flds(
+            db,
+            df,
+            inplace=True,
+            id_column=id_column,
+            prepended=prepended,
+            drop=drop,
+        )
         return df

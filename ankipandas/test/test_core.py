@@ -148,6 +148,20 @@ class TestCoreFunctions(unittest.TestCase):
             ["Basic: Front"]
         )
 
+    def test_fields_as_columns_to_flds(self):
+        # Add fields as column, remove original 'flds' column, then
+        # add it back from the field columns and see if things still check
+        # out
+        notes = get_notes(self.db)
+        notes = add_fields_as_columns(self.db, notes)
+        flds = copy.copy(notes["flds"].values)
+        notes["flds"] = ""
+        notes = fields_as_columns_to_flds(self.db, notes, drop=True)
+        self.assertEqual(
+            list(flds),
+            list(notes["flds"].values)
+        )
+
 
 class TestUtils(unittest.TestCase):
     def test__replace_df_inplace(self):
