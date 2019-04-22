@@ -42,11 +42,9 @@ as a all-in-one pandas DataFrame!
 * Bring together information about cards, notes and models in just one object!
   There's no need to go from cards to corresponding notes to corresponding
   note model just to find out the field names and contents.
+* Easily manipulate and write back data (experimental)
 * Easy installation (does not depend on any anki installation)
 
-**Cons**:
-
-* This package does not aim to write back to your database (yet)
 
 Installation
 ------------
@@ -72,28 +70,42 @@ of this repository:
 Usage
 -----
 
+The simplest interface is that of ``AnkiDataFrame``s:
+
 It's as easy as this:
 
 .. code:: python
 
-    import ankipandas
+    from ankipandas import AnkiDataFrame
 
-    ankipandas.load_cards()
+    adf = AnkiDataFrame.cards()
 
-And you have a dataframe containing all cards (with all the information from the
-notes, such as all the fields already added to it).
+And you have a dataframe containing all cards, with additional methods that make
+many things easy. For example:
 
-Take a look at the documentation_ to find out more about the parameters.
+    adf.merge_note_info()
+
+merges all columns from the ntoes that correspond to the cards into the
+dataframe.
+
+    adf.add_deck_names()
+
+Adds the deck names to the dataframe (instead of just deck IDs, ``did``s).
+
+    adf.add_fields_as_columns()
+
+Adds all fields from the notes as new columns to the dataframe (instead of being
+all merged in one field ``flds`` as by default).
+
+Take a look at the documentation_ to find out more about more about the
+available methods!
 
 .. _documentation: https://ankipandas.readthedocs.io/
 
-Similarly there are the functions ``load_notes()`` (just load notes) and
-``load_reflog()`` (to load the dataframe that contains information about
-every review that was ever done). Again, these can be tweaked with parameters,
-but by default include as much information as possible in one dataframe.
-
-If you want to fine-tweak this, take a look at the core functions, which are
-slightly more low-level, but allow you to get to your dataframe step by step.
+The basic implementation is done in a functional way, so if you rather work with
+standard pandas DataFrames, you can also just use these functions to manipulate
+them.
+Again, the documentation_ is a good starting point!
 
 Columns
 -------
