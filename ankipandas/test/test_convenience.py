@@ -94,7 +94,7 @@ def select_random_folders(basedir, n=1):
             alldirs.append(Path(root) / d)
     if not alldirs:
         return []
-    return [random.choice(alldirs) for _ in range(n)]
+    return random.sample(alldirs, min(len(alldirs), n))
 
 
 def touch_file_in_random_folders(basedir, filename, n=1):
@@ -139,7 +139,7 @@ class TestFindDatabase(unittest.TestCase):
             convenience.find_database(self.dirs["nothing"].name, break_on_first=False)
         with self.assertRaises(ValueError):
             convenience.find_database(self.dirs["multiple"].name, break_on_first=False)
-            self.dbs["multiple"]
+            print(self.dbs["multiple"])
         self.assertEqual(
             str(convenience.find_database(self.dirs["perfect"].name, break_on_first=False)),
             str(self.dbs["perfect"][0])
