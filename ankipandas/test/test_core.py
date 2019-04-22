@@ -4,6 +4,8 @@
 import unittest
 import pathlib
 import copy
+import shutil
+import tempfile
 
 # ours
 from ankipandas.core_functions import *
@@ -12,7 +14,7 @@ import ankipandas.core_functions as core_functions
 from ankipandas.test.shared import revlog_cols, note_cols, card_cols
 
 
-class TestCoreFunctions(unittest.TestCase):
+class TestCoreFunctionsRead(unittest.TestCase):
     def setUp(self):
         self.db = load_db(
             pathlib.Path(__file__).parent / "data" / "few_basic_cards" /
@@ -177,6 +179,80 @@ class TestCoreFunctions(unittest.TestCase):
             list(flds),
             list(notes["flds"].values)
         )
+
+
+class TestCoreWrite(unittest.TestCase):
+    def setUp(self):
+        self.db_read_path = pathlib.Path(__file__).parent / "data" \
+            / "few_basic_cards" / "collection.anki2"
+        self.db_read = load_db(self.db_read_path)
+        self.db_write_dir = tempfile.TemporaryDirectory()
+        self.db_write_path = pathlib.Path(self.db_write_dir.name) / \
+                        "collection.anki2"
+        self._reset()
+
+    def _reset(self):
+        shutil.copy(str(self.db_read_path), str(self.db_write_path))
+        self.db_write = load_db(self.db_write_path)
+
+    def tearDown(self):
+        self.db_read.close()
+        self.db_write.close()
+        self.db_write_dir.cleanup()
+
+    def _check_db_equal(self):
+        notes = get_notes(self.db_read)
+        cards = get_cards(self.db_read)
+        revlog = get_revlog(self.db_read)
+        notes2 = get_notes(self.db_write)
+        cards2 = get_cards(self.db_write)
+        revlog2 = get_revlog(self.db_write)
+        self.assertListEqual(
+            list(notes.values.tolist()), list(notes2.values.tolist())
+        )
+        self.assertListEqual(
+            list(cards.values.tolist()), list(cards2.values.tolist())
+        )
+        self.assertListEqual(
+            list(revlog.values.tolist()), list(revlog2.values.tolist())
+        )
+
+    def test_rw_identical(self):
+        notes = get_notes(self.db_read)
+        cards = get_cards(self.db_read)
+        revlog = get_revlog(self.db_read)
+        for mode in ["update", "replace", "append"]:
+            with self.subTest(mode=mode):
+                self._reset()
+                set_notes(self.db_write, notes, mode)
+                set_cards(self.db_write, cards, mode)
+                set_revlog(self.db_write, revlog, mode)
+                self._check_db_equal()
+
+    def test_update(self):
+        notes_changed = get_notes(self.db_read)
+        notes_original = get_notes(self.db_read)
+        for mode in ["update", "replace", "append"]:
+            with self.subTest(mode=mode):
+                self._reset()
+                notes_changed.loc[notes_changed["id"] == 1555579337683, "tags"] = "mytesttag"
+                set_notes(self.db_write, notes_changed, mode)
+                if mode == "append":
+                    self._check_db_equal()
+                else:
+                    notes2 = get_notes(self.db_write)
+                    chtag = notes2.loc[notes_changed["id"] == 1555579337683, "tags"]
+                    self.assertListEqual(
+                        list(chtag.values.tolist()),
+                        ["mytesttag"]
+                    )
+                    unchanged = notes_original.loc[notes_original["id"] != 1555579337683, :]
+                    unchanged2 = notes2.loc[notes2["id"] != 1555579337683, :]
+
+                    self.assertListEqual(
+                        list(unchanged.values.tolist()),
+                        list(unchanged2.values.tolist())
+                    )
 
 
 class TestUtils(unittest.TestCase):

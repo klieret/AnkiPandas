@@ -143,12 +143,15 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
         indices = set(old_indices)
     elif mode == "append":
         indices = set(new_indices) - set(old_indices)
+        if not indices:
+            # todo: logging
+            return
     elif mode == "replace":
         indices = set(new_indices)
     else:
         raise ValueError("Unknown mode '{}'.".format(mode))
     # Remove everything not indices
-    df = df[df["id_column"].isin[indices]]
+    df = df[df[id_column].isin(indices)]
     old_cols = list(df_old.columns)
     new_cols = list(df.columns)
     if drop_new_columns:
@@ -158,7 +161,11 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
             raise ValueError("Columns do not match: Old: {}, New: {}".format(
                 ", ".join(df_old.columns), ", ".join(df.columns)
             ))
-    df.to_sql(table, db, if_exists="replace")
+    if mode == "append":
+        if_exists = "append"
+    else:
+        if_exists = "replace"
+    df.to_sql(table, db, if_exists=if_exists, index=False)
 
 
 # NOTE: fields as columns will not get merged!
@@ -171,7 +178,7 @@ def set_cards(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
 
 
 def set_revlog(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
-    _set_table(db, df, "cards", mode)
+    _set_table(db, df, "revlog", mode)
 
 
 # Trivially derived getters

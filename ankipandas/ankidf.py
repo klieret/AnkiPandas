@@ -20,10 +20,8 @@ def adapt_docstring(method, replace_desc=None):
     return format_docstring(desc, args, ret, drop_arg=["df", "db"])
 
 
-
-# todo: inplace == false as default
 class AnkiDataFrame(pd.DataFrame):
-    _attributes = ("db", "db_path", "table")
+    _attributes = ("db", "db_path", "_table")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +29,7 @@ class AnkiDataFrame(pd.DataFrame):
             args[0]._copy_attrs(self)
         self.db = None
         self.db_path = None
-        self.table = None
+        self._table = None
 
     def _load_db(self, path):
         self.db = core.load_db(path)
@@ -43,18 +41,18 @@ class AnkiDataFrame(pd.DataFrame):
         self._load_db(path)
         table = core._get_table(self.db, table)
         core._replace_df_inplace(self, table)
-        self.table = table
+        self._table = table
 
     @property
     def _nid_column(self):
-        if self.table == "notes":
+        if self._table == "notes":
             return "id"
         else:
             return "nid"
 
     @property
     def _cid_column(self):
-        if self.table == "cards":
+        if self._table == "cards":
             return "id"
         else:
             return "cid"
@@ -156,6 +154,10 @@ class AnkiDataFrame(pd.DataFrame):
         )
     fields_as_columns_to_flds.__doc__ = \
         adapt_docstring(core.fields_as_columns_to_flds)
+
+    def help(self):
+        # todo
+        pass
 
 
 class Cards(AnkiDataFrame):
