@@ -21,7 +21,7 @@ def adapt_docstring(method, replace_desc=None):
 
 
 class AnkiDataFrame(pd.DataFrame):
-    _attributes = ("db", "db_path", "_table")
+    _attributes = ("db", "db_path", "_anki_table")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,7 +29,7 @@ class AnkiDataFrame(pd.DataFrame):
             args[0]._copy_attrs(self)
         self.db = None
         self.db_path = None
-        self._table = None
+        self._anki_table = None
 
     @property
     def _constructor(self):
@@ -54,9 +54,9 @@ class AnkiDataFrame(pd.DataFrame):
         if not path:
             path = self.db_path
         self._load_db(path)
-        table = core._get_table(self.db, table)
-        core._replace_df_inplace(self, table)
-        self._table = table
+        df = core._get_table(self.db, table)
+        core._replace_df_inplace(self, df)
+        self._anki_table = table
 
     @classmethod
     def _table_constructor(cls, path, table):
@@ -81,14 +81,14 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def _nid_column(self):
-        if self._table == "notes":
-            return "id"
+        if self._anki_table == "notes":
+             return "id"
         else:
             return "nid"
 
     @property
     def _cid_column(self):
-        if self._table == "cards":
+        if self._anki_table == "cards":
             return "id"
         else:
             return "cid"

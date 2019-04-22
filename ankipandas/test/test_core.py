@@ -9,6 +9,7 @@ import tempfile
 
 # ours
 from ankipandas.core_functions import *
+from ankipandas.ankidf import AnkiDataFrame as ADF
 # for hidden
 import ankipandas.core_functions as core_functions
 from ankipandas.test.shared import revlog_cols, note_cols, card_cols
@@ -16,37 +17,42 @@ from ankipandas.test.shared import revlog_cols, note_cols, card_cols
 
 class TestCoreFunctionsRead(unittest.TestCase):
     def setUp(self):
-        self.db = load_db(
-            pathlib.Path(__file__).parent / "data" / "few_basic_cards" /
-            "collection.anki2"
-        )
+        self.db_path = pathlib.Path(__file__).parent / "data" / \
+                       "few_basic_cards" / "collection.anki2"
+        self.db = load_db(self.db_path)
 
     def tearDown(self):
         close_db(self.db)
 
     def test_get_cards(self):
-        cards = get_cards(self.db)
-        self.assertEqual(len(cards), 3)
-        self.assertEqual(
-            list(sorted(cards.columns)),
-            sorted(card_cols)
-        )
+        cards1 = get_cards(self.db)
+        cards2 = ADF.cards(self.db_path)
+        for cards in [cards1, cards2]:
+            self.assertEqual(len(cards), 3)
+            self.assertEqual(
+                list(sorted(cards.columns)),
+                sorted(card_cols)
+            )
 
     def test_get_notes(self):
-        notes = get_notes(self.db)
-        self.assertEqual(len(notes), 2)
-        self.assertEqual(
-            list(sorted(notes.columns)),
-            sorted(note_cols)
-        )
+        notes1 = get_notes(self.db)
+        notes2 = ADF.notes(self.db_path)
+        for notes in [notes1, notes2]:
+            self.assertEqual(len(notes), 2)
+            self.assertEqual(
+                list(sorted(notes.columns)),
+                sorted(note_cols)
+            )
 
     def test_get_revlog(self):
-        revlog = get_revlog(self.db)
-        # todo assert length
-        self.assertEqual(
-            list(sorted(revlog.columns)),
-            sorted(revlog_cols)
-        )
+        revlog1 = get_revlog(self.db)
+        revlog2 = ADF.revlog(self.db_path)
+        for revlog in [revlog1, revlog2]:
+            # todo assert length
+            self.assertEqual(
+                list(sorted(revlog.columns)),
+                sorted(revlog_cols)
+            )
 
     def test_get_deck_info(self):
         get_deck_info(self.db)
@@ -82,43 +88,52 @@ class TestCoreFunctionsRead(unittest.TestCase):
         )
 
     def test_merge_note_info(self):
-        cards = get_cards(self.db)
-        merged = merge_note_info(self.db, cards)
-        self.assertListEqual(
-            sorted(list(merged.columns)),
-            sorted(list(
-                set(card_cols) | set(note_cols) |
-                {"ndata", "nflags", "nmod", "nusn"}  # clashes
-            ))
-        )
+        cards1 = get_cards(self.db)
+        merged1 = merge_note_info(self.db, cards1)
+        cards2 = ADF.cards(self.db_path)
+        merged2 = cards2.merge_note_info()
+        for merged in [merged1, merged2]:
+            self.assertListEqual(
+                sorted(list(merged.columns)),
+                sorted(list(
+                    set(card_cols) | set(note_cols) |
+                    {"ndata", "nflags", "nmod", "nusn"}  # clashes
+                ))
+            )
 
     def test_merge_card_info(self):
-        revlog = get_revlog(self.db)
-        merged = merge_card_info(self.db, revlog)
-        self.assertListEqual(
-            sorted(list(merged.columns)),
-            sorted(list(
-                set(revlog_cols) | set(card_cols) |
-                {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
-            ))
-        )
+        revlog1 = get_revlog(self.db)
+        merged1 = merge_card_info(self.db, revlog1)
+        merged2 = ADF.revlog(self.db_path).merge_card_info()
+        for merged in [merged1, merged2]:
+            self.assertListEqual(
+                sorted(list(merged.columns)),
+                sorted(list(
+                    set(revlog_cols) | set(card_cols) |
+                    {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
+                ))
+            )
 
     def test_add_nids(self):
-        cards = get_cards(self.db)
-        cards = add_nids(self.db, cards)
-        self.assertIn("nid", list(cards.columns))
-        self.assertListEqual(
-            sorted(list(cards["nid"].unique())),
-            sorted(list(get_notes(self.db)["id"].unique()))
-        )
+        cards1 = get_cards(self.db)
+        cards1 = add_nids(self.db, cards1)
+        cards2 = ADF.cards(self.db_path).add_nids()
+        for cards in [cards1, cards2]:
+            self.assertIn("nid", list(cards.columns))
+            self.assertListEqual(
+                sorted(list(cards["nid"].unique())),
+                sorted(list(get_notes(self.db)["id"].unique()))
+            )
 
     def test_add_mids(self):
-        notes = get_notes(self.db)
-        notes = add_mids(self.db, notes)
-        self.assertEqual(
-            len(notes["mid"].unique()),
-            2  # we don't have notesfor every model
-        )
+        notes1 = get_notes(self.db)
+        notes1 = add_mids(self.db, notes1)
+        notes2 = ADF.notes(self.db_path).add_mids()
+        for notes in [notes1, notes2]:
+            self.assertEqual(
+                len(notes["mid"].unique()),
+                2  # we don't have notesfor every model
+            )
 
     def test_add_model_names(self):
         notes = get_notes(self.db)
