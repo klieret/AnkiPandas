@@ -136,64 +136,79 @@ class TestCoreFunctionsRead(unittest.TestCase):
             )
 
     def test_add_model_names(self):
-        notes = get_notes(self.db)
-        notes = add_mids(self.db, notes)
-        notes = add_model_names(self.db, notes)
-        self.assertEqual(
-            sorted(list(notes["mname"].unique())),
-            ["Basic", 'Basic (and reversed card)']
-        )
+        notes1 = get_notes(self.db)
+        notes1 = add_mids(self.db, notes1)
+        notes1 = add_model_names(self.db, notes1)
+        # todo: add_mids() should soon be called automatically
+        notes2 = ADF.notes(self.db_path).add_mids().add_model_names()
+        for notes in [notes1, notes2]:
+            self.assertEqual(
+                sorted(list(notes["mname"].unique())),
+                ["Basic", 'Basic (and reversed card)']
+            )
 
     def test_add_deck_names(self):
-        cards = get_cards(self.db)
-        cards = add_deck_names(self.db, cards)
-        self.assertEqual(
-            sorted(list(cards["dname"].unique())),
-            ["Default"]
-        )
+        cards1 = get_cards(self.db)
+        cards1 = add_deck_names(self.db, cards1)
+        cards2 = ADF.cards(self.db_path).add_deck_names()
+        for cards in [cards1, cards2]:
+            self.assertEqual(
+                sorted(list(cards["dname"].unique())),
+                ["Default"]
+            )
 
     def test_add_fields_as_columns(self):
-        notes = get_notes(self.db)
-        notes = add_fields_as_columns(self.db, notes)
-        notes = add_model_names(self.db, notes)
-        self.assertEqual(
-            sorted(list(notes.columns)),
-            sorted(note_cols + ["mname", "Front", "Back"])
-        )
-        self.assertEqual(
-            list(notes.query("mname=='Basic'")["Front"].unique()),
-            ["Basic: Front"]
-        )
+        notes1 = get_notes(self.db)
+        notes1 = add_fields_as_columns(self.db, notes1)
+        notes1 = add_model_names(self.db, notes1)
+        notes2 = ADF.notes(self.db_path).add_model_names().add_fields_as_columns()
+        for notes in [notes1, notes2]:
+            self.assertEqual(
+                sorted(list(notes.columns)),
+                sorted(note_cols + ["mname", "Front", "Back"])
+            )
+            self.assertEqual(
+                list(notes.query("mname=='Basic'")["Front"].unique()),
+                ["Basic: Front"]
+            )
 
     def test_fields_as_columns_to_flds(self):
         # Add fields as column, remove original 'flds' column, then
         # add it back from the field columns and see if things still check
         # out
-        notes = get_notes(self.db)
-        notes = add_fields_as_columns(self.db, notes)
-        flds = copy.copy(notes["flds"].values)
-        notes["flds"] = ""
-        notes = fields_as_columns_to_flds(self.db, notes, drop=True)
-        self.assertEqual(
-            list(flds),
-            list(notes["flds"].values)
-        )
-        self.assertListEqual(
-            sorted(list(notes.columns)),
-            sorted(note_cols)
-        )
+        notes1 = get_notes(self.db)
+        notes1 = add_fields_as_columns(self.db, notes1)
+        flds = copy.copy(notes1["flds"].values)
+        notes1["flds"] = ""
+        notes1 = fields_as_columns_to_flds(self.db, notes1, drop=True)
+        notes2 = ADF.notes(self.db_path).add_fields_as_columns()
+        notes2["flds"] = ""
+        notes2.fields_as_columns_to_flds(inplace=True, drop=True)
+        for notes in [notes1, notes2]:
+            self.assertEqual(
+                list(flds),
+                list(notes["flds"].values)
+            )
+            self.assertListEqual(
+                sorted(list(notes.columns)),
+                sorted(note_cols)
+            )
 
     def test_fields_as_columns_to_flds_2(self):
-        notes = get_notes(self.db)
-        notes = add_fields_as_columns(self.db, notes, prepend="fld_")
-        flds = copy.copy(notes["flds"].values)
-        notes["flds"] = ""
-        notes = fields_as_columns_to_flds(self.db, notes, drop=True,
+        notes1 = get_notes(self.db)
+        notes1 = add_fields_as_columns(self.db, notes1, prepend="fld_")
+        flds = copy.copy(notes1["flds"].values)
+        notes1["flds"] = ""
+        notes1 = fields_as_columns_to_flds(self.db, notes1, drop=True,
                                           prepended="fld_")
-        self.assertListEqual(
-            list(flds),
-            list(notes["flds"].values)
-        )
+        notes2 = ADF.notes(self.db_path).add_fields_as_columns(prepend="fld_")
+        notes2["flds"] = ""
+        notes2 = notes2.fields_as_columns_to_flds(drop=True, prepended="fld_")
+        for notes in [notes1, notes2]:
+            self.assertListEqual(
+                list(flds),
+                list(notes["flds"].values)
+            )
 
 
 class TestCoreWrite(unittest.TestCase):

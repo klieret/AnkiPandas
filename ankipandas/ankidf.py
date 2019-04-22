@@ -53,6 +53,8 @@ class AnkiDataFrame(pd.DataFrame):
     def _get_table(self, path, table):
         if not path:
             path = self.db_path
+        if not path:
+            path = convenience.find_database()
         self._load_db(path)
         df = core._get_table(self.db, table)
         core._replace_df_inplace(self, df)
@@ -120,6 +122,7 @@ class AnkiDataFrame(pd.DataFrame):
         return core.add_nids(
             db=self.db,
             df=self,
+            cid_column=cid_column
             *args,
             **kwargs
         )
@@ -135,6 +138,7 @@ class AnkiDataFrame(pd.DataFrame):
         return core.add_mids(
             db=self.db,
             df=self,
+            nid_column = nid_column,
             *args,
             **kwargs
         )
@@ -147,8 +151,7 @@ class AnkiDataFrame(pd.DataFrame):
         # Todo: Perhaps call add_mids, if nid column not found
         return core.add_model_names(
             db=self.db,
-            df=self.df,
-            inplace=True,
+            df=self,
             *args,
             **kwargs
         )
@@ -173,7 +176,7 @@ class AnkiDataFrame(pd.DataFrame):
     add_fields_as_columns.__doc__ = adapt_docstring(core.add_fields_as_columns)
 
     def fields_as_columns_to_flds(self, *args, **kwargs):
-        core.fields_as_columns_to_flds(
+        return core.fields_as_columns_to_flds(
             db=self.db,
             df=self,
             *args,
