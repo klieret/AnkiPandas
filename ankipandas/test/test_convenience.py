@@ -7,10 +7,16 @@ import tempfile
 import random
 import string
 import os
+import sys
 
 # ours
 import ankipandas.convenience_functions as convenience
 from ankipandas.test.shared import *
+
+
+seed = random.randrange(sys.maxsize)
+random.seed(seed)
+print("Random seed:", seed)
 
 
 def random_string(min_length=5, max_length=10):
