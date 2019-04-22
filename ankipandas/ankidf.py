@@ -185,6 +185,9 @@ class AnkiDataFrame(pd.DataFrame):
     fields_as_columns_to_flds.__doc__ = \
         adapt_docstring(core.fields_as_columns_to_flds)
 
-    def help(self):
-        # todo
-        pass
+    def help(self, columns=None):
+        """ Print help about all known columns in this AnkiDataFrame. """
+        if not columns:
+            columns = list(self.columns)
+        df = convenience.table_help(columns=columns)
+        return df

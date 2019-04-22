@@ -217,11 +217,30 @@ def find_database(
     return found
 
 
-def table_help() -> pd.DataFrame:
+def table_help(table=None, columns=None, native=None) -> pd.DataFrame:
     """
     Return a pandas dataframe containing descriptions of every field in the
     anki database.
+
+    Args:
+        table: notes, cards, revlog
+        columns: Which fields/columns are you looking for?
+        native: If true, only columns that are present in the official anki
+            columns are shown.
+
+    Returns:
+        Pandas DataFrame with all matches.
     """
     help_path = pathlib.Path(__file__).parent / "anki_fields.csv"
     df = pd.read_csv(help_path)
+    df["Tables"] = df["Tables"].str.split(", ")
+    if table:
+        df = df.loc[df["Tables"].apply(lambda t: table in t), :]
+    if isinstance(columns, str):
+        columns = [columns]
+    if columns:
+        df = df[df["Name"].isin(columns)]
+    if native is not None:
+        df = df.query("Native=={}".format(native))
+
     return df
