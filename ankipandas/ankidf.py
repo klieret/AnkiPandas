@@ -122,7 +122,7 @@ class AnkiDataFrame(pd.DataFrame):
         return core.add_nids(
             db=self.db,
             df=self,
-            cid_column=cid_column
+            cid_column=cid_column,
             *args,
             **kwargs
         )
