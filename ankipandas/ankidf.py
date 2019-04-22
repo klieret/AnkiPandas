@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 # std
-import sqlite3
 
 # 3rd
 import pandas as pd
@@ -12,7 +11,7 @@ import ankipandas.core_functions as core
 from ankipandas.docstring_utils import *
 
 
-def adapt_docstring(method, replace_desc=None):
+def _adapt_docstring(method, replace_desc=None):
     docs = method.__doc__
     desc, args, ret = parse_docstring(docs)
     if replace_desc:
@@ -68,14 +67,20 @@ class AnkiDataFrame(pd.DataFrame):
 
     @classmethod
     def notes(cls, path):
+        """ Initialize AnkiDataFrame with notes table loaded from Anki
+        database. """
         return cls._table_constructor(path, "notes")
 
     @classmethod
     def cards(cls, path):
+        """ Initialize AnkiDataFrame with cards table loaded from Anki
+        database. """
         return cls._table_constructor(path, "cards")
 
     @classmethod
     def revlog(cls, path):
+        """ Initialize AnkiDataFrame with revlog table loaded from Anki
+        database. """
         return cls._table_constructor(path, "revlog")
 
     # Internal helpers
@@ -105,7 +110,7 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    merge_note_info.__doc__ = adapt_docstring(core.merge_note_info)
+    merge_note_info.__doc__ = _adapt_docstring(core.merge_note_info)
 
     def merge_card_info(self, *args, **kwargs):
         return core.merge_card_info(
@@ -114,7 +119,7 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    merge_card_info.__doc__ = adapt_docstring(core.merge_card_info)
+    merge_card_info.__doc__ = _adapt_docstring(core.merge_card_info)
 
     def add_nids(self, cid_column=None, *args, **kwargs):
         if not cid_column:
@@ -126,7 +131,7 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_nids.__doc__ = adapt_docstring(
+    add_nids.__doc__ = _adapt_docstring(
         core.add_nids,
         "Add note IDs"
     )
@@ -142,7 +147,7 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_mids.__doc__ = adapt_docstring(
+    add_mids.__doc__ = _adapt_docstring(
         core.add_mids,
         "Add model IDs"
     )
@@ -155,7 +160,7 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_model_names.__doc__ = adapt_docstring(core.add_model_names)
+    add_model_names.__doc__ = _adapt_docstring(core.add_model_names)
 
     def add_deck_names(self, *args, **kwargs):
         return core.add_deck_names(
@@ -164,7 +169,7 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_deck_names.__doc__ = adapt_docstring(core.add_deck_names)
+    add_deck_names.__doc__ = _adapt_docstring(core.add_deck_names)
 
     def add_fields_as_columns(self, *args, **kwargs):
         return core.add_fields_as_columns(
@@ -173,7 +178,7 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_fields_as_columns.__doc__ = adapt_docstring(core.add_fields_as_columns)
+    add_fields_as_columns.__doc__ = _adapt_docstring(core.add_fields_as_columns)
 
     def fields_as_columns_to_flds(self, *args, **kwargs):
         return core.fields_as_columns_to_flds(
@@ -183,7 +188,7 @@ class AnkiDataFrame(pd.DataFrame):
             **kwargs
         )
     fields_as_columns_to_flds.__doc__ = \
-        adapt_docstring(core.fields_as_columns_to_flds)
+        _adapt_docstring(core.fields_as_columns_to_flds)
 
     def help(self, columns=None):
         """ Print help about all known columns in this AnkiDataFrame. """

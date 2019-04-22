@@ -540,6 +540,9 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
                           inplace=False, mid_column="mid", prepend="",
                           flds_column="flds"):
     """
+    In the 'notes' table, the field contents of the notes is contained in one
+    column ('flds') by default. With this method, this column can be split up
+    into a new column for every field.
 
     Args:
         db: Database
@@ -577,11 +580,27 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
         return df
 
 
-# todo: docstring
 # fixme: what if fields aren't found?
 def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
                               inplace=False, mid_column="mid", prepended="",
                               drop=False):
+    """
+    This reverts :py:func:`~ankipandas.core_functions.add_fields_as_columns`, all
+    columns that represented field contents are now merged into one column
+    'flds'.
+
+    Args:
+        db: Database
+        df: Dataframe to merge information into
+        inplace: If False, return new dataframe, else update old one
+        mid_column: Column with model ID
+        prepended: Use this, if the name of columns that contained the fields
+            had a string prepended to them
+        drop: Drop columns that were now merged into the 'flds' column
+
+    Returns:
+        New dataframe if inplace==True, else None
+    """
     if mid_column not in df.columns:
         raise ValueError(
             "Could not find model id column '{}'. You can specify a custom one "
