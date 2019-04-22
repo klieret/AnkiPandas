@@ -31,6 +31,21 @@ class AnkiDataFrame(pd.DataFrame):
         self.db_path = None
         self._table = None
 
+    @property
+    def _constructor(self):
+        def __constructor(*args, **kw):
+            df = self.__class__(*args, **kw)
+            self._copy_attrs(df)
+            return df
+        return __constructor
+
+    def _copy_attrs(self, df):
+        for attr in self._attributes:
+            df.__dict__[attr] = getattr(self, attr, None)
+
+    # Constructors
+    # ==========================================================================
+
     def _load_db(self, path):
         self.db = core.load_db(path)
         self.db_path = path
@@ -42,6 +57,27 @@ class AnkiDataFrame(pd.DataFrame):
         table = core._get_table(self.db, table)
         core._replace_df_inplace(self, table)
         self._table = table
+
+    @classmethod
+    def _table_constructor(cls, path, table):
+        new = AnkiDataFrame()
+        new._get_table(path, table)
+        return new
+
+    @classmethod
+    def notes(cls, path):
+        return cls._table_constructor(path, "notes")
+
+    @classmethod
+    def cards(cls, path):
+        return cls._table_constructor(path, "cards")
+
+    @classmethod
+    def revlog(cls, path):
+        return cls._table_constructor(path, "revlog")
+
+    # Internal helpers
+    # ==========================================================================
 
     @property
     def _nid_column(self):
@@ -57,17 +93,8 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             return "cid"
 
-    @property
-    def _constructor(self):
-        def __constructor(*args, **kw):
-            df = self.__class__(*args, **kw)
-            self._copy_attrs(df)
-            return df
-        return __constructor
-
-    def _copy_attrs(self, df):
-        for attr in self._attributes:
-            df.__dict__[attr] = getattr(self, attr, None)
+    # Public methods
+    # ==========================================================================
 
     def merge_note_info(self, *args, **kwargs):
         return core.merge_note_info(
@@ -158,24 +185,3 @@ class AnkiDataFrame(pd.DataFrame):
     def help(self):
         # todo
         pass
-
-
-class Cards(AnkiDataFrame):
-    def __init__(self, *args, path=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if len(args) == 0 and len(kwargs) == 0 and path:
-            self._get_table(path, "cards")
-
-
-class Notes(AnkiDataFrame):
-    def __init__(self, *args, path=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if len(args) == 0 and len(kwargs) == 0 and path:
-            self._get_table(path, "notes")
-
-
-class Revlog(AnkiDataFrame):
-    def __init__(self, *args, path=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if len(args) == 0 and len(kwargs) == 0 and path:
-            self._get_table(path, "revlog")
