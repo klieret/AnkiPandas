@@ -83,14 +83,20 @@ It's as easy as this:
 And you have a dataframe containing all cards, with additional methods that make
 many things easy. For example:
 
+.. code:: python
+
     adf.merge_note_info()
 
 merges all columns from the ntoes that correspond to the cards into the
 dataframe.
 
+.. code:: python
+
     adf.add_deck_names()
 
 Adds the deck names to the dataframe (instead of just deck IDs, ``did``s).
+
+.. code:: python
 
     adf.add_fields_as_columns()
 
