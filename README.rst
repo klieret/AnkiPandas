@@ -70,7 +70,7 @@ of this repository:
 Usage
 -----
 
-The simplest interface is that of ``AnkiDataFrame``s:
+The simplest interface is that of ``AnkiDataFrame`` (a subclass of pandas ``DataFrame``):
 
 It's as easy as this:
 
@@ -94,7 +94,7 @@ dataframe.
 
     adf.add_deck_names()
 
-Adds the deck names to the dataframe (instead of just deck IDs, ``did``s).
+Adds the deck names to the dataframe (instead of just deck IDs, ``did``).
 
 .. code:: python
 
