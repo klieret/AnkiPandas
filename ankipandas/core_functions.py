@@ -122,6 +122,7 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
                drop_new_columns=True
                ) -> None:
     """
+    Write table back to database.
 
     Args:
         db: Database
@@ -134,7 +135,7 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
             but not in the old table.
 
     Returns:
-
+        None
     """
     df_old = pd.read_sql_query("SELECT * FROM {}".format(table), db)
     old_indices = set(df_old[id_column])
@@ -168,16 +169,48 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
     df.to_sql(table, db, if_exists=if_exists, index=False)
 
 
-# NOTE: fields as columns will not get merged!
-def set_notes(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+def set_notes(db: sqlite3.Connection, df: pd.DataFrame, mode: str) -> None:
+    """ Write notes table back into database.
+
+    Args:
+        db: Database
+        df: Dataframe
+        mode: 'update': Update only existing entries, 'append': Only append new
+            entries, but do not modify, 'replace': Append, modify and delete
+
+    Returns:
+        None
+    """
     _set_table(db, df, "notes", mode)
 
 
 def set_cards(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+    """ Write cards table back into database.
+
+    Args:
+        db: Database
+        df: Dataframe
+        mode: 'update': Update only existing entries, 'append': Only append new
+            entries, but do not modify, 'replace': Append, modify and delete
+
+    Returns:
+        None
+    """
     _set_table(db, df, "cards", mode)
 
 
 def set_revlog(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+    """ Write revlog table back into database.
+
+    Args:
+        db: Database
+        df: Dataframe
+        mode: 'update': Update only existing entries, 'append': Only append new
+            entries, but do not modify, 'replace': Append, modify and delete
+
+    Returns:
+        None
+    """
     _set_table(db, df, "revlog", mode)
 
 
@@ -585,8 +618,8 @@ def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
                               inplace=False, mid_column="mid", prepended="",
                               drop=False):
     """
-    This reverts :py:func:`~ankipandas.core_functions.add_fields_as_columns`, all
-    columns that represented field contents are now merged into one column
+    This reverts :py:func:`~ankipandas.core_functions.add_fields_as_columns`,
+    all columns that represented field contents are now merged into one column
     'flds'.
 
     Args:

@@ -89,7 +89,7 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def _nid_column(self):
         if self._anki_table == "notes":
-             return "id"
+            return "id"
         else:
             return "nid"
 
@@ -196,3 +196,6 @@ class AnkiDataFrame(pd.DataFrame):
             columns = list(self.columns)
         df = convenience.table_help(columns=columns)
         return df
+
+    # def write(self):
+    #
