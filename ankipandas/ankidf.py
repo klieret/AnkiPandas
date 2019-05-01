@@ -8,6 +8,7 @@ import pandas as pd
 # ours
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
+from ankipandas.log import get_logger
 from ankipandas.docstring_utils import *
 
 
