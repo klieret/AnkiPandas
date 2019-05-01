@@ -406,11 +406,11 @@ def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
     )
 
 
-# todo: doc
 def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
                     columns=None, drop_columns=None,
                     cid_column="cid", prepend="c", prepend_clash_only=True):
     """
+    Merges information from the card table into the current dataframe.
 
     Args:
         db: Database
@@ -420,7 +420,7 @@ def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
         drop_columns:  Columns to ignore when merging
         cid_column: Column to match card id onto
         prepend: Prepend this string to fields from card table
-        prepend_clash_only: Only prepend the ``prepend`` string when column 
+        prepend_clash_only: Only prepend the ``prepend`` string when column
             names would otherwise clash.
 
     Returns:

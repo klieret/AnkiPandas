@@ -35,6 +35,18 @@ class AnkiDataFrame(pd.DataFrame):
     _attributes = ("db", "db_path", "_anki_table")
 
     def __init__(self, *args, **kwargs):
+        """ Initializes a blank :class:`AnkiDataFrame`.
+
+        .. warning::
+
+            It is recommended to directly initialize this class with the notes,
+            cards or revlog table, using one of the methods
+            :meth:`.notes`, :meth:`.cards` or :meth:`.revlog` instead!
+
+        Args:
+            *args:
+            **kwargs:
+        """
         super().__init__(*args, **kwargs)
         if len(args) == 1 and isinstance(args[0], AnkiDataFrame):
             args[0]._copy_attrs(self)
@@ -78,21 +90,60 @@ class AnkiDataFrame(pd.DataFrame):
         return new
 
     @classmethod
-    def notes(cls, path):
-        """ Initialize AnkiDataFrame with notes table loaded from Anki
-        database. """
+    def notes(cls, path=None):
+        """ Initialize :class:`AnkiDataFrame` with notes table loaded from Anki
+        database.
+
+        Args:
+            path: Path to anki database. If None is given, ``ankipandas`` will
+                search for the database.
+
+        Example:
+
+        .. code-block:: python
+
+            import ankipandas
+            notes = ankipandas.AnkiDataFrame.notes()
+
+        """
         return cls._table_constructor(path, "notes")
 
     @classmethod
-    def cards(cls, path):
-        """ Initialize AnkiDataFrame with cards table loaded from Anki
-        database. """
+    def cards(cls, path=None):
+        """ Initialize :class:`AnkiDataFrame` with cards table loaded from Anki
+        database.
+
+        Args:
+            path: Path to anki database. If None is given, ``ankipandas`` will
+                search for the database.
+
+        Example:
+
+        .. code-block:: python
+
+            import ankipandas
+            cards = ankipandas.AnkiDataFrame.cards()
+
+        """
         return cls._table_constructor(path, "cards")
 
     @classmethod
-    def revlog(cls, path):
-        """ Initialize AnkiDataFrame with revlog table loaded from Anki
-        database. """
+    def revlog(cls, path=None):
+        """ Initialize :class:`AnkiDataFrame` with revlog table loaded from Anki
+        database.
+
+        Args:
+            path: Path to anki database. If None is given, ``ankipandas`` will
+                search for the database.
+
+        Example:
+
+        .. code-block:: python
+
+            import ankipandas
+            revlog = ankipandas.AnkiDataFrame.revlog()
+
+        """
         return cls._table_constructor(path, "revlog")
 
     # Internal helpers
