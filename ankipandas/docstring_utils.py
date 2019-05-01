@@ -4,6 +4,14 @@ import collections
 
 
 def parse_docstring(string):
+    """ Parses docstring
+
+    Args:
+        string: docstring
+
+    Returns: Description [str], description of arguments [Dict[str, str]],
+        description of return value [str]
+    """
     if not string:
         return "", {}, ""
     desc = ""
@@ -35,7 +43,19 @@ def parse_docstring(string):
 
 
 def format_docstring(desc, args, returns, drop_arg=()):
-    ret = desc.strip()
+    """ Format docstring.
+
+    Args:
+        desc: Description [str]
+        args: Description of parameters Dict[str, str],
+        returns: Description of return values
+        drop_arg: Remove the following parameters from the description of
+            parameters
+
+    Returns:
+        Docstring with the info supplied in the parameters.
+    """
+    ret = desc
     ret += "\n\nArgs:\n"
     skip = False
     for arg, argdesc in args.items():

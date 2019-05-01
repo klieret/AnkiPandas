@@ -8,16 +8,27 @@ import pandas as pd
 # ours
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
-from ankipandas.log import get_logger
-from ankipandas.docstring_utils import *
+from ankipandas.docstring_utils import parse_docstring, format_docstring
 
 
-def _adapt_docstring(method, replace_desc=None):
-    docs = method.__doc__
-    desc, args, ret = parse_docstring(docs)
-    if replace_desc:
-        desc = replace_desc
-    return format_docstring(desc, args, ret, drop_arg=["df", "db"])
+def _copy_docstring(other, desc=None):
+    """ Use this as a decorator in order to copy the docstring from the
+    first argument.
+    Drops the ``df`` and ``db`` arguments from the parameter description.
+
+    Args:
+        desc: Replace description with this description
+    """
+    def dec_adapt_docstring(this):
+        docs = other.__doc__
+        _desc, _args, _ret = parse_docstring(docs)
+        if desc:
+            _desc = desc
+        this.__doc__ = format_docstring(
+            _desc, _args, _ret, drop_arg=["df", "db"]
+        )
+        return this
+    return dec_adapt_docstring
 
 
 class AnkiDataFrame(pd.DataFrame):
@@ -104,6 +115,7 @@ class AnkiDataFrame(pd.DataFrame):
     # Public methods
     # ==========================================================================
 
+    @_copy_docstring(core.merge_note_info)
     def merge_note_info(self, *args, **kwargs):
         return core.merge_note_info(
             db=self.db,
@@ -111,8 +123,8 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    merge_note_info.__doc__ = _adapt_docstring(core.merge_note_info)
 
+    @_copy_docstring(core.merge_card_info)
     def merge_card_info(self, *args, **kwargs):
         return core.merge_card_info(
             db=self.db,
@@ -120,8 +132,8 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    merge_card_info.__doc__ = _adapt_docstring(core.merge_card_info)
 
+    @_copy_docstring(core.add_nids, "Add note IDs")
     def add_nids(self, cid_column=None, *args, **kwargs):
         if not cid_column:
             cid_column = self._cid_column
@@ -132,11 +144,8 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_nids.__doc__ = _adapt_docstring(
-        core.add_nids,
-        "Add note IDs"
-    )
 
+    @_copy_docstring(core.add_mids, "Add model IDs")
     def add_mids(self, nid_column=None, *args, **kwargs):
         if not nid_column:
             nid_column = self._nid_column
@@ -148,11 +157,8 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_mids.__doc__ = _adapt_docstring(
-        core.add_mids,
-        "Add model IDs"
-    )
 
+    @_copy_docstring(core.add_model_names)
     def add_model_names(self, *args, **kwargs):
         # Todo: Perhaps call add_mids, if nid column not found
         return core.add_model_names(
@@ -161,8 +167,8 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_model_names.__doc__ = _adapt_docstring(core.add_model_names)
 
+    @_copy_docstring(core.add_deck_names)
     def add_deck_names(self, *args, **kwargs):
         return core.add_deck_names(
             self.db,
@@ -170,8 +176,8 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_deck_names.__doc__ = _adapt_docstring(core.add_deck_names)
 
+    @_copy_docstring(core.add_fields_as_columns)
     def add_fields_as_columns(self, *args, **kwargs):
         return core.add_fields_as_columns(
             db=self.db,
@@ -179,8 +185,8 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    add_fields_as_columns.__doc__ = _adapt_docstring(core.add_fields_as_columns)
 
+    @_copy_docstring(core.fields_as_columns_to_flds)
     def fields_as_columns_to_flds(self, *args, **kwargs):
         return core.fields_as_columns_to_flds(
             db=self.db,
@@ -188,8 +194,6 @@ class AnkiDataFrame(pd.DataFrame):
             *args,
             **kwargs
         )
-    fields_as_columns_to_flds.__doc__ = \
-        _adapt_docstring(core.fields_as_columns_to_flds)
 
     def help(self, columns=None):
         """ Print help about all known columns in this AnkiDataFrame. """
