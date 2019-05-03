@@ -118,7 +118,7 @@ Get information about the fields in the table:
 
 .. code:: python
 
-    ankipandas.table_help()
+    cards.help()
 
 Most of this information is from the `ankidroid documentation`_.
 
@@ -142,4 +142,3 @@ This software is lienced under the `MIT license`_.
 .. _MIT  license: https://github.com/klieret/ankipandas/blob/master/LICENSE.txt
 
 .. end-body
-
