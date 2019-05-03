@@ -13,6 +13,7 @@ from pathlib import Path
 keywords = [
     "anki",
     "pandas",
+    "dataframe"
 ]
 
 description = "Load your anki database as a pandas DataFrame with just one " \
@@ -28,6 +29,13 @@ with (this_dir / "README.rst").open() as fh:
 with (this_dir / "ankipandas" / "version.txt").open() as vf:
     version = vf.read()
 
+with (this_dir / "requirements.txt").open() as rf:
+    requirements = [
+        req.strip() for req in rf.readlines()
+        if not req.startswith("#")
+    ]
+
+
 setup(
     name='ankipandas',
     version=version,
@@ -41,7 +49,7 @@ setup(
     package_data={
         'ankipandas': ['anki_fields.csv', 'version.txt'],
     },
-    install_requires=["pandas", "colorlog"],
+    install_requires=requirements,
     license="MIT",
     keywords=keywords,
     description=description,
