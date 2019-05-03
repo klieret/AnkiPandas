@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # std
+import collections
 import unittest
 from pathlib import Path
 import tempfile
@@ -63,6 +64,25 @@ class TestFindDatabase(unittest.TestCase):
             )))
             b = sorted(map(str, self.dbs[d]))
             self.assertListEqual(a, b)
+
+    def test__find_database_filename(self):
+        # If doesn't exist
+        self.assertEqual(
+            convenience._find_database(
+                Path("abc/myfilename.txt"), filename="myfilename.txt"
+            ),
+            {}
+        )
+        tmpdir = tempfile.TemporaryDirectory()
+        dir_path = Path(tmpdir.name) / "myfolder"
+        file_path = dir_path / "myfilename.txt"
+        dir_path.mkdir()
+        file_path.touch()
+        self.assertEqual(
+            convenience._find_database(file_path, filename="myfilename.txt"),
+            collections.defaultdict(list, {"myfolder": [file_path]})
+        )
+        tmpdir.cleanup()
 
     def test_find_database(self):
         with self.assertRaises(ValueError):

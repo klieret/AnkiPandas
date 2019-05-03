@@ -107,7 +107,8 @@ def load_revs(
 
 # todo: decorator messes up sphinx signature
 @lru_cache(32)
-def _find_database(search_path, maxdepth=6, filename="collection.anki2",
+def _find_database(search_path, maxdepth=6,
+                   filename="collection.anki2",
                    break_on_first=False, user=None):
     """
     Like find_database but only for one search path at a time. Also doesn't
@@ -116,8 +117,14 @@ def _find_database(search_path, maxdepth=6, filename="collection.anki2",
     Returns:
         collection.defaultdict({user: [list of results]})
     """
+    search_path = pathlib.Path(search_path)
     if not os.path.exists(str(search_path)):
         return collections.defaultdict(list)
+    if search_path.is_file():
+        if search_path.name == filename:
+            return collections.defaultdict(
+                list, {search_path.parent.name: [search_path]}
+            )
     found = collections.defaultdict(list)
     for root, dirs, files in os.walk(str(search_path)):
         if filename in files:
@@ -190,7 +197,7 @@ def find_database(
             else:
                 if found:
                     break
-    
+
     if user:
         if user not in found:
             raise ValueError(
