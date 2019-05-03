@@ -8,7 +8,7 @@ import pandas as pd
 # ours
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
-from ankipandas.docstring_utils import parse_docstring, format_docstring
+from ankipandas.util.docstring_utils import parse_docstring, format_docstring
 
 
 def _copy_docstring(other, desc=None):

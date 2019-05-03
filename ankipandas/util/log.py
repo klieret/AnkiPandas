@@ -2,7 +2,6 @@
 
 import logging
 
-# todo: add colorlog to recommended packages
 try:
     import colorlog
 except ImportError:

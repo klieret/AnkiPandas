@@ -55,7 +55,7 @@ setup(
         "Source Code": "https://github.com/klieret/ankipandas/",
     },
     package_data={
-        'ankipandas': ['anki_fields.csv', 'version.txt'],
+        'ankipandas': ['anki_fields.csv', 'data/*'],
     },
     install_requires=requirements,
     license="MIT",
