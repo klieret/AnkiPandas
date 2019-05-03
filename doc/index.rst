@@ -8,7 +8,6 @@ line of code!
   :maxdepth: 2
 
   readme
-  convenience_functions
   ankidf
+  convenience_functions
   core_functions
-

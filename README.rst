@@ -130,14 +130,14 @@ Common problems
 * Locked database: While Anki is running, your database will be locked and you might
   not be able to access it. Simply close Anki and try again.
 
-Any other problems? Please open an issue_
+Any other problems? Please open an issue_.
 
 .. _issue: https://github.com/klieret/AnkiPandas/issues
 
 License
 -------
 
-This software is lienced under the `MIT license`_.
+This software is licenced under the `MIT license`_.
 
 .. _MIT  license: https://github.com/klieret/ankipandas/blob/master/LICENSE.txt
 

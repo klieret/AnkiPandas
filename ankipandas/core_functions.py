@@ -57,10 +57,10 @@ def get_cards(db: sqlite3.Connection):
     Get all cards as a dataframe.
 
     Args:
-        db: Database
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
-        pandas.DataFrame
+        :class:`pandas.DataFrame`
     """
     return _get_table(db, "cards")
 
@@ -70,10 +70,10 @@ def get_notes(db: sqlite3.Connection):
     Get all notes as a dataframe.
 
     Args:
-        db: Database
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
-        pandas.DataFrame
+        :class:`pandas.DataFrame`
     """
     return _get_table(db, "notes")
 
@@ -83,10 +83,10 @@ def get_revlog(db: sqlite3.Connection):
     Get the revision log as a dataframe.
 
     Args:
-        db: Database
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
-        pandas.DataFrame
+        :class:`pandas.DataFrame`
     """
     return _get_table(db, "revlog")
 
@@ -98,7 +98,7 @@ def get_info(db: sqlite3.Connection):
     decks etc.
 
     Args:
-        db: Databse
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
         Nested dictionary.
@@ -126,8 +126,8 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
     Write table back to database.
 
     Args:
-        db: Database
-        df: The dataframe to write
+        db: Database (:class:`sqlite3.Connection`)
+        df: The :class:`pandas.DataFrame` to write
         table: Table to write to: 'notes', 'cards', 'revlog'
         mode: 'update': Update only existing entries, 'append': Only append new
             entries, but do not modify, 'replace': Append, modify and delete
@@ -174,8 +174,8 @@ def set_notes(db: sqlite3.Connection, df: pd.DataFrame, mode: str) -> None:
     """ Write notes table back into database.
 
     Args:
-        db: Database
-        df: Dataframe
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame`
         mode: 'update': Update only existing entries, 'append': Only append new
             entries, but do not modify, 'replace': Append, modify and delete
 
@@ -189,8 +189,8 @@ def set_cards(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
     """ Write cards table back into database.
 
     Args:
-        db: Database
-        df: Dataframe
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame`
         mode: 'update': Update only existing entries, 'append': Only append new
             entries, but do not modify, 'replace': Append, modify and delete
 
@@ -204,8 +204,8 @@ def set_revlog(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
     """ Write revlog table back into database.
 
     Args:
-        db: Database
-        df: Dataframe
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame`
         mode: 'update': Update only existing entries, 'append': Only append new
             entries, but do not modify, 'replace': Append, modify and delete
 
@@ -226,7 +226,7 @@ def get_deck_info(db: sqlite3.Connection):
     """ Get information about decks.
 
     Args:
-        db: Database
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
         Nested dictionary
@@ -239,11 +239,10 @@ def get_deck_names(db: sqlite3.Connection):
     """ Mapping of deck IDs (did) to deck names.
 
     Args:
-        db: Database
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
         Dictionary mapping of deck id to deck name
-
     """
     dinfo = get_deck_info(db)
     return {
@@ -257,7 +256,7 @@ def get_model_info(db: sqlite3.Connection):
     """ Get information about models.
 
     Args:
-        db: Database
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
         Nested dictionary
@@ -270,7 +269,7 @@ def get_model_names(db: sqlite3.Connection):
     """ Mapping of model IDs (mid) to model names.
 
     Args:
-        db: Database
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
         Dictionary mapping of model id to model name
@@ -287,7 +286,7 @@ def get_field_names(db: sqlite3.Connection):
     """ Get names of the fields in the notes
 
     Args:
-        db: Databse
+        db: Databse (:class:`sqlite3.Connection`)
 
     Returns:
         Dictionary mapping of model id to list of field names
@@ -307,8 +306,16 @@ def get_field_names(db: sqlite3.Connection):
 
 
 # todo: move to utils
-def _replace_df_inplace(df, df_new):
-    """ Replace dataframe 'in place'. """
+def _replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
+    """ Replace dataframe 'in place'.
+
+    Args:
+        df: :class:`pandas.DataFrame` to be replaced
+        df_new: :class:`pandas.DataFrame` to replace the previous one
+
+    Returns:
+        None
+    """
     if df.index.any():
         df.drop(df.index, inplace=True)
     for col in df_new.columns:
@@ -320,13 +327,15 @@ def _replace_df_inplace(df, df_new):
 
 def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
               inplace=False, id_add="id", prepend="",
-              prepend_clash_only=True, columns=None, drop_columns=None):
+              prepend_clash_only=True, columns=None,
+              drop_columns=None):
     """
     Merge information from two dataframes.
 
     Args:
-        df: Original dataframe
-        df_add: Dataframe to be merged with original dataframe
+        df: Original :class:`pandas.DataFrame`
+        df_add: :class:`pandas.DataFrame` to be merged with original
+            :class:`pandas.DataFrame`
         id_df: Column of original dataframe that contains the id along which
             we merge.
         inplace: If False, return new dataframe, else update old one
@@ -339,7 +348,7 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
         drop_columns: Drop these columns
 
     Returns:
-        New merged dataframe
+        New merged :class:`pandas.DataFrame`
     """
     # Careful: Do not drop the id column until later (else we can't merge)
     # Still, we want to remove as much as possible here, because it's probably
@@ -382,8 +391,8 @@ def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
     """ Merge note table into existing dataframe
 
     Args:
-        db: Database
-        df: Dataframe to merge information into
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
         inplace: If False, return new dataframe, else update old one
         columns: Columns to merge
         drop_columns: Columns to ignore when merging
@@ -393,7 +402,7 @@ def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
             names would otherwise clash.
 
     Returns:
-        New dataframe if inplace==True, else None
+        New :class:`pandas.DataFrame` if inplace==True, else None
     """
     return merge_dfs(
         df=df,
@@ -415,8 +424,8 @@ def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     Merges information from the card table into the current dataframe.
 
     Args:
-        db: Database
-        df: Dataframe to merge information into
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
         inplace: If False, return new dataframe, else update old one
         columns:  Columns to merge
         drop_columns:  Columns to ignore when merging
@@ -426,7 +435,7 @@ def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
             names would otherwise clash.
 
     Returns:
-        New dataframe if inplace==True, else None
+        New :class:`pandas.DataFrame` if inplace==True, else None
     """
     return merge_dfs(
         df=df,
@@ -447,13 +456,13 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     Example: ``add_nids(db, cards, id_column="nid")``
 
     Args:
-        db: Database
-        df: Dataframe to merge information into
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
         inplace: If False, return new dataframe, else update old one
         cid_column: Column with card ID
 
     Returns:
-        New dataframe if inplace==True, else None
+        New :class:`pandas.DataFrame` if inplace==True, else None
     """
     if "nid" in df.columns:
         if inplace:
@@ -479,13 +488,13 @@ def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     ``add_mids(db, cards_with_merged_notes, id_column="nid")``.
 
     Args:
-        db: Database
-        df: Dataframe to merge information into
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
         inplace: If False, return new dataframe, else update old one
         nid_column: Column with note ID
 
     Returns:
-        New dataframe if inplace==True, else None
+        New :class:`pandas.DataFrame` if inplace==True, else None
     """
     if "mid" in df.columns:
         if inplace:
@@ -514,14 +523,14 @@ def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     """ Add model names to a dataframe that contains model IDs.
 
     Args:
-        db: Database
-        df: Dataframe to merge information into
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
         inplace: If False, return new dataframe, else update old one
         mid_column: Column with model ID
         new_column: Name of new column to be added
 
     Returns:
-        New dataframe if inplace==True, else None
+        New :class:`pandas.DataFrame` if inplace==True, else None
     """
     if mid_column not in df.columns:
         raise ValueError(
@@ -546,14 +555,14 @@ def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     Add deck names to a dataframe that contains deck IDs.
 
     Args:
-        db: Database
-        df: Dataframe to merge information into
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
         inplace: If False, return new dataframe, else update old one
         did_column: Column with deck ID (did)
         new_column: Name of new column to be added
 
     Returns:
-        New dataframe if inplace==True, else None
+        New :class:`pandas.DataFrame` if inplace==True, else None
     """
     if did_column not in df.columns:
         raise ValueError(
@@ -581,15 +590,15 @@ def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
     into a new column for every field.
 
     Args:
-        db: Database
-        df: Dataframe to merge information into
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
         inplace: If False, return new dataframe, else update old one
         mid_column: Column with model ID
         prepend: Prepend string to all new column names
         flds_column: Column that contains the joined fields
 
     Returns:
-        New dataframe if inplace==True, else None
+        New :class:`pandas.DataFrame` if inplace==True, else None
     """
     if mid_column not in df.columns:
         raise ValueError(
@@ -626,8 +635,8 @@ def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
     'flds'.
 
     Args:
-        db: Database
-        df: Dataframe to merge information into
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
         inplace: If False, return new dataframe, else update old one
         mid_column: Column with model ID
         prepended: Use this, if the name of columns that contained the fields
@@ -635,7 +644,7 @@ def fields_as_columns_to_flds(db: sqlite3.Connection, df: pd.DataFrame,
         drop: Drop columns that were now merged into the 'flds' column
 
     Returns:
-        New dataframe if inplace==True, else None
+        New :class:`pandas.DataFrame` if inplace==True, else None
     """
     if mid_column not in df.columns:
         raise ValueError(

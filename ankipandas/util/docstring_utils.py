@@ -32,9 +32,9 @@ def parse_docstring(string):
             returns += line + "\n"
         elif _section == "args":
             kv = line.split(":")
-            if len(kv) == 2:
+            if len(kv) >= 2:
                 _arg = kv[0]
-                args[_arg] = kv[1]
+                args[_arg] = ":".join(kv[1:])
             else:
                 args[_arg] += kv[0].strip()
         else:
