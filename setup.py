@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+""" To install this package, change to the directory of this file and run
+
+    pip3 install --user .
+
+(the ``--user`` flag installs the package for your user account only, otherwise
+you will need administrator rights).
+"""
+
 # std
 from distutils.core import setup
 # noinspection PyUnresolvedReferences

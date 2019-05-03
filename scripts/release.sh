@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# This script is used to push a new release to pypy and add an appropriate
+# tag to the git repository.
+
 set -e
 
 # Upload to pypi
@@ -32,3 +35,6 @@ python3 setup.py sdist bdist_wheel
 python3 -m twine upload --verbose --repository-url https://upload.pypi.org/legacy/ dist/*
 git tag -a "v${version}" -m "Release version ${version}"
 git push origin "v${version}"
+
+# Cleanup
+bash "${thisDir}/clean.sh"
