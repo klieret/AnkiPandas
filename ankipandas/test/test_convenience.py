@@ -37,7 +37,6 @@ def random_string(min_length=5, max_length=10):
     )
 
 
-
 def create_random_tree(basedir, nfiles=2, nfolders=1, repeat=1,
                        maxdepth=None, sigma_folders=1, sigma_files=1):
     """
@@ -130,18 +129,28 @@ class TestFindDatabase(unittest.TestCase):
 
     def test__find_database(self):
         for d in self.dirs:
-            a = sorted(map(str, flatten_list(convenience._find_database(self.dirs[d].name, maxdepth=None, break_on_first=False).values())))
+            a = sorted(map(str, flatten_list(
+                convenience._find_database(
+                    self.dirs[d].name, maxdepth=None, break_on_first=False
+                ).values()
+            )))
             b = sorted(map(str, self.dbs[d]))
             self.assertListEqual(a, b)
 
     def test_find_database(self):
         with self.assertRaises(ValueError):
-            convenience.find_database(self.dirs["nothing"].name, break_on_first=False)
+            convenience.find_database(
+                self.dirs["nothing"].name, break_on_first=False
+            )
         with self.assertRaises(ValueError):
-            convenience.find_database(self.dirs["multiple"].name, break_on_first=False)
+            convenience.find_database(
+                self.dirs["multiple"].name, break_on_first=False
+            )
             print(self.dbs["multiple"])
         self.assertEqual(
-            str(convenience.find_database(self.dirs["perfect"].name, break_on_first=False)),
+            str(convenience.find_database(
+                self.dirs["perfect"].name, break_on_first=False
+            )),
             str(self.dbs["perfect"][0])
         )
 
@@ -165,7 +174,8 @@ class TestHelp(unittest.TestCase):
 
 class TestLoaders(unittest.TestCase):
     def setUp(self):
-        self.path = Path(__file__).parent / "data" / "few_basic_cards" / "collection.anki2"
+        self.path = Path(__file__).parent / "data" / "few_basic_cards" / \
+                    "collection.anki2"
 
     def test_load_notes_no_expand(self):
         notes = convenience.load_notes(self.path, expand_fields=False)

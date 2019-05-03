@@ -46,6 +46,7 @@ def close_db(db):
 # Basic getters
 # ==============================================================================
 
+# todo: make public, doc
 def _get_table(db: sqlite3.Connection, table):
     df = pd.read_sql_query("SELECT * FROM {}".format(table), db)
     return df
@@ -305,6 +306,7 @@ def get_field_names(db: sqlite3.Connection):
 # todo: inplace passible decorator
 
 
+# todo: move to utils
 def _replace_df_inplace(df, df_new):
     """ Replace dataframe 'in place'. """
     if df.index.any():

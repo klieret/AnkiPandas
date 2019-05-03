@@ -49,6 +49,7 @@ class AnkiDataFrame(pd.DataFrame):
         """
         super().__init__(*args, **kwargs)
         if len(args) == 1 and isinstance(args[0], AnkiDataFrame):
+            # todo: maybe do this the other way round as self.copy_attrs_to(...)
             args[0]._copy_attrs(self)
         self.db = None
         self.db_path = None
@@ -204,7 +205,7 @@ class AnkiDataFrame(pd.DataFrame):
         return core.add_mids(
             db=self.db,
             df=self,
-            nid_column = nid_column,
+            nid_column=nid_column,
             *args,
             **kwargs
         )

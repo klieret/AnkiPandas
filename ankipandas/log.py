@@ -9,7 +9,8 @@ except ImportError:
     colorlog = None
 
 
-def get_logger(name="AnkiPandas", level=logging.WARNING, sh_level=logging.WARNING):
+def get_logger(name="AnkiPandas", level=logging.WARNING,
+               sh_level=logging.WARNING):
     """Sets up a logging.Logger.
 
     If the colorlog module is available, the logger will use colors,

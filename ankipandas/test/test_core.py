@@ -2,14 +2,12 @@
 
 # std
 import unittest
-import pathlib
-import copy
 import shutil
 import tempfile
 
 # ours
 from ankipandas.core_functions import *
-from ankipandas.ankidf import AnkiDataFrame as ADF
+from ankipandas.ankidf import AnkiDataFrame as AnkiDF
 # for hidden
 import ankipandas.core_functions as core_functions
 from ankipandas.test.shared import revlog_cols, note_cols, card_cols
@@ -26,7 +24,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
 
     def test_get_cards(self):
         cards1 = get_cards(self.db)
-        cards2 = ADF.cards(self.db_path)
+        cards2 = AnkiDF.cards(self.db_path)
         for cards in [cards1, cards2]:
             self.assertEqual(len(cards), 3)
             self.assertEqual(
@@ -36,7 +34,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
 
     def test_get_notes(self):
         notes1 = get_notes(self.db)
-        notes2 = ADF.notes(self.db_path)
+        notes2 = AnkiDF.notes(self.db_path)
         for notes in [notes1, notes2]:
             self.assertEqual(len(notes), 2)
             self.assertEqual(
@@ -46,7 +44,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
 
     def test_get_revlog(self):
         revlog1 = get_revlog(self.db)
-        revlog2 = ADF.revlog(self.db_path)
+        revlog2 = AnkiDF.revlog(self.db_path)
         for revlog in [revlog1, revlog2]:
             # todo assert length
             self.assertEqual(
@@ -90,7 +88,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def test_merge_note_info(self):
         cards1 = get_cards(self.db)
         merged1 = merge_note_info(self.db, cards1)
-        cards2 = ADF.cards(self.db_path)
+        cards2 = AnkiDF.cards(self.db_path)
         merged2 = cards2.merge_note_info()
         for merged in [merged1, merged2]:
             self.assertListEqual(
@@ -104,7 +102,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def test_merge_card_info(self):
         revlog1 = get_revlog(self.db)
         merged1 = merge_card_info(self.db, revlog1)
-        merged2 = ADF.revlog(self.db_path).merge_card_info()
+        merged2 = AnkiDF.revlog(self.db_path).merge_card_info()
         for merged in [merged1, merged2]:
             self.assertListEqual(
                 sorted(list(merged.columns)),
@@ -117,7 +115,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def test_add_nids(self):
         cards1 = get_cards(self.db)
         cards1 = add_nids(self.db, cards1)
-        cards2 = ADF.cards(self.db_path).add_nids()
+        cards2 = AnkiDF.cards(self.db_path).add_nids()
         for cards in [cards1, cards2]:
             self.assertIn("nid", list(cards.columns))
             self.assertListEqual(
@@ -128,7 +126,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def test_add_mids(self):
         notes1 = get_notes(self.db)
         notes1 = add_mids(self.db, notes1)
-        notes2 = ADF.notes(self.db_path).add_mids()
+        notes2 = AnkiDF.notes(self.db_path).add_mids()
         for notes in [notes1, notes2]:
             self.assertEqual(
                 len(notes["mid"].unique()),
@@ -140,7 +138,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
         notes1 = add_mids(self.db, notes1)
         notes1 = add_model_names(self.db, notes1)
         # todo: add_mids() should soon be called automatically
-        notes2 = ADF.notes(self.db_path).add_mids().add_model_names()
+        notes2 = AnkiDF.notes(self.db_path).add_mids().add_model_names()
         for notes in [notes1, notes2]:
             self.assertEqual(
                 sorted(list(notes["mname"].unique())),
@@ -150,7 +148,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def test_add_deck_names(self):
         cards1 = get_cards(self.db)
         cards1 = add_deck_names(self.db, cards1)
-        cards2 = ADF.cards(self.db_path).add_deck_names()
+        cards2 = AnkiDF.cards(self.db_path).add_deck_names()
         for cards in [cards1, cards2]:
             self.assertEqual(
                 sorted(list(cards["dname"].unique())),
@@ -161,7 +159,8 @@ class TestCoreFunctionsRead(unittest.TestCase):
         notes1 = get_notes(self.db)
         notes1 = add_fields_as_columns(self.db, notes1)
         notes1 = add_model_names(self.db, notes1)
-        notes2 = ADF.notes(self.db_path).add_model_names().add_fields_as_columns()
+        notes2 = AnkiDF.notes(self.db_path).add_model_names()
+        notes2 = notes2.add_fields_as_columns()
         for notes in [notes1, notes2]:
             self.assertEqual(
                 sorted(list(notes.columns)),
@@ -181,7 +180,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
         flds = copy.copy(notes1["flds"].values)
         notes1["flds"] = ""
         notes1 = fields_as_columns_to_flds(self.db, notes1, drop=True)
-        notes2 = ADF.notes(self.db_path).add_fields_as_columns()
+        notes2 = AnkiDF.notes(self.db_path).add_fields_as_columns()
         notes2["flds"] = ""
         notes2.fields_as_columns_to_flds(inplace=True, drop=True)
         for notes in [notes1, notes2]:
@@ -199,9 +198,11 @@ class TestCoreFunctionsRead(unittest.TestCase):
         notes1 = add_fields_as_columns(self.db, notes1, prepend="fld_")
         flds = copy.copy(notes1["flds"].values)
         notes1["flds"] = ""
-        notes1 = fields_as_columns_to_flds(self.db, notes1, drop=True,
-                                          prepended="fld_")
-        notes2 = ADF.notes(self.db_path).add_fields_as_columns(prepend="fld_")
+        notes1 = fields_as_columns_to_flds(
+            self.db, notes1, drop=True, prepended="fld_"
+        )
+        notes2 = AnkiDF.notes(self.db_path)
+        notes2 = notes2.add_fields_as_columns(prepend="fld_")
         notes2["flds"] = ""
         notes2 = notes2.fields_as_columns_to_flds(drop=True, prepended="fld_")
         for notes in [notes1, notes2]:
@@ -217,8 +218,8 @@ class TestCoreWrite(unittest.TestCase):
             / "few_basic_cards" / "collection.anki2"
         self.db_read = load_db(self.db_read_path)
         self.db_write_dir = tempfile.TemporaryDirectory()
-        self.db_write_path = pathlib.Path(self.db_write_dir.name) / \
-                        "collection.anki2"
+        self.db_write_path = \
+            pathlib.Path(self.db_write_dir.name) / "collection.anki2"
         self._reset()
 
     def _reset(self):
@@ -260,23 +261,23 @@ class TestCoreWrite(unittest.TestCase):
                 self._check_db_equal()
 
     def test_update(self):
-        notes_changed = get_notes(self.db_read)
-        notes_original = get_notes(self.db_read)
+        notes2 = get_notes(self.db_read)
+        notes = get_notes(self.db_read)
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
-                notes_changed.loc[notes_changed["id"] == 1555579337683, "tags"] = "mytesttag"
-                set_notes(self.db_write, notes_changed, mode)
+                notes2.loc[notes2["id"] == 1555579337683, "tags"] = "mytesttag"
+                set_notes(self.db_write, notes2, mode)
                 if mode == "append":
                     self._check_db_equal()
                 else:
                     notes2 = get_notes(self.db_write)
-                    chtag = notes2.loc[notes_changed["id"] == 1555579337683, "tags"]
+                    chtag = notes2.loc[notes2["id"] == 1555579337683, "tags"]
                     self.assertListEqual(
                         list(chtag.values.tolist()),
                         ["mytesttag"]
                     )
-                    unchanged = notes_original.loc[notes_original["id"] != 1555579337683, :]
+                    unchanged = notes.loc[notes["id"] != 1555579337683, :]
                     unchanged2 = notes2.loc[notes2["id"] != 1555579337683, :]
 
                     self.assertListEqual(
