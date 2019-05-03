@@ -30,26 +30,31 @@ AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 Description
 -----------
 
-With this small python package, you can easily load all of your Anki flashcards
-as a all-in-one pandas DataFrame!
+With this small python package, you can easily load all of your Anki_ flashcards
+as a all-in-one pandas_ DataFrame_!
+
+.. _anki: https://apps.ankiweb.net/
+.. _pandas: https://pandas.pydata.org/
+.. _DataFrame: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html
 
 **Pros**:
 
-* Use all of your mighty pandas tools to data science the heck out of
-  your Anki collection
-* Just one line of code to get your data frame containing all the information
-  you need
-* Bring together information about cards, notes and models in just one object!
-  There's no need to go from cards to corresponding notes to corresponding
-  note model just to find out the field names and contents.
-* Easily manipulate and write back data (experimental)
-* Easy installation (does not depend on any anki installation)
+* Use pandas to easily analize or manipulate your Anki collection
+* Just one line of code to get started
+* Bring together information about cards_, notes_, models_, decks_ in just one table!
+* Easy installation (independent from your anki installation)
 
+.. _cards: https://apps.ankiweb.net/docs/manual.html#cards
+.. _notes: https://apps.ankiweb.net/docs/manual.html#notes-&-fields
+.. _models: https://apps.ankiweb.net/docs/manual.html#note-types
+.. _decks: https://apps.ankiweb.net/docs/manual.html#decks
 
 Installation
 ------------
 
-``AnkiPandas`` can be installed with the python package manager:
+``AnkiPandas`` can be installed with the `python package manager`_:
+
+.. _python package manager: https://pip.pypa.io/en/stable/
 
 .. code:: sh
 
@@ -70,7 +75,7 @@ of this repository:
 Usage
 -----
 
-The simplest interface is that of ``AnkiDataFrame`` (a subclass of pandas ``DataFrame``):
+The simplest interface is that of an ``AnkiDataFrame`` (a subclass of pandas ``DataFrame``):
 
 It's as easy as this:
 
@@ -78,38 +83,31 @@ It's as easy as this:
 
     from ankipandas import AnkiDataFrame
 
-    adf = AnkiDataFrame.cards()
+    cards = AnkiDataFrame.cards()
 
 And you have a dataframe containing all cards, with additional methods that make
 many things easy. For example:
 
 .. code:: python
 
-    adf.merge_note_info()
+    # For each card, merge all information from the corresponding note into
+    # the dataframe
+    cards.merge_note_info(inplace=True)
 
-merges all columns from the ntoes that correspond to the cards into the
-dataframe.
+    # Add deck names (rather than just IDs)
+    cards.add_deck_names(inplace=True)
 
-.. code:: python
-
-    adf.add_deck_names()
-
-Adds the deck names to the dataframe (instead of just deck IDs, ``did``).
-
-.. code:: python
-
-    adf.add_fields_as_columns()
-
-Adds all fields from the notes as new columns to the dataframe (instead of being
-all merged in one field ``flds`` as by default).
+    # Add all fields from the notes as new columns to the dataframe (instead of
+    # being merged in one field ``flds`` as by default):
+    cards.add_fields_as_columns(inplace=True)
 
 Take a look at the documentation_ to find out more about more about the
 available methods!
 
 .. _documentation: https://ankipandas.readthedocs.io/
 
-The basic implementation is done in a functional way, so if you rather work with
-standard pandas DataFrames, you can also just use these functions to manipulate
+The basic implementation is done in a functional way, so if you prefer
+the vanilla pandas ``DataFrame``, you can also just use these functions to manipulate
 them.
 Again, the documentation_ is a good starting point!
 
@@ -129,7 +127,12 @@ Most of this information is from the `ankidroid documentation`_.
 Common problems
 ---------------
 
-* Locked database?
+* Locked database: While Anki is running, your database will be locked and you might
+  not be able to access it. Simply close Anki and try again.
+
+Any other problems? Please open an issue_
+
+.. _issue: https://github.com/klieret/AnkiPandas/issues
 
 License
 -------
