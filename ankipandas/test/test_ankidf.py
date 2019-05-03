@@ -20,7 +20,7 @@ class TestAnkiDF(unittest.TestCase):
                        "few_basic_cards" / "collection.anki2"
 
     def test_help(self):
-        notes = AnkiDF.notes()
+        notes = AnkiDF.notes(self.db_path)
         hlp = notes.help()
         self.assertTrue(
             ["notes" in tables for tables in hlp["Tables"].values]
