@@ -35,12 +35,12 @@ with (this_dir / "README.rst").open() as fh:
     long_description = fh.read()
 
 with (this_dir / "ankipandas" / "version.txt").open() as vf:
-    version = vf.read()
+    version = vf.read().strip()
 
 with (this_dir / "requirements.txt").open() as rf:
     requirements = [
         req.strip() for req in rf.readlines()
-        if req.strip() and not not req.startswith("#")
+        if req.strip() and not req.startswith("#")
     ]
 
 
