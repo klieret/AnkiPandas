@@ -40,7 +40,7 @@ with (this_dir / "ankipandas" / "version.txt").open() as vf:
 with (this_dir / "requirements.txt").open() as rf:
     requirements = [
         req.strip() for req in rf.readlines()
-        if not req.startswith("#")
+        if req.strip() and not not req.startswith("#")
     ]
 
 

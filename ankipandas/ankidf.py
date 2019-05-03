@@ -248,10 +248,15 @@ class AnkiDataFrame(pd.DataFrame):
         )
 
     def help(self, columns=None):
-        """ Print help about all known columns in this AnkiDataFrame. """
-        if not columns:
-            columns = list(self.columns)
-        df = convenience.table_help(columns=columns)
+        """ Print help about all known columns in this AnkiDataFrame.
+
+        Args:
+            columns: Specific column you are interested in
+
+        Returns:
+            :class:`pandas.DataFrame` with descriptions about each column.
+        """
+        df = convenience.table_help(table=self._anki_table, columns=columns)
         return df
 
     # def write(self):

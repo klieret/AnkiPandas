@@ -232,7 +232,7 @@ def table_help(table=None, columns=None, native=None) -> pd.DataFrame:
     Returns:
         Pandas DataFrame with all matches.
     """
-    help_path = pathlib.Path(__file__).parent / "data"/ "anki_fields.csv"
+    help_path = pathlib.Path(__file__).parent / "data" / "anki_fields.csv"
     df = pd.read_csv(help_path)
     df["Tables"] = df["Tables"].str.split(", ")
     if table:

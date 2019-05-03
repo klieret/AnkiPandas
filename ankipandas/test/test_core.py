@@ -8,7 +8,7 @@ import tempfile
 # ours
 from ankipandas.core_functions import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-# for hidden
+# for hidden imports
 import ankipandas.core_functions as core_functions
 from ankipandas.test.shared import revlog_cols, note_cols, card_cols
 
