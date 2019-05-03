@@ -110,8 +110,8 @@ def load_revs(
 def _find_database(search_path, maxdepth=6, filename="collection.anki2",
                    break_on_first=False, user=None):
     """
-    Like find_database but only for one search_path at a time. Also doesn't
-    raise any error, even if the search_path doesn't exist.
+    Like find_database but only for one search path at a time. Also doesn't
+    raise any error, even if the search path doesn't exist.
 
     Returns:
         collection.defaultdict({user: [list of results]})
@@ -183,8 +183,14 @@ def find_database(
                 break_on_first=break_on_first
             )
         }
-        if found and break_on_first:
-            break
+        if break_on_first:
+            if user is not None:
+                if user in found:
+                    break
+            else:
+                if found:
+                    break
+    
     if user:
         if user not in found:
             raise ValueError(
