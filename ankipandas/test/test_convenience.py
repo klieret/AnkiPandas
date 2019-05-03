@@ -4,107 +4,27 @@
 import unittest
 from pathlib import Path
 import tempfile
-import random
-import string
-import os
-import sys
+
+# 3rd
+from randomfiletree import sample_random_elements, iterative_gaussian_tree
 
 # ours
 import ankipandas.convenience_functions as convenience
 from ankipandas.test.shared import *
 
 
-seed = random.randrange(sys.maxsize)
-random.seed(seed)
-print("Random seed:", seed)
-
-
-def random_string(min_length=5, max_length=10):
-    """
-    Get a random string
-
-    Args:
-        min_length: Minimal length of string
-        max_length: Maximal length of string
-
-    Returns:
-        Random string of ascii characters
-    """
-    length = random.randint(min_length, max_length)
-    return ''.join(
-        random.choice(string.ascii_uppercase + string.digits)
-        for _ in range(length)
-    )
-
-
-def create_random_tree(basedir, nfiles=2, nfolders=1, repeat=1,
-                       maxdepth=None, sigma_folders=1, sigma_files=1):
-    """
-    Create a random set of files and folders by repeatedly walking through the
-    current tree and creating random files or subfolders (the number of files
-    and folders created is chosen from a Gaussian distribution).
-    Args:
-        basedir: Directory to create files and folders in
-        nfiles: Average number of files to create
-        nfolders: Average number of folders to create
-        repeat: Walk this often through the directory tree to create new
-            subdirectories and files
-        maxdepth: Maximum depth to descend into current file tree. If None,
-            infinity.
-        sigma_folders: Spread of number of folders
-        sigma_files: Spread of number of files
-    Returns:
-       (List of dirs, List of files), all as pathlib.Path objects.
-    """
-    alldirs = []
-    allfiles = []
-    for i in range(repeat):
-        for root, dirs, files in os.walk(str(basedir)):
-            for _ in range(int(random.gauss(nfolders, sigma_folders))):
-                p = Path(root) / random_string()
-                p.mkdir(exist_ok=True)
-                alldirs.append(p)
-            for _ in range(int(random.gauss(nfiles, sigma_files))):
-                p = Path(root) / random_string()
-                p.touch(exist_ok=True)
-                allfiles.append(p)
-            depth = os.path.relpath(root, str(basedir)).count(os.sep)
-            if maxdepth and depth >= maxdepth - 1:
-                del dirs[:]
-    alldirs = list(set(alldirs))
-    allfiles = list(set(allfiles))
-    return alldirs, allfiles
-
-
-def select_random_folders(basedir, n=1):
-    """
-    Select random subfolders
-
-    Args:
-        basedir: Directory to scan
-        n: Number of subfolders to return
-
-    Returns:
-        List of pathlib.Path objects
-    """
-    alldirs = []
-    for root, dirs, files in os.walk(str(basedir)):
-        for d in dirs:
-            alldirs.append(Path(root) / d)
-    if not alldirs:
-        return []
-    return random.sample(alldirs, min(len(alldirs), n))
-
-
+# todo: doc, perhaps move to RandomFileTree package?
 def touch_file_in_random_folders(basedir, filename, n=1):
     files = set()
-    for d in select_random_folders(basedir, n=n):
+    for d in sample_random_elements(basedir, n_dirs=n, n_files=0,
+                                    onfail="ignore")[0]:
         p = Path(d) / filename
         p.touch()
         files.add(p)
     return list(files)
 
 
+# todo: doc
 def flatten_list(lst):
     return [item for sublist in lst for item in sublist]
 
@@ -117,7 +37,14 @@ class TestFindDatabase(unittest.TestCase):
             "perfect": tempfile.TemporaryDirectory()
         }
         for d in self.dirs.values():
-            create_random_tree(d.name, repeat=5)
+            iterative_gaussian_tree(
+                d.name,
+                repeat=5,
+                nfolders=1,
+                min_folders=1,
+                nfiles=2,
+                min_files=1,
+            )
         self.dbs = {
             "nothing": [],
             "multiple": touch_file_in_random_folders(

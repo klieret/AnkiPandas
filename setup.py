@@ -21,7 +21,7 @@ from pathlib import Path
 keywords = [
     "anki",
     "pandas",
-    "dataframe"
+    "dataframe",
 ]
 
 description = "Load your anki database as a pandas DataFrame with just one " \
