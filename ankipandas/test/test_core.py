@@ -152,6 +152,9 @@ class TestCoreFunctionsRead(unittest.TestCase):
                 sorted(list(cards["dname"].unique())),
                 ["Default"]
             )
+            self.assertTrue(
+                check_dnames_did(self.db, cards1)
+            )
 
     def test_add_fields_as_columns(self):
         notes1 = get_notes(self.db)

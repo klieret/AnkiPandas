@@ -13,8 +13,11 @@ import copy
 
 # 3rd
 import pandas as pd
+import numpy as np
 
+# ours
 from ankipandas.util.dataframe import replace_df_inplace
+from ankipandas.util.log import log
 
 CACHE_SIZE = 32
 
@@ -55,8 +58,16 @@ def close_db(db: sqlite3.Connection) -> None:
 # Basic getters
 # ==============================================================================
 
-# todo: make public, doc
 def _get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
+    """ Get a table from the Anki database.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        table: Internal name of the table in the Anki database
+
+    Returns:
+        :class:`pandas.DataFrame`
+    """
     df = pd.read_sql_query("SELECT * FROM {}".format(table), db)
     return df
 
@@ -155,7 +166,10 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
     elif mode == "append":
         indices = set(new_indices) - set(old_indices)
         if not indices:
-            # todo: logging
+            log.warning(
+                "Was told to append to table, but there do not seem to be any"
+                " new entries. Returning doing nothing."
+            )
             return
     elif mode == "replace":
         indices = set(new_indices)
@@ -536,8 +550,59 @@ def add_mnames(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
                    new_column=new_column)
         return df
 
+
+# todo: add checker
+
 # Cards
 # ------------------------------------------------------------------------------
+
+
+def sync_dnames_did(db: sqlite3.Connection, df: pd.DataFrame, source="dnames",
+                    inplace=False, did_column="did", dname_column="dname"):
+    """
+    Update deck names based on deck IDs or vice versa.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
+        source: ``dnames`` (to overwrite deck IDs) or ``dids`` (to overwrite
+            deck names)
+        inplace: If False, return new dataframe, else update old one
+        did_column: Column with deck ID (did)
+        dname_column: Name of column with deck names
+
+    Returns:
+        New :class:`pandas.DataFrame` if inplace==True, else None
+    """
+    if source == "dids" and did_column not in df.columns:
+        raise ValueError(
+            "Could not find deck id column '{}'. You can specify a custom one "
+            "using the did_column option.".format(did_column)
+        )
+    if source == "dnames" and did_column not in df.columns:
+        raise ValueError(
+            "Could not find deck name column '{}'. You can specify a custom one"
+            " using the dname_column option.".format(dname_column)
+        )
+    if inplace:
+        if source == "dids":
+            df[dname_column] = df[did_column].astype(str).map(get_deck_names(db))
+        elif source == "dnames":
+            # fixme
+            df[dname_column] = df[did_column].astype(str).map(get_deck_names(db))
+        else:
+            raise ValueError("Unknown source: '{}'.".format(source))
+    else:
+        df = copy.deepcopy(df)
+        sync_dnames_did(
+            db,
+            df,
+            source=source,
+            did_column=did_column,
+            dname_column=dname_column,
+            inplace=True
+        )
+        return df
 
 
 def add_dnames(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
@@ -555,18 +620,46 @@ def add_dnames(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
     Returns:
         New :class:`pandas.DataFrame` if inplace==True, else None
     """
+    return sync_dnames_did(db=db, df=df, inplace=inplace, did_column=did_column,
+                           dname_column=new_column, source="dids")
+
+
+def check_dnames_did(db: sqlite3.Connection, df: pd.DataFrame,
+                     did_column="did", dname_column="dname",
+                     mask=False):
+    """
+    Check whether deck IDs and deck names still match or whether the user
+    performed inconsistent edits.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
+        did_column: Column with deck ID (did)
+        dname_column: Name of column with deck names
+        mask: Rather than just returning True/False, return the full vector of
+            comparison results.
+
+    Returns:
+        True/False if ``mask==False`` (default), else boolean
+        :class:`numpy.ndarray`
+    """
     if did_column not in df.columns:
         raise ValueError(
             "Could not find deck id column '{}'. You can specify a custom one "
             "using the did_column option.".format(did_column)
         )
-    if inplace:
-        df[new_column] = df[did_column].astype(str).map(get_deck_names(db))
+    if dname_column not in df.columns:
+        raise ValueError(
+            "Could not find deck name column '{}'. You can specify a custom one"
+            " using the dname_column option.".format(dname_column)
+        )
+    dnames_from_dids = df[did_column].astype(str).map(get_deck_names(db))
+    dnames = df[dname_column]
+    if mask:
+        return dnames_from_dids == dnames
     else:
-        df = copy.deepcopy(df)
-        add_dnames(db, df, did_column=did_column, new_column=new_column,
-                   inplace=True)
-        return df
+        return np.all(dnames_from_dids == dnames)
+
 
 # Notes
 # ------------------------------------------------------------------------------

@@ -29,8 +29,8 @@ mod,notes,"Modification timestamp, epoch seconds",TRUE
 nid,cards,ID of the note,TRUE
 odid,cards,Original did: only used when the card is currently in filtered deck,TRUE
 odue,cards,Original due: only used when the card is currently in filtered deck,TRUE
-ord,cards,Identifies which of the card templates the card corresponds to. Valid values are from 0 to num templates – 1,TRUE
-queue,cards,"3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review",TRUE
+ord,cards,Identifies which of the card templates the card corresponds to. Valid values are from 0 to num templates -1,TRUE
+queue,cards,"-3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review",TRUE
 reps,cards,Number of reviews,TRUE
 sfld,notes,Content of the sort field.,TRUE
 tags,notes,Tags of the note as space-separated string,TRUE
