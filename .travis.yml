@@ -8,7 +8,7 @@ install:
   - "pip3 install ."
   - "pip3 install pytest"
   - "pip3 install pytest-cover"
-  - "pip3 isntall pytest-subtests"
+  - "pip3 install pytest-subtests"
   - "pip3 install coveralls"
 
 script: 
