@@ -20,14 +20,14 @@ def load_notes(
     expand_fields=True
 ) -> pd.DataFrame:
     """
-    Load all notes as a pandas DataFrame.
+    Load all notes as a :class:`pandas.DataFrame`..
 
     Args:
         path: Path to database
         expand_fields: Add all fields as a new column
 
     Returns:
-        Pandas dataframe
+        :class:`pandas.DataFrame`.
     """
     if not path:
         path = find_database()
@@ -45,7 +45,7 @@ def load_cards(
     expand_fields=True
 ) -> pd.DataFrame:
     """
-    Return all cards as a pandas DataFrame.
+    Return all cards as a :class:`pandas.DataFrame`..
 
     Args:
         path: Path to database
@@ -54,7 +54,7 @@ def load_cards(
         expand_fields: When merging notes, epxand the 'flds' column to have a
             column for every field.
     Returns:
-        Pandas dataframe
+        :class:`pandas.DataFrame`.
     """
     if not path:
         path = find_database()
@@ -71,13 +71,13 @@ def load_cards(
 
 
 def load_revs(
-    path=None,
+    path: str = None,
     merge_cards=True,
     merge_notes=True,
     expand_fields=True
 ) -> pd.DataFrame:
     """
-    Load revision log as a pandas DataFrame
+    Load revision log as a :class:`pandas.DataFrame`.
 
     Args:
         path: Path to database
@@ -88,7 +88,7 @@ def load_revs(
             column for every field.
 
     Returns:
-        Pandas dataframe
+        :class:`pandas.DataFrame`.
     """
     if not path:
         path = find_database()
@@ -96,9 +96,11 @@ def load_revs(
     df = apd.get_revlog(db)
     if merge_cards:
         apd.merge_cards(db, df, inplace=True)
+        apd.add_dnames(db, df, inplace=True)
     if merge_notes:
         apd.add_nids(db, df, cid_column="cid", inplace=True)
         apd.merge_notes(db, df, inplace=True)
+        apd.add_mnames(db, df, inplace=True)
         if expand_fields:
             apd.add_fields_as_columns(db, df, inplace=True)
     apd.close_db(db)

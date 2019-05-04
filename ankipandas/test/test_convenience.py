@@ -136,6 +136,16 @@ class TestHelp(unittest.TestCase):
                     sorted(compare)
                 )
 
+    def test_table_help_search_column(self):
+        for table in ["notes", "cards", "revlog"]:
+            with self.subTest(table=table):
+                df = convenience.table_help(table=table, column="id")
+                df2 = convenience.table_help(
+                    table=table, column="id", native=False
+                )
+                self.assertEqual(len(df), 1)
+                self.assertEqual(len(df2), 0)
+
 
 class TestLoaders(unittest.TestCase):
     def setUp(self):
@@ -171,6 +181,25 @@ class TestLoaders(unittest.TestCase):
         self.assertEqual(
             sorted(list(cards.columns)),
             sorted(card_cols + ["dname"])
+        )
+
+    def test_load_revs(self):
+        revs = convenience.load_revs(self.path)
+        self.assertEqual(
+            sorted(list(revs.columns)),
+            sorted(list(set(
+                revlog_cols + card_cols + note_cols +
+                ["dname", "mname", "Front", "Back"] +
+                ["ndata", "nflags", "nmod", "nusn"] +
+                ["civl", "cfactor", "cusn", "ctype"]
+            )))
+        )
+
+    def test_load_revs_nomerge(self):
+        revs = convenience.load_revs(self.path, False, False)
+        self.assertEqual(
+            sorted(list(revs.columns)),
+            sorted(revlog_cols)
         )
 
 
