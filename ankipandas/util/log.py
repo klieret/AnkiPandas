@@ -6,7 +6,7 @@ import logging
 from typing import Union
 
 
-LOG_DEFAULT_LEVEL = logging.WARNING
+LOG_DEFAULT_LEVEL = logging.INFO
 
 
 def get_logger():
