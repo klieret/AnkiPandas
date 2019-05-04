@@ -32,6 +32,9 @@ def _copy_docstring(other, desc=None):
 
 
 class AnkiDataFrame(pd.DataFrame):
+    #: Additional attributes of a :class:`AnkiDataFrame` that a normal
+    #: :class:`pandas.DataFrame` does not posess. These will be copied in the
+    #: constructor.
     _attributes = ("db", "db_path", "_anki_table")
 
     def __init__(self, *args, **kwargs):
@@ -51,8 +54,11 @@ class AnkiDataFrame(pd.DataFrame):
         """
         super().__init__(*args, **kwargs)
         if len(args) == 1 and isinstance(args[0], AnkiDataFrame):
-            # todo: maybe do this the other way round as self.copy_attrs_to(...)
-            args[0]._copy_attrs(self)
+            self._copy_attrs_from(args[0])
+
+        # IMPORTANT: Make sure to add all attributes to the class variable
+        # :attr:`._attributes`. Also all of them have to be initialized as None!
+        # (see the code where we copy attributes).
 
         #: Opened Anki database (:class:`sqlite3.Connection`)
         self.db = None  # type: sqlite3.Connection
@@ -70,13 +76,23 @@ class AnkiDataFrame(pd.DataFrame):
         return a :class:`pandas.DataFrame` but a :class:`AnkiDataFrame`."""
         def __constructor(*args, **kw):
             df = self.__class__(*args, **kw)
-            self._copy_attrs(df)
+            self._copy_attrs_to(df)
             return df
         return __constructor
 
-    def _copy_attrs(self, df):
+    def _copy_attrs_to(self, df):
+        """ Copy all additional attributes of this class to another instance.
+        Also see :attr:`self._attributes`.
+        """
         for attr in self._attributes:
             df.__dict__[attr] = getattr(self, attr, None)
+
+    def _copy_attrs_from(self, df):
+        """ Copy all additional attributes of this class from another instance.
+        Also see :attr:`self._attributes`.
+        """
+        for attr in self._attributes:
+            self.__dict__[attr] = getattr(df, attr, None)
 
     # Constructors
     # ==========================================================================
