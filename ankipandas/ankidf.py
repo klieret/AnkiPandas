@@ -104,12 +104,10 @@ class AnkiDataFrame(pd.DataFrame):
         self.db = core.load_db(path)
         self.db_path = path
 
-    def _get_table(self, path, table):
+    def _get_table(self, path, user, table):
         if not path:
             path = self.db_path
-        if not path:
-            path = convenience.find_db()
-        self._load_db(path)
+        self._load_db(convenience.db_path_input(path, user=user))
         if table == "notes":
             df = core.get_notes(self.db)
         elif table == "cards":
@@ -122,19 +120,21 @@ class AnkiDataFrame(pd.DataFrame):
         self._anki_table = table
 
     @classmethod
-    def _table_constructor(cls, path, table):
+    def _table_constructor(cls, path, user, table):
         new = AnkiDataFrame()
-        new._get_table(path, table)
+        new._get_table(path, user, table)
         return new
 
     @classmethod
-    def notes(cls, path=None):
+    def notes(cls, path=None, user=None):
         """ Initialize :class:`AnkiDataFrame` with notes table loaded from Anki
         database.
 
         Args:
-            path: Path to anki database. If None is given, ``ankipandas`` will
-                search for the database.
+            path: (Search) path to database see :func:`.db_path_input` for more
+                information.
+            user: Anki user name. See :func:`.db_path_input` for more
+                information.
 
         Example:
 
@@ -144,16 +144,18 @@ class AnkiDataFrame(pd.DataFrame):
             notes = ankipandas.AnkiDataFrame.notes()
 
         """
-        return cls._table_constructor(path, "notes")
+        return cls._table_constructor(path, user, "notes")
 
     @classmethod
-    def cards(cls, path=None):
+    def cards(cls, path=None, user=None):
         """ Initialize :class:`AnkiDataFrame` with cards table loaded from Anki
         database.
 
         Args:
-            path: Path to anki database. If None is given, ``ankipandas`` will
-                search for the database.
+            path: (Search) path to database see :func:`.db_path_input` for more
+                information.
+            user: Anki user name. See :func:`.db_path_input` for more
+                information.
 
         Example:
 
@@ -163,16 +165,18 @@ class AnkiDataFrame(pd.DataFrame):
             cards = ankipandas.AnkiDataFrame.cards()
 
         """
-        return cls._table_constructor(path, "cards")
+        return cls._table_constructor(path, user, "cards")
 
     @classmethod
-    def revs(cls, path=None):
+    def revs(cls, path=None, user=None):
         """ Initialize :class:`AnkiDataFrame` with review table loaded from Anki
         database.
 
         Args:
-            path: Path to anki database. If None is given, ``ankipandas`` will
-                search for the database.
+            path: (Search) path to database see :func:`.db_path_input` for more
+                information.
+            user: Anki user name. See :func:`.db_path_input` for more
+                information.
 
         Example:
 
@@ -182,7 +186,7 @@ class AnkiDataFrame(pd.DataFrame):
             revs = ankipandas.AnkiDataFrame.revs()
 
         """
-        return cls._table_constructor(path, "revlog")
+        return cls._table_constructor(path, user, "revlog")
 
     # Internal helpers
     # ==========================================================================

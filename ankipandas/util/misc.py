@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 
 
-def invert_dict(dct):
+def invert_dict(dct: dict) -> dict:
+    """ Invert dictionary, i.e. reverse keys and values.
+
+    Args:
+        dct: Dictionary
+
+    Returns:
+        Dictionary with reversed keys and values.
+
+    Raises:
+        :class:`ValueError` if values are not unique.
+    """
     if not len(set(dct.values())) == len(dct.values()):
         raise ValueError(
             "Dictionary does not seem to be invertible."

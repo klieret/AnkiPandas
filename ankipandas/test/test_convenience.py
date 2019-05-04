@@ -72,6 +72,24 @@ class TestFindDatabase(unittest.TestCase):
         }
         self.maxDiff = None
 
+    def test_db_path_input_nexist(self):
+        with self.assertRaises(FileNotFoundError):
+            convenience.db_path_input("/x/y/z")
+
+    def test_db_path_input_multiple(self):
+        with self.assertRaises(ValueError):
+            convenience.db_path_input(self.dirs["multiple"].name)
+
+    def test_db_path_input_nothing(self):
+        with self.assertRaises(ValueError):
+            convenience.db_path_input(self.dirs["nothing"].name)
+
+    def test_db_path_input_perfect(self):
+        self.assertEqual(
+            convenience.db_path_input(self.dirs["perfect"].name),
+            self.dbs["perfect"][0]
+        )
+
     def test__find_database(self):
         for d in self.dirs:
             a = sorted(map(str, flatten_list(
@@ -205,7 +223,8 @@ class TestLoaders(unittest.TestCase):
         )
 
     def test_load_revs_nomerge(self):
-        revs = convenience.load_revs(self.path, False, False)
+        revs = convenience.load_revs(self.path, merge_cards=False,
+                                     merge_notes=False)
         self.assertEqual(
             sorted(list(revs.columns)),
             sorted(columns["revlog"])

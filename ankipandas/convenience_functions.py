@@ -9,6 +9,7 @@ import collections
 import pathlib
 import pandas as pd
 from functools import lru_cache
+from typing import Union
 
 # ours
 import ankipandas.core_functions as apd
@@ -17,21 +18,23 @@ from ankipandas.util.log import log
 
 def load_notes(
     path=None,
+    user=None,
     expand_fields=True
 ) -> pd.DataFrame:
     """
     Load all notes as a :class:`pandas.DataFrame`..
 
     Args:
-        path: Path to database
+        path: (Search) path to database see :func:`.db_path_input` for more
+            information.
+        user: Anki user name. See :func:`.db_path_input` for more
+            information.
         expand_fields: Add all fields as a new column
 
     Returns:
         :class:`pandas.DataFrame`.
     """
-    if not path:
-        path = find_db()
-    db = apd.load_db(path)
+    db = apd.load_db(db_path_input(path, user=user))
     df = apd.get_notes(db)
     apd.add_mnames(db, df, inplace=True)
     if expand_fields:
@@ -41,6 +44,7 @@ def load_notes(
 
 def load_cards(
     path=None,
+    user=None,
     merge_notes=True,
     expand_fields=True
 ) -> pd.DataFrame:
@@ -48,7 +52,10 @@ def load_cards(
     Return all cards as a :class:`pandas.DataFrame`..
 
     Args:
-        path: Path to database
+        path: (Search) path to database see :func:`.db_path_input` for more
+            information.
+        user: Anki user name. See :func:`.db_path_input` for more
+            information.
         merge_notes: Merge information from the notes (default True), e.g. all
             of the fields.
         expand_fields: When merging notes, epxand the 'flds' column to have a
@@ -56,9 +63,7 @@ def load_cards(
     Returns:
         :class:`pandas.DataFrame`.
     """
-    if not path:
-        path = find_db()
-    db = apd.load_db(path)
+    db = apd.load_db(db_path_input(path, user=user))
     df = apd.get_cards(db)
     apd.add_dnames(db, df, inplace=True)
     if merge_notes:
@@ -71,7 +76,8 @@ def load_cards(
 
 
 def load_revs(
-    path: str = None,
+    path=None,
+    user=None,
     merge_cards=True,
     merge_notes=True,
     expand_fields=True
@@ -80,7 +86,10 @@ def load_revs(
     Load revision log as a :class:`pandas.DataFrame`.
 
     Args:
-        path: Path to database
+        path: (Search) path to database see :func:`.db_path_input` for more
+            information.
+        user: Anki user name. See :func:`.db_path_input` for more
+            information.
         merge_cards: Merge information from the cards
         merge_notes: Merge information from the notes (default True), e.g. all
             of the fields.
@@ -90,9 +99,7 @@ def load_revs(
     Returns:
         :class:`pandas.DataFrame`.
     """
-    if not path:
-        path = find_db()
-    db = apd.load_db(path)
+    db = apd.load_db(db_path_input(path, user=user))
     df = apd.get_revs(db)
     if merge_cards:
         apd.merge_cards(db, df, inplace=True)
@@ -120,13 +127,23 @@ def _find_db(search_path, maxdepth=6,
         collection.defaultdict({user: [list of results]})
     """
     search_path = pathlib.Path(search_path)
-    if not os.path.exists(str(search_path)):
+    if not search_path.exists():
+        log.debug(
+            "_find_db: Search path '{}' does not "
+            "exist.".format(str(search_path))
+        )
         return collections.defaultdict(list)
     if search_path.is_file():
         if search_path.name == filename:
             return collections.defaultdict(
                 list, {search_path.parent.name: [search_path]}
             )
+        else:
+            log.warning(
+                "_find_db: Search path '{}' is a file, but filename does not "
+                "match that of '{}'.".format(str(search_path), filename)
+            )
+            return collections.defaultdict(list)
     found = collections.defaultdict(list)
     for root, dirs, files in os.walk(str(search_path)):
         if filename in files:
@@ -135,8 +152,13 @@ def _find_db(search_path, maxdepth=6,
                 continue
             found[_user].append(pathlib.Path(root) / filename)
             if break_on_first:
+                log.debug("_find_db: Breaking after first hit.")
                 break
         if maxdepth and root.count(os.sep) >= maxdepth:
+            log.debug(
+                "_find_db: Abort search at '{}'. "
+                "Max depth exceeded.".format(str(root))
+            )
             del dirs[:]
     return found
 
@@ -236,6 +258,49 @@ def find_db(
     found = found[0]
     log.debug("Database found at '{}'.".format(found))
     return found
+
+
+def db_path_input(path: Union[str, pathlib.PurePath] = None,
+                  user: str = None) -> pathlib.Path:
+    """ Helper function to interpret user input of path to database.
+
+    1. If no path is given, we search through some default locations
+    2. If path points to a file: Take that file
+    3. If path poitns to a directory: Search in that directory
+
+    Args:
+        path: Path to database or search path or None
+        user: User name of anki collection or None
+
+    Returns:
+        Path to anki database as :class:`pathlib.Path` object
+
+    Raises:
+        :class:`FileNotFoundError` if path does not exist
+        :class:`ValueError` in various other cases
+    """
+    if path is None:
+        result = find_db(user=user)
+    else:
+        path = pathlib.Path(path)
+        if not path.exists():
+            raise FileNotFoundError(
+                "db_path_input: File '{}' does not exist.".format(str(path))
+            )
+        if path.is_file():
+            log.debug(
+                "db_path_input: Database explicitly set to '{}'.".format(path)
+            )
+            result = path
+        else:
+            result = find_db(
+                search_paths=(path,),
+                break_on_first=False
+            )
+    if result:
+        return result
+    else:
+        raise ValueError("Databse could not be found.")
 
 
 # todo: rename table_help?
