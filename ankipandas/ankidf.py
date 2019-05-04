@@ -44,19 +44,30 @@ class AnkiDataFrame(pd.DataFrame):
             :meth:`.notes`, :meth:`.cards` or :meth:`.revlog` instead!
 
         Args:
-            *args:
-            **kwargs:
+            *args: Internal use only. See arguments of
+                :class:`pandas.DataFrame`.
+            **kwargs: Internal use only. See arguments of
+                :class:`pandas.DataFrame`.
         """
         super().__init__(*args, **kwargs)
         if len(args) == 1 and isinstance(args[0], AnkiDataFrame):
             # todo: maybe do this the other way round as self.copy_attrs_to(...)
             args[0]._copy_attrs(self)
-        self.db = None
-        self.db_path = None
-        self._anki_table = None
+
+        #: Opened Anki database (:class:`sqlite3.Connection`)
+        self.db = None  # type: sqlite3.Connection
+
+        #: Path to Anki database that is opened as :attr:`.db`
+        self.db_path = None  # type: pathlib.Path
+
+        #: Type of anki table: Notes, Cards or Revlog. This corresponds to the
+        #: meaning of the ID row.
+        self._anki_table = None  # type: str
 
     @property
     def _constructor(self):
+        """ This needs to be overriden so that any DataFrame operations do not
+        return a :class:`pandas.DataFrame` but a :class:`AnkiDataFrame`."""
         def __constructor(*args, **kw):
             df = self.__class__(*args, **kw)
             self._copy_attrs(df)

@@ -38,8 +38,15 @@ def load_db(path):
     return sqlite3.connect(str(path.resolve()))
 
 
-def close_db(db):
-    """ Close the database. """
+def close_db(db: sqlite3.Connection) -> None:
+    """ Close the database.
+
+    Args:
+        db:  Database (:class:`sqlite3.Connection`)
+
+    Returns:
+        None
+    """
     db.close()
 
 
@@ -47,12 +54,12 @@ def close_db(db):
 # ==============================================================================
 
 # todo: make public, doc
-def _get_table(db: sqlite3.Connection, table):
+def _get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
     df = pd.read_sql_query("SELECT * FROM {}".format(table), db)
     return df
 
 
-def get_cards(db: sqlite3.Connection):
+def get_cards(db: sqlite3.Connection) -> pd.DataFrame:
     """
     Get all cards as a dataframe.
 
@@ -65,7 +72,7 @@ def get_cards(db: sqlite3.Connection):
     return _get_table(db, "cards")
 
 
-def get_notes(db: sqlite3.Connection):
+def get_notes(db: sqlite3.Connection) -> pd.DataFrame:
     """
     Get all notes as a dataframe.
 
@@ -78,7 +85,7 @@ def get_notes(db: sqlite3.Connection):
     return _get_table(db, "notes")
 
 
-def get_revlog(db: sqlite3.Connection):
+def get_revlog(db: sqlite3.Connection) -> pd.DataFrame:
     """
     Get the revision log as a dataframe.
 
@@ -92,7 +99,7 @@ def get_revlog(db: sqlite3.Connection):
 
 
 @lru_cache(cache_size)
-def get_info(db: sqlite3.Connection):
+def get_info(db: sqlite3.Connection) -> dict:
     """
     Get all other information from the databse, e.g. information about models,
     decks etc.
@@ -168,51 +175,6 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
     else:
         if_exists = "replace"
     df.to_sql(table, db, if_exists=if_exists, index=False)
-
-
-def set_notes(db: sqlite3.Connection, df: pd.DataFrame, mode: str) -> None:
-    """ Write notes table back into database.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-        df: :class:`pandas.DataFrame`
-        mode: 'update': Update only existing entries, 'append': Only append new
-            entries, but do not modify, 'replace': Append, modify and delete
-
-    Returns:
-        None
-    """
-    _set_table(db, df, "notes", mode)
-
-
-def set_cards(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
-    """ Write cards table back into database.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-        df: :class:`pandas.DataFrame`
-        mode: 'update': Update only existing entries, 'append': Only append new
-            entries, but do not modify, 'replace': Append, modify and delete
-
-    Returns:
-        None
-    """
-    _set_table(db, df, "cards", mode)
-
-
-def set_revlog(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
-    """ Write revlog table back into database.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-        df: :class:`pandas.DataFrame`
-        mode: 'update': Update only existing entries, 'append': Only append new
-            entries, but do not modify, 'replace': Append, modify and delete
-
-    Returns:
-        None
-    """
-    _set_table(db, df, "revlog", mode)
 
 
 # Trivially derived getters
@@ -298,6 +260,54 @@ def get_field_names(db: sqlite3.Connection):
         ]
         for mid in minfo
     }
+
+
+# Trivially derived setters
+# ==============================================================================
+
+def set_notes(db: sqlite3.Connection, df: pd.DataFrame, mode: str) -> None:
+    """ Write notes table back into database.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame`
+        mode: 'update': Update only existing entries, 'append': Only append new
+            entries, but do not modify, 'replace': Append, modify and delete
+
+    Returns:
+        None
+    """
+    _set_table(db, df, "notes", mode)
+
+
+def set_cards(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+    """ Write cards table back into database.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame`
+        mode: 'update': Update only existing entries, 'append': Only append new
+            entries, but do not modify, 'replace': Append, modify and delete
+
+    Returns:
+        None
+    """
+    _set_table(db, df, "cards", mode)
+
+
+def set_revlog(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+    """ Write revlog table back into database.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame`
+        mode: 'update': Update only existing entries, 'append': Only append new
+            entries, but do not modify, 'replace': Append, modify and delete
+
+    Returns:
+        None
+    """
+    _set_table(db, df, "revlog", mode)
 
 
 # Merging information
