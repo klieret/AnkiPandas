@@ -6,10 +6,16 @@ line of code!
 
 .. toctree::
     :maxdepth: 2
+    :caption: Basics
 
     readme
+    troubleshooting
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Module documentation
+
     ankidf
     convenience_functions
     core_functions
     util
-

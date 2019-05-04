@@ -1,0 +1,37 @@
+Troubleshooting
+===============
+
+Getting help
+------------
+
+Submit an `issue on github`_ or write in the `gitter community`_. Thank you for
+improving this toolkit with me!
+
+.. _issue on github: https://github.com/klieret/ankipandas/issues
+.. _gitter community: https://gitter.im/AnkiPandas/community
+
+Common problems
+---------------
+
+* **Locked database**: While Anki is running, your database will be locked and
+  you might not be able to access it. Simply close Anki and try again. Similarly
+  Anki might refuse to open the database if ``ankipandas`` has currently opened
+  it (be it in a Jupyter notebook or in a currently running project).
+
+.. note::
+
+    Any unlisted problem that you ran into (and solved)? Help others by bringing
+    it to my attention_.
+
+.. _attention: https://github.com/klieret/ankipandas/issues
+
+
+Debugging
+---------
+
+For better debugging, you can increase the log level of ``ankipandas``:
+
+.. code-block::
+
+    ankipandas.set_log_level("debug")
+

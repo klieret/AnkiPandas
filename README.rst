@@ -48,6 +48,11 @@ Analyze and manipulate your Anki_ flashcards as a pandas_ DataFrame_!
 .. _models: https://apps.ankiweb.net/docs/manual.html#note-types
 .. _decks: https://apps.ankiweb.net/docs/manual.html#decks
 
+If your main goal is to add new cards, models and more, you can also take a
+look at the genanki_ project alternatively.
+
+.. _genanki: https://github.com/kerrickstaley/genanki
+
 Installation
 ------------
 
@@ -113,7 +118,7 @@ Again, the documentation_ is a good starting point!
 Columns
 -------
 
-Get information about the fields in the table:
+Get information about the columns in the table:
 
 .. code:: python
 
@@ -123,15 +128,25 @@ Most of this information is from the `ankidroid documentation`_.
 
 .. _ankidroid documentation: https://github.com/ankidroid/Anki-Android/wiki/Database-Structure
 
-Common problems
+Troubleshooting
 ---------------
 
-* Locked database: While Anki is running, your database will be locked and you might
-  not be able to access it. Simply close Anki and try again.
+See the documentation_.
 
-Any other problems? Please open an issue_.
+.. _documentation: https://ankipandas.readthedocs.io/en/latest/troubleshooting.html
 
-.. _issue: https://github.com/klieret/AnkiPandas/issues
+Contributing
+------------
+
+Your help is greatly appreciated! Suggestions, bug reports and feature requests
+are best opened as `github issues`_. You could also first discuss in the
+`gitter community`_.
+If you want to code something yourself, you are very welcome to submit a `pull request`_!
+
+.. _github issues: https://github.com/klieret/ankipandas/issues
+.. _gitter community: https://gitter.im/ankipandas/community
+.. _pull requests: https://github.com/klieret/AnkiPandas/pulls
+
 
 License
 -------
