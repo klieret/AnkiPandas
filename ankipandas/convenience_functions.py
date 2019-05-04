@@ -155,10 +155,15 @@ def find_database(
         search_paths: Search path as string or pathlib object or list/iterable
             thereof. If None, some search paths are set by default.
         maxdepth: Maximal search depth.
-        filename: Filename of the collection.
+        filename: Filename of the collection (default: ``collections.anki2``)
         user: Username to which the collection belongs. If None, search for
             databases of any user.
-        break_on_first: Stop searching once a database is found.
+        break_on_first: Stop searching once a database is found. This is
+            obviously faster, but you will not get any errors if there are
+            multiple databases matching your criteria.
+
+    Raises:
+        :class:`ValueError` if none ore more than one result is found.
 
     Returns:
         pathlib.Path to the anki2 database

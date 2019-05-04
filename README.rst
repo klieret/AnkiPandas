@@ -30,8 +30,7 @@ AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 Description
 -----------
 
-With this small python package, you can easily load all of your Anki_ flashcards
-as a all-in-one pandas_ DataFrame_!
+Analyze and manipulate your Anki_ flashcards as a pandas_ DataFrame_!
 
 .. _anki: https://apps.ankiweb.net/
 .. _pandas: https://pandas.pydata.org/
@@ -39,7 +38,7 @@ as a all-in-one pandas_ DataFrame_!
 
 **Pros**:
 
-* Use pandas to easily analize or manipulate your Anki collection
+* Use pandas to easily analyze or manipulate your Anki collection
 * Just one line of code to get started
 * Bring together information about cards_, notes_, models_, decks_ in just one table!
 * Easy installation (independent from your anki installation)

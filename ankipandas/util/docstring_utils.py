@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 
+# std
 import collections
+from typing import Dict, Tuple
 
 
-def parse_docstring(string):
-    """ Parses docstring
+def parse_docstring(string: str) -> Tuple[str, Dict[str, str], str]:
+    """ Parses google style docstring.
 
     Args:
         string: docstring
 
     Returns: Description [str], description of arguments [Dict[str, str]],
         description of return value [str]
+
+    .. warning::
+
+        Experimental. This is not yet well tested but for this very module.
+
     """
     if not string:
         return "", {}, ""
@@ -36,14 +43,15 @@ def parse_docstring(string):
                 _arg = kv[0]
                 args[_arg] = ":".join(kv[1:])
             else:
-                args[_arg] += kv[0].strip()
+                args[_arg] += kv[0]
         else:
             raise AssertionError
     return desc, args, returns
 
 
-def format_docstring(desc, args, returns, drop_arg=()):
-    """ Format docstring.
+def format_docstring(desc: str, args: Dict[str, str], returns: str,
+                     drop_arg=()) -> str:
+    """ Format google style docstring.
 
     Args:
         desc: Description [str]
@@ -54,6 +62,11 @@ def format_docstring(desc, args, returns, drop_arg=()):
 
     Returns:
         Docstring with the info supplied in the parameters.
+
+    .. warning::
+
+        Experimental. This is not yet well tested but for this very module.
+
     """
     ret = desc
     ret += "\n\nArgs:\n"
@@ -68,5 +81,5 @@ def format_docstring(desc, args, returns, drop_arg=()):
             continue
         ret += "{}: {}\n".format(arg, argdesc)
     ret += "\nReturns:\n"
-    ret += returns.strip()
+    ret += returns
     return ret

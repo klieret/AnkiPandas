@@ -1,7 +1,6 @@
 AnkiDataFrame
 =============
 
-.. automodule:: ankipandas.ankidf
+.. autoclass:: ankipandas.ankidf.AnkiDataFrame
     :members:
     :undoc-members:
-
