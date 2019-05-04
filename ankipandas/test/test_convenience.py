@@ -118,6 +118,24 @@ class TestHelp(unittest.TestCase):
             10
         )
 
+    def test_table_help_search_table(self):
+        for table in ["notes", "cards", "revlog"]:
+            with self.subTest(table=table):
+                # todo: factor out
+                if table == "notes":
+                    compare = note_cols
+                elif table == "cards":
+                    compare = card_cols
+                elif table == "revlog":
+                    compare = revlog_cols
+                else:
+                    raise ValueError("Unknown table.")
+                df = convenience.table_help(table=table, native=True)
+                self.assertListEqual(
+                    sorted(list(df["Name"].unique())),
+                    sorted(compare)
+                )
+
 
 class TestLoaders(unittest.TestCase):
     def setUp(self):
