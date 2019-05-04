@@ -16,7 +16,7 @@ import pandas as pd
 
 from ankipandas.util.dataframe import replace_df_inplace
 
-cache_size = 32
+CACHE_SIZE = 32
 
 
 # Open/Close db
@@ -100,7 +100,7 @@ def get_revs(db: sqlite3.Connection) -> pd.DataFrame:
     return _get_table(db, "revlog")
 
 
-@lru_cache(cache_size)
+@lru_cache(CACHE_SIZE)
 def get_info(db: sqlite3.Connection) -> dict:
     """
     Get all other information from the databse, e.g. information about models,
@@ -185,7 +185,7 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
 # todo: Using decorators here causes the function signatures to be messed up
 #  with sphinx but oh well.
 
-@lru_cache(cache_size)
+@lru_cache(CACHE_SIZE)
 def get_deck_info(db: sqlite3.Connection):
     """ Get information about decks.
 
@@ -198,7 +198,7 @@ def get_deck_info(db: sqlite3.Connection):
     return get_info(db)["decks"]
 
 
-@lru_cache(cache_size)
+@lru_cache(CACHE_SIZE)
 def get_deck_names(db: sqlite3.Connection):
     """ Mapping of deck IDs (did) to deck names.
 
@@ -215,7 +215,7 @@ def get_deck_names(db: sqlite3.Connection):
     }
 
 
-@lru_cache(cache_size)
+@lru_cache(CACHE_SIZE)
 def get_model_info(db: sqlite3.Connection):
     """ Get information about models.
 
@@ -228,7 +228,7 @@ def get_model_info(db: sqlite3.Connection):
     return get_info(db)["models"]
 
 
-@lru_cache(cache_size)
+@lru_cache(CACHE_SIZE)
 def get_model_names(db: sqlite3.Connection):
     """ Mapping of model IDs (mid) to model names.
 
@@ -245,7 +245,7 @@ def get_model_names(db: sqlite3.Connection):
     }
 
 
-@lru_cache(cache_size)
+@lru_cache(CACHE_SIZE)
 def get_field_names(db: sqlite3.Connection):
     """ Get names of the fields in the notes
 
@@ -314,7 +314,6 @@ def set_revs(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
 
 # Merging information
 # ==============================================================================
-# todo: inplace passible decorator
 
 
 def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,

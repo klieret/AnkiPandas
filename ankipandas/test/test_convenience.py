@@ -15,8 +15,17 @@ import ankipandas.convenience_functions as convenience
 from ankipandas.data.columns import *
 
 
-# todo: doc, perhaps move to RandomFileTree package?
-def touch_file_in_random_folders(basedir, filename, n=1):
+def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:
+    """ Create files in random folders.
+
+    Args:
+        basedir: Starting directory
+        filename: Filename of the files to create
+        n: Number of files to create
+
+    Returns:
+        List of files that were created.
+    """
     files = set()
     for d in sample_random_elements(basedir, n_dirs=n, n_files=0,
                                     onfail="ignore")[0]:
@@ -170,7 +179,8 @@ class TestLoaders(unittest.TestCase):
         self.assertEqual(
             sorted(list(cards.columns)),
             sorted(list(set(
-                columns["cards"] + columns["notes"] + ["dname", "mname", "Front", "Back"] +
+                columns["cards"] + columns["notes"] +
+                ["dname", "mname", "Front", "Back"] +
                 ["ndata", "nflags", "nmod", "nusn"]
             )))  # clashes
         )
