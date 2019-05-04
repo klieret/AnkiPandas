@@ -664,6 +664,22 @@ def check_dnames_did(db: sqlite3.Connection, df: pd.DataFrame,
 # Notes
 # ------------------------------------------------------------------------------
 
+def convert_tags_list(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+                      tag_column="tags", new_column="tags"):
+    """ Converts space separated tags to a list.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        df: :class:`pandas.DataFrame` to merge information into
+        inplace: If False, return new dataframe, else update old one
+        tag_column: Column with tags
+        new_column: Column to write to (by default identical)
+
+    Returns:
+        New :class:`pandas.DataFrame` if inplace==True, else None
+    """
+    raise NotImplementedError
+
 
 def add_fields_as_columns(db: sqlite3.Connection, df: pd.DataFrame,
                           inplace=False, mid_column="mid", prepend="",

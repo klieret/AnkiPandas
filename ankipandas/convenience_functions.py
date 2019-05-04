@@ -300,7 +300,7 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
     if result:
         return result
     else:
-        raise ValueError("Databse could not be found.")
+        raise ValueError("Database could not be found.")
 
 
 # todo: rename table_help?
