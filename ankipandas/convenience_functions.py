@@ -236,14 +236,14 @@ def find_database(
     return found
 
 
-def table_help(table=None, columns=None, native=None) -> pd.DataFrame:
+def table_help(table=None, column=None, native=None) -> pd.DataFrame:
     """
     Return a pandas dataframe containing descriptions of every field in the
-    anki database.
+    anki database. The arguments below help to filter it.
 
     Args:
-        table: notes, cards, revlog
-        columns: Which fields/columns are you looking for?
+        table: Possible values: 'notes', 'cards', 'revlog' or list thereof.
+        column: Name of a field or column or list thereof.
         native: If true, only columns that are present in the official anki
             columns are shown.
 
@@ -252,13 +252,14 @@ def table_help(table=None, columns=None, native=None) -> pd.DataFrame:
     """
     help_path = pathlib.Path(__file__).parent / "data" / "anki_fields.csv"
     df = pd.read_csv(help_path)
-    df["Tables"] = df["Tables"].str.split(", ")
     if table:
-        df = df.loc[df["Tables"].apply(lambda t: table in t), :]
-    if isinstance(columns, str):
-        columns = [columns]
-    if columns:
-        df = df[df["Column"].isin(columns)]
+        if isinstance(table, str):
+            table = [table]
+        df = df[df["Table"].isin(table)]
+    if column:
+        if isinstance(column, str):
+            column = [column]
+        df = df[df["Column"].isin(column)]
     if native is not None:
         df = df.query("Native=={}".format(native))
 

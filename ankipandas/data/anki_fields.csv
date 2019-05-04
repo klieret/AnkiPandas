@@ -1,18 +1,24 @@
-Column,Tables,Description,Native
+Column,Table,Description,Native
 *,notes,Field,FALSE
 cid,revlog,Card ID,TRUE
 csum,notes,Field checksum used for duplicate check: Integer representation of first 8 digits of sha1 hash of the first field,TRUE
-data,"cards, notes",Currently unused,TRUE
+data,cards,Currently unused,TRUE
+data,notes,Currently unused,TRUE
 did,cards,ID of the deck,TRUE
 dname,cards,Name of the card,FALSE
-due,cards," Due is used differently for different card types: new: note id or random int, due: integer day, relative to the collection's creation time, learning: integer timestamp",TRUE
+due,cards,"Due is used differently for different card types: new: note id or random int, due: integer day, relative to the collection's creation time, learning: integer timestamp",TRUE
 ease,revlog,"Which button you pushed to score your recall: review:  1(wrong), 2(hard), 3(ok), 4(easy), learn/relearn:   1(wrong), 2(ok), 3(easy)",TRUE
-factor,"cards, revlog","The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE
-flags,"cards, notes",Currently unused,TRUE
+factor,cards,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE
+factor,revlog,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE
+flags,cards,Currently unused,TRUE
+flags,notes,Currently unused,TRUE
 flds,notes,Fields of the card as a concatenated string with fields separated by the ``\x1f`` character. The field names can be retrieved from the corresponding model.,TRUE
 guid,notes,"Globally unique id, almost certainly used for syncing",TRUE
-id,"cards, notes, revlog","ID of the card, note or review in the card, note or revlog table (this corresponds to a epoch millisecond time stamp from the creating time)",TRUE
-ivl,"cards, revlog",The new interval that the card was pushed to after the review. Positive values are in days; negative values are in seconds (for learning cards).,TRUE
+id,cards,ID of the card (this corresponds to a epoch millisecond time stamp from the creating time),TRUE
+id,notes,ID of the note (this corresponds to a epoch millisecond time stamp from the creating time),TRUE
+id,revlog,ID of the review (this corresponds to a epoch millisecond time stamp from the creating time),TRUE
+ivl,cards,"The new interval that the card was pushed to after the review. Positive values are in days, negative values are in seconds (for learning cards).",TRUE
+ivl,revlog,"The new interval that the card was pushed to after the review. Positive values are in days, negative values are in seconds (for learning cards).",TRUE
 lapses,cards,"The number of times the card went from a ""was answered correctly"" to ""was answered incorrectly"" state",TRUE
 lastIvl,revlog,Last interval,TRUE
 left,cards,"Of the form ``a*1000+b``, with: ``b`` the number of reps left till graduation and ``a`` the number of reps left today",TRUE
@@ -29,5 +35,8 @@ reps,cards,Number of reviews,TRUE
 sfld,notes,Content of the sort field.,TRUE
 tags,notes,Tags of the note as space-separated string,TRUE
 time,revlog,"How many milliseconds your review took, up to 60000 (60s)",TRUE
-type,"cards, revlog","This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
-usn,"cards, notes, revlog",This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE
+type,cards,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
+type,revlog,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
+usn,cards,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE
+usn,notes,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE
+usn,revlog,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE

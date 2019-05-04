@@ -111,7 +111,7 @@ class TestHelp(unittest.TestCase):
         df = convenience.table_help()
         self.assertListEqual(
             list(df.columns),
-            ["Column", "Tables", "Description", "Native"]
+            ["Column", "Table", "Description", "Native"]
         )
         self.assertGreater(
             len(df),
