@@ -111,7 +111,7 @@ class TestHelp(unittest.TestCase):
         df = convenience.table_help()
         self.assertListEqual(
             list(df.columns),
-            ["Name", "Tables", "Description", "Native"]
+            ["Column", "Tables", "Description", "Native"]
         )
         self.assertGreater(
             len(df),
@@ -132,7 +132,7 @@ class TestHelp(unittest.TestCase):
                     raise ValueError("Unknown table.")
                 df = convenience.table_help(table=table, native=True)
                 self.assertListEqual(
-                    sorted(list(df["Name"].unique())),
+                    sorted(list(df["Column"].unique())),
                     sorted(compare)
                 )
 

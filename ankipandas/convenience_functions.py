@@ -258,7 +258,7 @@ def table_help(table=None, columns=None, native=None) -> pd.DataFrame:
     if isinstance(columns, str):
         columns = [columns]
     if columns:
-        df = df[df["Name"].isin(columns)]
+        df = df[df["Column"].isin(columns)]
     if native is not None:
         df = df.query("Native=={}".format(native))
 

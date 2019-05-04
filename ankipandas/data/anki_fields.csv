@@ -1,4 +1,4 @@
-Name,Tables,Description,Native
+Column,Tables,Description,Native
 *,notes,Field,FALSE
 cid,revlog,Card ID,TRUE
 csum,notes,Field checksum used for duplicate check: Integer representation of first 8 digits of sha1 hash of the first field,TRUE
