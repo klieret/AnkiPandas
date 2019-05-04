@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
 # std
+import sqlite3
 
 # 3rd
 import pandas as pd
+import pathlib
 
 # ours
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
-from ankipandas.util.docstring_utils import parse_docstring, format_docstring
+from ankipandas.util.docstrings import parse_docstring, format_docstring
 
 
 def _copy_docstring(other, desc=None):
@@ -107,7 +109,14 @@ class AnkiDataFrame(pd.DataFrame):
         if not path:
             path = convenience.find_database()
         self._load_db(path)
-        df = core._get_table(self.db, table)
+        if table == "notes":
+            df = core.get_notes(self.db)
+        elif table == "cards":
+            df = core.get_cards(self.db)
+        elif table == "revlog":
+            df = core.get_revlog(self.db)
+        else:
+            raise ValueError("Unsupported table type: '{}'.".format(table))
         core._replace_df_inplace(self, df)
         self._anki_table = table
 
