@@ -42,8 +42,19 @@ def get_logger():
     return _log
 
 
-# todo: doc
-def set_log_level(level: Union[str, int]):
+def set_log_level(level: Union[str, int]) -> None:
+    """ Set global log level.
+
+    Args:
+        level: Either an int
+            (https://docs.python.org/3/library/logging.html#levels)
+            or one of the keywords, 'critical' (only the most terrifying of log
+            messages), 'error', 'warning', 'info',
+            'debug' (all log messages)
+
+    Returns:
+        None
+    """
     lvl = level
     if isinstance(level, str):
         lvl = getattr(logging, level.upper())

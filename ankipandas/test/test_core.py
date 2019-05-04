@@ -8,7 +8,7 @@ import tempfile
 # ours
 from ankipandas.core_functions import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas.test.shared import revlog_cols, note_cols, card_cols
+from ankipandas.data.columns import columns
 
 
 class TestCoreFunctionsRead(unittest.TestCase):
@@ -27,7 +27,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
             self.assertEqual(len(cards), 3)
             self.assertEqual(
                 list(sorted(cards.columns)),
-                sorted(card_cols)
+                sorted(columns["cards"])
             )
 
     def test_get_notes(self):
@@ -37,7 +37,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
             self.assertEqual(len(notes), 2)
             self.assertEqual(
                 list(sorted(notes.columns)),
-                sorted(note_cols)
+                sorted(columns["notes"])
             )
 
     def test_get_revlog(self):
@@ -47,7 +47,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
             # todo assert length
             self.assertEqual(
                 list(sorted(revlog.columns)),
-                sorted(revlog_cols)
+                sorted(columns["revlog"])
             )
 
     def test_get_deck_info(self):
@@ -92,7 +92,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
             self.assertListEqual(
                 sorted(list(merged.columns)),
                 sorted(list(
-                    set(card_cols) | set(note_cols) |
+                    set(columns["cards"]) | set(columns["notes"]) |
                     {"ndata", "nflags", "nmod", "nusn"}  # clashes
                 ))
             )
@@ -105,7 +105,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
             self.assertListEqual(
                 sorted(list(merged.columns)),
                 sorted(list(
-                    set(revlog_cols) | set(card_cols) |
+                    set(columns["revlog"]) | set(columns["cards"]) |
                     {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
                 ))
             )
@@ -162,7 +162,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
         for notes in [notes1, notes2]:
             self.assertEqual(
                 sorted(list(notes.columns)),
-                sorted(note_cols + ["mname", "Front", "Back"])
+                sorted(columns["notes"] + ["mname", "Front", "Back"])
             )
             self.assertEqual(
                 list(notes.query("mname=='Basic'")["Front"].unique()),
@@ -188,7 +188,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
             )
             self.assertListEqual(
                 sorted(list(notes.columns)),
-                sorted(note_cols)
+                sorted(columns["notes"])
             )
 
     def test_fields_as_columns_to_flds_2(self):

@@ -5,13 +5,14 @@ import collections
 import unittest
 from pathlib import Path
 import tempfile
+from typing import List, Any
 
 # 3rd
 from randomfiletree import sample_random_elements, iterative_gaussian_tree
 
 # ours
 import ankipandas.convenience_functions as convenience
-from ankipandas.test.shared import *
+from ankipandas.data.columns import *
 
 
 # todo: doc, perhaps move to RandomFileTree package?
@@ -25,8 +26,15 @@ def touch_file_in_random_folders(basedir, filename, n=1):
     return list(files)
 
 
-# todo: doc
-def flatten_list(lst):
+def flatten_list(lst: List[List[Any]]) -> List[Any]:
+    """ Takes a list of lists and returns a list of all elements.
+
+    Args:
+        lst: List of Lists
+
+    Returns:
+        list
+    """
     return [item for sublist in lst for item in sublist]
 
 
@@ -121,19 +129,10 @@ class TestHelp(unittest.TestCase):
     def test_table_help_search_table(self):
         for table in ["notes", "cards", "revlog"]:
             with self.subTest(table=table):
-                # todo: factor out
-                if table == "notes":
-                    compare = note_cols
-                elif table == "cards":
-                    compare = card_cols
-                elif table == "revlog":
-                    compare = revlog_cols
-                else:
-                    raise ValueError("Unknown table.")
                 df = convenience.table_help(table=table, native=True)
                 self.assertListEqual(
                     sorted(list(df["Column"].unique())),
-                    sorted(compare)
+                    columns[table]
                 )
 
     def test_table_help_search_column(self):
@@ -156,14 +155,14 @@ class TestLoaders(unittest.TestCase):
         notes = convenience.load_notes(self.path, expand_fields=False)
         self.assertEqual(
             sorted(list(notes.columns)),
-            sorted(note_cols + ["mname"])
+            sorted(columns["notes"] + ["mname"])
         )
 
     def test_load_notes_expand(self):
         notes = convenience.load_notes(self.path, expand_fields=True)
         self.assertEqual(
             sorted(list(notes.columns)),
-            sorted(note_cols + ["mname", "Front", "Back"])
+            sorted(columns["notes"] + ["mname", "Front", "Back"])
         )
 
     def test_load_cards(self):
@@ -171,7 +170,7 @@ class TestLoaders(unittest.TestCase):
         self.assertEqual(
             sorted(list(cards.columns)),
             sorted(list(set(
-                card_cols + note_cols + ["dname", "mname", "Front", "Back"] +
+                columns["cards"] + columns["notes"] + ["dname", "mname", "Front", "Back"] +
                 ["ndata", "nflags", "nmod", "nusn"]
             )))  # clashes
         )
@@ -180,7 +179,7 @@ class TestLoaders(unittest.TestCase):
         cards = convenience.load_cards(self.path, merge_notes=False)
         self.assertEqual(
             sorted(list(cards.columns)),
-            sorted(card_cols + ["dname"])
+            sorted(columns["cards"] + ["dname"])
         )
 
     def test_load_revs(self):
@@ -188,7 +187,7 @@ class TestLoaders(unittest.TestCase):
         self.assertEqual(
             sorted(list(revs.columns)),
             sorted(list(set(
-                revlog_cols + card_cols + note_cols +
+                columns["revlog"] + columns["cards"] + columns["notes"] +
                 ["dname", "mname", "Front", "Back"] +
                 ["ndata", "nflags", "nmod", "nusn"] +
                 ["civl", "cfactor", "cusn", "ctype"]
@@ -199,7 +198,7 @@ class TestLoaders(unittest.TestCase):
         revs = convenience.load_revs(self.path, False, False)
         self.assertEqual(
             sorted(list(revs.columns)),
-            sorted(revlog_cols)
+            sorted(columns["revlog"])
         )
 
 
