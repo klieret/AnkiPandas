@@ -12,7 +12,7 @@ from functools import lru_cache
 
 # ours
 import ankipandas.core_functions as apd
-from ankipandas.util.log import get_logger
+from ankipandas.util.log import log
 
 
 def load_notes(
@@ -169,7 +169,7 @@ def find_database(
         pathlib.Path to the anki2 database
     """
     if not search_paths:
-        get_logger().info(
+        log.info(
             "Searching for database. This might take some time. "
             "You can speed this up by specifying a search path or "
             "directly entering the path to your database."
@@ -232,7 +232,7 @@ def find_database(
             )
         )
     found = found[0]
-    get_logger().debug("Database found at '{}'.".format(found))
+    log.debug("Database found at '{}'.".format(found))
     return found
 
 
