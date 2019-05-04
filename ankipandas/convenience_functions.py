@@ -33,7 +33,7 @@ def load_notes(
         path = find_database()
     db = apd.load_db(path)
     df = apd.get_notes(db)
-    apd.add_model_names(db, df, inplace=True)
+    apd.add_mnames(db, df, inplace=True)
     if expand_fields:
         apd.add_fields_as_columns(db, df, inplace=True)
     return df
@@ -60,10 +60,10 @@ def load_cards(
         path = find_database()
     db = apd.load_db(path)
     df = apd.get_cards(db)
-    apd.add_deck_names(db, df, inplace=True)
+    apd.add_dnames(db, df, inplace=True)
     if merge_notes:
-        apd.merge_note_info(db, df, inplace=True)
-        apd.add_model_names(db, df, inplace=True)
+        apd.merge_notes(db, df, inplace=True)
+        apd.add_mnames(db, df, inplace=True)
         if expand_fields:
             apd.add_fields_as_columns(db, df, inplace=True)
     apd.close_db(db)
@@ -95,10 +95,10 @@ def load_revs(
     db = apd.load_db(path)
     df = apd.get_revlog(db)
     if merge_cards:
-        apd.merge_card_info(db, df, inplace=True)
+        apd.merge_cards(db, df, inplace=True)
     if merge_notes:
         apd.add_nids(db, df, cid_column="cid", inplace=True)
-        apd.merge_note_info(db, df, inplace=True)
+        apd.merge_notes(db, df, inplace=True)
         if expand_fields:
             apd.add_fields_as_columns(db, df, inplace=True)
     apd.close_db(db)

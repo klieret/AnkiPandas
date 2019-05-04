@@ -87,9 +87,9 @@ class TestCoreFunctionsRead(unittest.TestCase):
 
     def test_merge_note_info(self):
         cards1 = get_cards(self.db)
-        merged1 = merge_note_info(self.db, cards1)
+        merged1 = merge_notes(self.db, cards1)
         cards2 = AnkiDF.cards(self.db_path)
-        merged2 = cards2.merge_note_info()
+        merged2 = cards2.merge_notes()
         for merged in [merged1, merged2]:
             self.assertListEqual(
                 sorted(list(merged.columns)),
@@ -101,8 +101,8 @@ class TestCoreFunctionsRead(unittest.TestCase):
 
     def test_merge_card_info(self):
         revlog1 = get_revlog(self.db)
-        merged1 = merge_card_info(self.db, revlog1)
-        merged2 = AnkiDF.revlog(self.db_path).merge_card_info()
+        merged1 = merge_cards(self.db, revlog1)
+        merged2 = AnkiDF.revlog(self.db_path).merge_cards()
         for merged in [merged1, merged2]:
             self.assertListEqual(
                 sorted(list(merged.columns)),
@@ -136,9 +136,9 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def test_add_model_names(self):
         notes1 = get_notes(self.db)
         notes1 = add_mids(self.db, notes1)
-        notes1 = add_model_names(self.db, notes1)
+        notes1 = add_mnames(self.db, notes1)
         # todo: add_mids() should soon be called automatically
-        notes2 = AnkiDF.notes(self.db_path).add_mids().add_model_names()
+        notes2 = AnkiDF.notes(self.db_path).add_mids().add_mnames()
         for notes in [notes1, notes2]:
             self.assertEqual(
                 sorted(list(notes["mname"].unique())),
@@ -147,8 +147,8 @@ class TestCoreFunctionsRead(unittest.TestCase):
 
     def test_add_deck_names(self):
         cards1 = get_cards(self.db)
-        cards1 = add_deck_names(self.db, cards1)
-        cards2 = AnkiDF.cards(self.db_path).add_deck_names()
+        cards1 = add_dnames(self.db, cards1)
+        cards2 = AnkiDF.cards(self.db_path).add_dnames()
         for cards in [cards1, cards2]:
             self.assertEqual(
                 sorted(list(cards["dname"].unique())),
@@ -158,8 +158,8 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def test_add_fields_as_columns(self):
         notes1 = get_notes(self.db)
         notes1 = add_fields_as_columns(self.db, notes1)
-        notes1 = add_model_names(self.db, notes1)
-        notes2 = AnkiDF.notes(self.db_path).add_model_names()
+        notes1 = add_mnames(self.db, notes1)
+        notes2 = AnkiDF.notes(self.db_path).add_mnames()
         notes2 = notes2.add_fields_as_columns()
         for notes in [notes1, notes2]:
             self.assertEqual(

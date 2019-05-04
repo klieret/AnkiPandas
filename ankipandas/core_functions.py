@@ -395,10 +395,10 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
         return df_merge
 
 
-def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
-                    inplace=False, columns=None, drop_columns=None,
-                    nid_column="nid", prepend="n", prepend_clash_only=True):
-    """ Merge note table into existing dataframe
+def merge_notes(db: sqlite3.Connection, df: pd.DataFrame,
+                inplace=False, columns=None, drop_columns=None,
+                nid_column="nid", prepend="n", prepend_clash_only=True):
+    """ Merge note table into existing dataframe.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -427,9 +427,9 @@ def merge_note_info(db: sqlite3.Connection, df: pd.DataFrame,
     )
 
 
-def merge_card_info(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-                    columns=None, drop_columns=None,
-                    cid_column="cid", prepend="c", prepend_clash_only=True):
+def merge_cards(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+                columns=None, drop_columns=None,
+                cid_column="cid", prepend="c", prepend_clash_only=True):
     """
     Merges information from the card table into the current dataframe.
 
@@ -492,7 +492,7 @@ def add_nids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 
 def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
              nid_column="nid"):
-    """ Add note IDs to a dataframe that only contains note ids.
+    """ Add model IDs to a dataframe that only contains note ids.
 
     Example: ``add_mids(db, notes, id_column="id")``,
     ``add_mids(db, cards_with_merged_notes, id_column="nid")``.
@@ -528,8 +528,8 @@ def add_mids(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
 # Models
 # ------------------------------------------------------------------------------
 
-def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-                    mid_column="mid", new_column="mname"):
+def add_mnames(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+               mid_column="mid", new_column="mname"):
     """ Add model names to a dataframe that contains model IDs.
 
     Args:
@@ -551,16 +551,16 @@ def add_model_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
         df[new_column] = df[mid_column].astype(str).map(get_model_names(db))
     else:
         df = copy.deepcopy(df)
-        add_model_names(db, df, inplace=True, mid_column=mid_column,
-                        new_column=new_column)
+        add_mnames(db, df, inplace=True, mid_column=mid_column,
+                   new_column=new_column)
         return df
 
 # Cards
 # ------------------------------------------------------------------------------
 
 
-def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
-                   did_column="did", new_column="dname"):
+def add_dnames(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
+               did_column="did", new_column="dname"):
     """
     Add deck names to a dataframe that contains deck IDs.
 
@@ -583,8 +583,8 @@ def add_deck_names(db: sqlite3.Connection, df: pd.DataFrame, inplace=False,
         df[new_column] = df[did_column].astype(str).map(get_deck_names(db))
     else:
         df = copy.deepcopy(df)
-        add_deck_names(db, df, did_column=did_column, new_column=new_column,
-                       inplace=True)
+        add_dnames(db, df, did_column=did_column, new_column=new_column,
+                   inplace=True)
         return df
 
 # Notes

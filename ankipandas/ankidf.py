@@ -19,7 +19,7 @@ def _copy_docstring(other, desc=None):
     Args:
         desc: Replace description with this description
     """
-    def dec_adapt_docstring(this):
+    def copy_docstring_decorator(this):
         docs = other.__doc__
         _desc, _args, _ret = parse_docstring(docs)
         if desc:
@@ -28,7 +28,7 @@ def _copy_docstring(other, desc=None):
             _desc, _args, _ret, drop_arg=["df", "db"]
         )
         return this
-    return dec_adapt_docstring
+    return copy_docstring_decorator
 
 
 class AnkiDataFrame(pd.DataFrame):
@@ -194,18 +194,18 @@ class AnkiDataFrame(pd.DataFrame):
     # Public methods
     # ==========================================================================
 
-    @_copy_docstring(core.merge_note_info)
-    def merge_note_info(self, *args, **kwargs):
-        return core.merge_note_info(
+    @_copy_docstring(core.merge_notes)
+    def merge_notes(self, *args, **kwargs):
+        return core.merge_notes(
             db=self.db,
             df=self,
             *args,
             **kwargs
         )
 
-    @_copy_docstring(core.merge_card_info)
-    def merge_card_info(self, *args, **kwargs):
-        return core.merge_card_info(
+    @_copy_docstring(core.merge_cards)
+    def merge_cards(self, *args, **kwargs):
+        return core.merge_cards(
             db=self.db,
             df=self,
             *args,
@@ -237,19 +237,19 @@ class AnkiDataFrame(pd.DataFrame):
             **kwargs
         )
 
-    @_copy_docstring(core.add_model_names)
-    def add_model_names(self, *args, **kwargs):
+    @_copy_docstring(core.add_mnames)
+    def add_mnames(self, *args, **kwargs):
         # Todo: Perhaps call add_mids, if nid column not found
-        return core.add_model_names(
+        return core.add_mnames(
             db=self.db,
             df=self,
             *args,
             **kwargs
         )
 
-    @_copy_docstring(core.add_deck_names)
-    def add_deck_names(self, *args, **kwargs):
-        return core.add_deck_names(
+    @_copy_docstring(core.add_dnames)
+    def add_dnames(self, *args, **kwargs):
+        return core.add_dnames(
             self.db,
             self,
             *args,
