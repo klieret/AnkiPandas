@@ -8,8 +8,6 @@ import tempfile
 # ours
 from ankipandas.core_functions import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-# for hidden imports
-import ankipandas.core_functions as core_functions
 from ankipandas.test.shared import revlog_cols, note_cols, card_cols
 
 
@@ -284,16 +282,6 @@ class TestCoreWrite(unittest.TestCase):
                         list(unchanged.values.tolist()),
                         list(unchanged2.values.tolist())
                     )
-
-
-class TestUtils(unittest.TestCase):
-    def test__replace_df_inplace(self):
-        df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
-        df_new = pd.DataFrame({"a": [1]})
-        core_functions._replace_df_inplace(df, df_new)
-        self.assertEqual(len(df), 1)
-        self.assertEqual(len(df.columns), 1)
-        self.assertListEqual(list(df["a"].values), [1])
 
 
 class TestMergeDfs(unittest.TestCase):

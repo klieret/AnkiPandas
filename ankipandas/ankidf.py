@@ -10,6 +10,7 @@ import pathlib
 # ours
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
+from ankipandas.util.dataframe import replace_df_inplace
 from ankipandas.util.docstrings import parse_docstring, format_docstring
 
 
@@ -117,7 +118,7 @@ class AnkiDataFrame(pd.DataFrame):
             df = core.get_revlog(self.db)
         else:
             raise ValueError("Unsupported table type: '{}'.".format(table))
-        core._replace_df_inplace(self, df)
+        replace_df_inplace(self, df)
         self._anki_table = table
 
     @classmethod

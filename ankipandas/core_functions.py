@@ -14,6 +14,8 @@ import copy
 # 3rd
 import pandas as pd
 
+from ankipandas.util.dataframe import replace_df_inplace
+
 cache_size = 32
 
 
@@ -315,26 +317,6 @@ def set_revlog(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
 # todo: inplace passible decorator
 
 
-# todo: move to utils
-def _replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
-    """ Replace dataframe 'in place'.
-
-    Args:
-        df: :class:`pandas.DataFrame` to be replaced
-        df_new: :class:`pandas.DataFrame` to replace the previous one
-
-    Returns:
-        None
-    """
-    if df.index.any():
-        df.drop(df.index, inplace=True)
-    for col in df_new.columns:
-        df[col] = df_new[col]
-    drop_cols = set(df.columns) - set(df_new.columns)
-    if drop_cols:
-        df.drop(drop_cols, axis=1, inplace=True)
-
-
 def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
               inplace=False, id_add="id", prepend="",
               prepend_clash_only=True, columns=None,
@@ -390,7 +372,7 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
             (drop_columns and id_add in drop_columns):
         df_merge.drop(id_add, axis=1, inplace=True)
     if inplace:
-        _replace_df_inplace(df, df_merge)
+        replace_df_inplace(df, df_merge)
     else:
         return df_merge
 
