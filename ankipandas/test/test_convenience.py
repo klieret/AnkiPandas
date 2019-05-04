@@ -75,7 +75,7 @@ class TestFindDatabase(unittest.TestCase):
     def test__find_database(self):
         for d in self.dirs:
             a = sorted(map(str, flatten_list(
-                convenience._find_database(
+                convenience._find_db(
                     self.dirs[d].name, maxdepth=None, break_on_first=False
                 ).values()
             )))
@@ -85,7 +85,7 @@ class TestFindDatabase(unittest.TestCase):
     def test__find_database_filename(self):
         # If doesn't exist
         self.assertEqual(
-            convenience._find_database(
+            convenience._find_db(
                 Path("abc/myfilename.txt"), filename="myfilename.txt"
             ),
             {}
@@ -96,23 +96,23 @@ class TestFindDatabase(unittest.TestCase):
         dir_path.mkdir()
         file_path.touch()
         self.assertEqual(
-            convenience._find_database(file_path, filename="myfilename.txt"),
+            convenience._find_db(file_path, filename="myfilename.txt"),
             collections.defaultdict(list, {"myfolder": [file_path]})
         )
         tmpdir.cleanup()
 
     def test_find_database(self):
         with self.assertRaises(ValueError):
-            convenience.find_database(
+            convenience.find_db(
                 self.dirs["nothing"].name, break_on_first=False
             )
         with self.assertRaises(ValueError):
-            convenience.find_database(
+            convenience.find_db(
                 self.dirs["multiple"].name, break_on_first=False
             )
             print(self.dbs["multiple"])
         self.assertEqual(
-            str(convenience.find_database(
+            str(convenience.find_db(
                 self.dirs["perfect"].name, break_on_first=False
             )),
             str(self.dbs["perfect"][0])

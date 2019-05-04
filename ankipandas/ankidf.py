@@ -108,7 +108,7 @@ class AnkiDataFrame(pd.DataFrame):
         if not path:
             path = self.db_path
         if not path:
-            path = convenience.find_database()
+            path = convenience.find_db()
         self._load_db(path)
         if table == "notes":
             df = core.get_notes(self.db)

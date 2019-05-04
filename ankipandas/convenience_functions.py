@@ -30,7 +30,7 @@ def load_notes(
         :class:`pandas.DataFrame`.
     """
     if not path:
-        path = find_database()
+        path = find_db()
     db = apd.load_db(path)
     df = apd.get_notes(db)
     apd.add_mnames(db, df, inplace=True)
@@ -57,7 +57,7 @@ def load_cards(
         :class:`pandas.DataFrame`.
     """
     if not path:
-        path = find_database()
+        path = find_db()
     db = apd.load_db(path)
     df = apd.get_cards(db)
     apd.add_dnames(db, df, inplace=True)
@@ -91,7 +91,7 @@ def load_revs(
         :class:`pandas.DataFrame`.
     """
     if not path:
-        path = find_database()
+        path = find_db()
     db = apd.load_db(path)
     df = apd.get_revs(db)
     if merge_cards:
@@ -109,9 +109,9 @@ def load_revs(
 
 # todo: decorator messes up sphinx signature
 @lru_cache(32)
-def _find_database(search_path, maxdepth=6,
-                   filename="collection.anki2",
-                   break_on_first=False, user=None):
+def _find_db(search_path, maxdepth=6,
+             filename="collection.anki2",
+             break_on_first=False, user=None):
     """
     Like find_database but only for one search path at a time. Also doesn't
     raise any error, even if the search path doesn't exist.
@@ -143,7 +143,7 @@ def _find_database(search_path, maxdepth=6,
 
 # todo: decorator messes up sphinx signature
 @lru_cache(32)
-def find_database(
+def find_db(
         search_paths=None,
         maxdepth=8,
         filename="collection.anki2",
@@ -189,7 +189,7 @@ def find_database(
     for search_path in search_paths:
         found = {
             **found,
-            **_find_database(
+            **_find_db(
                 search_path,
                 maxdepth=maxdepth,
                 filename=filename,
@@ -238,6 +238,7 @@ def find_database(
     return found
 
 
+# todo: rename table_help?
 def table_help(table=None, column=None, native=None) -> pd.DataFrame:
     """
     Return a pandas dataframe containing descriptions of every field in the
