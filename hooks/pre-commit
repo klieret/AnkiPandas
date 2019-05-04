@@ -5,7 +5,7 @@ exec < /dev/tty
 
 echo "Pre-commit hook engaged."
 
-`nose2`
+pytest
 # read -p "Run unittests? [yY]" -n 1 -r
 # echo    # (optional) move to a new line
 # if [[ $REPLY =~ ^[Yy]$ ]]

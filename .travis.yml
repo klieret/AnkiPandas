@@ -6,10 +6,12 @@ python:
 install:
   # To work around a problem with wilson package we take the git master version of it
   - "pip3 install ."
-  - "pip3 install nose2"
+  - "pip3 install pytest"
+  - "pip3 install pytest-cover"
+  - "pip3 isntall pytest-subtests"
   - "pip3 install coveralls"
 
 script: 
-  - "nose2 --with-coverage"
+  - "pytest"
 
 after_success: coveralls
