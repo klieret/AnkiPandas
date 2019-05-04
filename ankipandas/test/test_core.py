@@ -41,8 +41,8 @@ class TestCoreFunctionsRead(unittest.TestCase):
             )
 
     def test_get_revlog(self):
-        revlog1 = get_revlog(self.db)
-        revlog2 = AnkiDF.revlog(self.db_path)
+        revlog1 = get_revs(self.db)
+        revlog2 = AnkiDF.revs(self.db_path)
         for revlog in [revlog1, revlog2]:
             # todo assert length
             self.assertEqual(
@@ -98,9 +98,9 @@ class TestCoreFunctionsRead(unittest.TestCase):
             )
 
     def test_merge_card_info(self):
-        revlog1 = get_revlog(self.db)
+        revlog1 = get_revs(self.db)
         merged1 = merge_cards(self.db, revlog1)
-        merged2 = AnkiDF.revlog(self.db_path).merge_cards()
+        merged2 = AnkiDF.revs(self.db_path).merge_cards()
         for merged in [merged1, merged2]:
             self.assertListEqual(
                 sorted(list(merged.columns)),
@@ -232,10 +232,10 @@ class TestCoreWrite(unittest.TestCase):
     def _check_db_equal(self):
         notes = get_notes(self.db_read)
         cards = get_cards(self.db_read)
-        revlog = get_revlog(self.db_read)
+        revlog = get_revs(self.db_read)
         notes2 = get_notes(self.db_write)
         cards2 = get_cards(self.db_write)
-        revlog2 = get_revlog(self.db_write)
+        revlog2 = get_revs(self.db_write)
         self.assertListEqual(
             list(notes.values.tolist()), list(notes2.values.tolist())
         )
@@ -249,13 +249,13 @@ class TestCoreWrite(unittest.TestCase):
     def test_rw_identical(self):
         notes = get_notes(self.db_read)
         cards = get_cards(self.db_read)
-        revlog = get_revlog(self.db_read)
+        revlog = get_revs(self.db_read)
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
                 set_notes(self.db_write, notes, mode)
                 set_cards(self.db_write, cards, mode)
-                set_revlog(self.db_write, revlog, mode)
+                set_revs(self.db_write, revlog, mode)
                 self._check_db_equal()
 
     def test_update(self):

@@ -46,8 +46,8 @@ class AnkiDataFrame(pd.DataFrame):
         .. warning::
 
             It is recommended to directly initialize this class with the notes,
-            cards or revlog table, using one of the methods
-            :meth:`.notes`, :meth:`.cards` or :meth:`.revlog` instead!
+            cards or revs table, using one of the methods
+            :meth:`.notes`, :meth:`.cards` or :meth:`.revs` instead!
 
         Args:
             *args: Internal use only. See arguments of
@@ -69,8 +69,8 @@ class AnkiDataFrame(pd.DataFrame):
         #: Path to Anki database that is opened as :attr:`.db`
         self.db_path = None  # type: pathlib.Path
 
-        #: Type of anki table: Notes, Cards or Revlog. This corresponds to the
-        #: meaning of the ID row.
+        #: Type of anki table: 'notes', 'cards' or 'revlog'. This corresponds to
+        #: the meaning of the ID row.
         self._anki_table = None  # type: str
 
     @property
@@ -115,7 +115,7 @@ class AnkiDataFrame(pd.DataFrame):
         elif table == "cards":
             df = core.get_cards(self.db)
         elif table == "revlog":
-            df = core.get_revlog(self.db)
+            df = core.get_revs(self.db)
         else:
             raise ValueError("Unsupported table type: '{}'.".format(table))
         replace_df_inplace(self, df)
@@ -166,8 +166,8 @@ class AnkiDataFrame(pd.DataFrame):
         return cls._table_constructor(path, "cards")
 
     @classmethod
-    def revlog(cls, path=None):
-        """ Initialize :class:`AnkiDataFrame` with revlog table loaded from Anki
+    def revs(cls, path=None):
+        """ Initialize :class:`AnkiDataFrame` with review table loaded from Anki
         database.
 
         Args:
@@ -179,7 +179,7 @@ class AnkiDataFrame(pd.DataFrame):
         .. code-block:: python
 
             import ankipandas
-            revlog = ankipandas.AnkiDataFrame.revlog()
+            revs = ankipandas.AnkiDataFrame.revs()
 
         """
         return cls._table_constructor(path, "revlog")

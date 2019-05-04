@@ -87,7 +87,7 @@ def get_notes(db: sqlite3.Connection) -> pd.DataFrame:
     return _get_table(db, "notes")
 
 
-def get_revlog(db: sqlite3.Connection) -> pd.DataFrame:
+def get_revs(db: sqlite3.Connection) -> pd.DataFrame:
     """
     Get the revision log as a dataframe.
 
@@ -297,8 +297,8 @@ def set_cards(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
     _set_table(db, df, "cards", mode)
 
 
-def set_revlog(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
-    """ Write revlog table back into database.
+def set_revs(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
+    """ Write review table back into database.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)

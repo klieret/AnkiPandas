@@ -93,7 +93,7 @@ def load_revs(
     if not path:
         path = find_database()
     db = apd.load_db(path)
-    df = apd.get_revlog(db)
+    df = apd.get_revs(db)
     if merge_cards:
         apd.merge_cards(db, df, inplace=True)
         apd.add_dnames(db, df, inplace=True)
