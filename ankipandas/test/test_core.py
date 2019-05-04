@@ -84,133 +84,99 @@ class TestCoreFunctionsRead(unittest.TestCase):
         )
 
     def test_merge_note_info(self):
-        cards1 = get_cards(self.db)
-        merged1 = merge_notes(self.db, cards1)
-        cards2 = AnkiDF.cards(self.db_path)
-        merged2 = cards2.merge_notes()
-        for merged in [merged1, merged2]:
-            self.assertListEqual(
-                sorted(list(merged.columns)),
-                sorted(list(
-                    set(columns["cards"]) | set(columns["notes"]) |
-                    {"ndata", "nflags", "nmod", "nusn"}  # clashes
-                ))
-            )
+        merged = AnkiDF.cards(self.db_path).merge_notes()
+        self.assertListEqual(
+            sorted(list(merged.columns)),
+            sorted(list(
+                set(columns["cards"]) | set(columns["notes"]) |
+                {"ndata", "nflags", "nmod", "nusn"}  # clashes
+            ))
+        )
 
     def test_merge_card_info(self):
-        revlog1 = get_revs(self.db)
-        merged1 = merge_cards(self.db, revlog1)
-        merged2 = AnkiDF.revs(self.db_path).merge_cards()
-        for merged in [merged1, merged2]:
-            self.assertListEqual(
-                sorted(list(merged.columns)),
-                sorted(list(
-                    set(columns["revlog"]) | set(columns["cards"]) |
-                    {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
-                ))
-            )
+        merged = AnkiDF.revs(self.db_path).merge_cards()
+        self.assertListEqual(
+            sorted(list(merged.columns)),
+            sorted(list(
+                set(columns["revlog"]) | set(columns["cards"]) |
+                {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
+            ))
+        )
 
     def test_add_nids(self):
-        cards1 = get_cards(self.db)
-        cards1 = add_nids(self.db, cards1)
-        cards2 = AnkiDF.cards(self.db_path).add_nids()
-        for cards in [cards1, cards2]:
-            self.assertIn("nid", list(cards.columns))
-            self.assertListEqual(
-                sorted(list(cards["nid"].unique())),
-                sorted(list(get_notes(self.db)["id"].unique()))
-            )
+        cards = AnkiDF.cards(self.db_path).add_nids()
+        self.assertIn("nid", list(cards.columns))
+        self.assertListEqual(
+            sorted(list(cards["nid"].unique())),
+            sorted(list(get_notes(self.db)["id"].unique()))
+        )
 
     def test_add_mids(self):
-        notes1 = get_notes(self.db)
-        notes1 = add_mids(self.db, notes1)
-        notes2 = AnkiDF.notes(self.db_path).add_mids()
-        for notes in [notes1, notes2]:
-            self.assertEqual(
-                len(notes["mid"].unique()),
-                2  # we don't have notesfor every model
-            )
+        notes = AnkiDF.notes(self.db_path).add_mids()
+        self.assertEqual(
+            len(notes["mid"].unique()),
+            2  # we don't have notesfor every model
+        )
 
-    def test_add_model_names(self):
-        notes1 = get_notes(self.db)
-        notes1 = add_mids(self.db, notes1)
-        notes1 = add_mnames(self.db, notes1)
+    def test_add_mnames(self):
         # todo: add_mids() should soon be called automatically
-        notes2 = AnkiDF.notes(self.db_path).add_mids().add_mnames()
-        for notes in [notes1, notes2]:
-            self.assertEqual(
-                sorted(list(notes["mname"].unique())),
-                ["Basic", 'Basic (and reversed card)']
-            )
+        notes = AnkiDF.notes(self.db_path).add_mnames()
+        self.assertEqual(
+            sorted(list(notes["mname"].unique())),
+            ["Basic", 'Basic (and reversed card)']
+        )
 
-    def test_add_deck_names(self):
-        cards1 = get_cards(self.db)
-        cards1 = add_dnames(self.db, cards1)
-        cards2 = AnkiDF.cards(self.db_path).add_dnames()
-        for cards in [cards1, cards2]:
-            self.assertEqual(
-                sorted(list(cards["dname"].unique())),
-                ["Default"]
-            )
-            self.assertTrue(
-                check_dnames_did(self.db, cards1)
-            )
+    def test_add_dnames(self):
+        cards = AnkiDF.cards(self.db_path).add_dnames()
+        self.assertEqual(
+            sorted(list(cards["dname"].unique())),
+            ["Default"]
+        )
+        self.assertTrue(
+            check_dnames_did(self.db, cards)
+        )
 
     def test_add_fields_as_columns(self):
-        notes1 = get_notes(self.db)
-        notes1 = add_fields_as_columns(self.db, notes1)
-        notes1 = add_mnames(self.db, notes1)
-        notes2 = AnkiDF.notes(self.db_path).add_mnames()
-        notes2 = notes2.add_fields_as_columns()
-        for notes in [notes1, notes2]:
-            self.assertEqual(
-                sorted(list(notes.columns)),
-                sorted(columns["notes"] + ["mname", "Front", "Back"])
-            )
-            self.assertEqual(
-                list(notes.query("mname=='Basic'")["Front"].unique()),
-                ["Basic: Front"]
-            )
+        # todo: add_mnames shouldn't be necessary
+        notes = AnkiDF.notes(self.db_path).add_mnames().add_fields_as_columns()
+        self.assertEqual(
+            sorted(list(notes.columns)),
+            sorted(columns["notes"] + ["mname", "Front", "Back"])
+        )
+        self.assertEqual(
+            list(notes.query("mname=='Basic'")["Front"].unique()),
+            ["Basic: Front"]
+        )
 
     def test_fields_as_columns_to_flds(self):
         # Add fields as column, remove original 'flds' column, then
         # add it back from the field columns and see if things still check
         # out
-        notes1 = get_notes(self.db)
-        notes1 = add_fields_as_columns(self.db, notes1)
-        flds = copy.copy(notes1["flds"].values)
-        notes1["flds"] = ""
-        notes1 = fields_as_columns_to_flds(self.db, notes1, drop=True)
-        notes2 = AnkiDF.notes(self.db_path).add_fields_as_columns()
-        notes2["flds"] = ""
-        notes2.fields_as_columns_to_flds(inplace=True, drop=True)
-        for notes in [notes1, notes2]:
-            self.assertEqual(
-                list(flds),
-                list(notes["flds"].values)
-            )
-            self.assertListEqual(
-                sorted(list(notes.columns)),
-                sorted(columns["notes"])
-            )
+        notes = AnkiDF.notes(self.db_path).add_fields_as_columns()
+        print("####")
+        print(notes)
+        print("#####")
+        flds = copy.copy(notes["flds"].values)
+        notes["flds"] = ""
+        notes.fields_as_columns_to_flds(inplace=True, drop=True)
+        self.assertEqual(
+            list(flds),
+            list(notes["flds"].values)
+        )
+        self.assertListEqual(
+            sorted(list(notes.columns)),
+            sorted(columns["notes"])
+        )
 
     def test_fields_as_columns_to_flds_2(self):
-        notes1 = get_notes(self.db)
-        notes1 = add_fields_as_columns(self.db, notes1, prepend="fld_")
-        flds = copy.copy(notes1["flds"].values)
-        notes1["flds"] = ""
-        notes1 = fields_as_columns_to_flds(
-            self.db, notes1, drop=True, prepended="fld_"
+        notes = AnkiDF.notes(self.db_path).add_fields_as_columns(prepend="fld_")
+        flds = copy.deepcopy(notes["flds"].values)
+        notes["flds"] = ""
+        notes = notes.fields_as_columns_to_flds(drop=True, prepended="fld_")
+        self.assertListEqual(
+            list(flds),
+            list(notes["flds"].values)
         )
-        notes2 = AnkiDF.notes(self.db_path)
-        notes2 = notes2.add_fields_as_columns(prepend="fld_")
-        notes2["flds"] = ""
-        notes2 = notes2.fields_as_columns_to_flds(drop=True, prepended="fld_")
-        for notes in [notes1, notes2]:
-            self.assertListEqual(
-                list(flds),
-                list(notes["flds"].values)
-            )
 
 
 class TestCoreWrite(unittest.TestCase):

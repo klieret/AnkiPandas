@@ -2,6 +2,7 @@
 
 # std
 import sqlite3
+import copy
 
 # 3rd
 import pandas as pd
@@ -208,85 +209,230 @@ class AnkiDataFrame(pd.DataFrame):
     # Public methods
     # ==========================================================================
 
-    @_copy_docstring(core.merge_notes)
-    def merge_notes(self, *args, **kwargs):
-        return core.merge_notes(
-            db=self.db,
+    def merge_notes(self, inplace=False, columns=None,
+                    drop_columns=None, prepend="n",
+                    prepend_clash_only=True):
+        """ Merge note table into existing dataframe.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+            columns: Columns to merge
+            drop_columns: Columns to ignore when merging
+            prepend: Prepend this string to fields from note table
+            prepend_clash_only: Only prepend the ``prepend`` string when column
+                names would otherwise clash.
+
+        Returns:
+            New :class:`AnkiDataFrame` if inplace==True, else None
+        """
+        return core.merge_dfs(
             df=self,
-            *args,
-            **kwargs
+            df_add=core.get_notes(self.db),
+            id_df=self._nid_column,
+            id_add="nid",
+            inplace=inplace,
+            prepend=prepend,
+            prepend_clash_only=prepend_clash_only,
+            columns=columns,
+            drop_columns=drop_columns
         )
 
-    @_copy_docstring(core.merge_cards)
-    def merge_cards(self, *args, **kwargs):
-        return core.merge_cards(
-            db=self.db,
+    def merge_cards(self, inplace=False, columns=None, drop_columns=None,
+                    prepend="c", prepend_clash_only=True):
+        """
+        Merges information from the card table into the current dataframe.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+            columns:  Columns to merge
+            drop_columns:  Columns to ignore when merging
+            prepend: Prepend this string to fields from card table
+            prepend_clash_only: Only prepend the ``prepend`` string when column
+                names would otherwise clash.
+
+        Returns:
+            New :class:`AnkiDataFrame` if inplace==True, else None
+        """
+        return core.merge_dfs(
             df=self,
-            *args,
-            **kwargs
+            df_add=core.get_cards(self.db),
+            id_df=self._cid_column,
+            inplace=inplace,
+            columns=columns,
+            drop_columns=drop_columns,
+            id_add="cid",
+            prepend=prepend,
+            prepend_clash_only=prepend_clash_only
         )
 
-    @_copy_docstring(core.add_nids, "Add note IDs")
-    def add_nids(self, cid_column=None, *args, **kwargs):
-        if not cid_column:
-            cid_column = self._cid_column
-        return core.add_nids(
-            db=self.db,
+    def add_nids(self, inplace=False):
+        """ Add note IDs to a dataframe that only contains card ids.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+
+        Returns:
+            New :class:`pandas.DataFrame` if inplace==True, else None
+        """
+        return core.merge_dfs(
             df=self,
-            cid_column=cid_column,
-            *args,
-            **kwargs
+            df_add=core.get_cards(self.db),
+            id_df=self._cid_column,
+            inplace=inplace,
+            columns=["nid"],
+            id_add="id",
+            prepend="",
+            replace=True
         )
 
-    @_copy_docstring(core.add_mids, "Add model IDs")
-    def add_mids(self, nid_column=None, *args, **kwargs):
-        if not nid_column:
-            nid_column = self._nid_column
+    def add_mids(self, inplace=False):
+        """ Add model IDs to a dataframe that only contains note ids.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+
+        Returns:
+            New :class:`pandas.DataFrame` if inplace==True, else None
+        """
         # Todo: Perhaps call add_nids, if nid column not found
-        return core.add_mids(
-            db=self.db,
+        return core.merge_dfs(
             df=self,
-            nid_column=nid_column,
-            *args,
-            **kwargs
+            df_add=core.get_notes(self.db),
+            id_df=self._nid_column,
+            inplace=inplace,
+            columns=["mid"],
+            id_add=self._nid_column,
+            prepend="",
+            replace=True
         )
 
-    @_copy_docstring(core.add_mnames)
-    def add_mnames(self, *args, **kwargs):
-        # Todo: Perhaps call add_mids, if nid column not found
-        return core.add_mnames(
+    def add_mnames(self, inplace=False):
+        """ Add model names to a dataframe that contains model IDs.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+
+        Returns:
+            New :class:`pandas.DataFrame` if inplace==True, else None
+        """
+        # todo: add it then?
+        if "mid" not in self.columns:
+            raise ValueError("Could not find model id column 'mid'")
+        if inplace:
+            self["mname"] = self["mid"].astype(str).map(
+                core.get_model_names(self.db)
+            )
+        else:
+            df = self.copy(True)
+            df.add_mnames(inplace=True)
+            return df
+
+    # todo: add checker
+
+    def add_dnames(self, inplace=False):
+        """
+        Add deck names to a dataframe that contains deck IDs.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+
+        Returns:
+            New :class:`pandas.DataFrame` if inplace==True, else None
+        """
+        return core.sync_dnames_did(
             db=self.db,
             df=self,
-            *args,
-            **kwargs
+            inplace=inplace,
+            did_column="did",
+            dname_column="dname",
+            source="dids"
         )
 
-    @_copy_docstring(core.add_dnames)
-    def add_dnames(self, *args, **kwargs):
-        return core.add_dnames(
-            self.db,
-            self,
-            *args,
-            **kwargs
-        )
+    def add_fields_as_columns(self, inplace=False, prepend=""):
+        """
+        In the 'notes' table, the field contents of the notes is contained in
+        one column ('flds') by default. With this method, this column can be
+        split up into a new column for every field.
 
-    @_copy_docstring(core.add_fields_as_columns)
-    def add_fields_as_columns(self, *args, **kwargs):
-        return core.add_fields_as_columns(
-            db=self.db,
-            df=self,
-            *args,
-            **kwargs
-        )
+        Args:
+            inplace: If False, return new dataframe, else update old one
+            prepend: Prepend string to all new column names
 
-    @_copy_docstring(core.fields_as_columns_to_flds)
-    def fields_as_columns_to_flds(self, *args, **kwargs):
-        return core.fields_as_columns_to_flds(
-            db=self.db,
-            df=self,
-            *args,
-            **kwargs
-        )
+        Returns:
+            New :class:`pandas.DataFrame` if inplace==True, else None
+        """
+        if "mid" not in self.columns:
+            raise ValueError("Could not find model id column 'mid'.")
+        if "flds" not in self.columns:
+            raise ValueError(
+                "Could not find fields column 'flds'.".format("flds")
+            )
+        # fixme: What if one field column is one that is already in use?
+        if inplace:
+            mids = self["mid"].unique()
+            for mid in mids:
+                df_model = self[self["mid"] == mid]
+                fields = df_model["flds"].str.split("\x1f", expand=True)
+                for ifield, field in enumerate(core.get_field_names(self.db)[str(mid)]):
+                    self.loc[self["mid"] == mid, prepend + field] = fields[ifield]
+        else:
+            df = self.copy(True)
+            df.add_fields_as_columns(inplace=True, prepend=prepend)
+            return df
+
+    def fields_as_columns_to_flds(self, inplace=False,
+                                  prepended="", drop=False):
+        """
+        This reverts :py:func:`~ankipandas.core_functions.add_fields_as_columns`,
+        all columns that represented field contents are now merged into one column
+        'flds'.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+            prepended: Use this, if the name of columns that contained the fields
+                had a string prepended to them
+            drop: Drop columns that were now merged into the 'flds' column
+
+        Returns:
+            New :class:`pandas.DataFrame` if inplace==True, else None
+        """
+        if "mid" not in self.columns:
+            raise ValueError("Could not find model id column 'mid'.")
+        if inplace:
+            mids = self["mid"].unique()
+            to_drop = []
+            for mid in mids:
+                fields = core.get_field_names(self.db)[str(mid)]
+                if prepended:
+                    fields = [prepended + field for field in fields]
+                self.loc[self["mid"] == mid, "flds"] = \
+                    pd.Series(self[fields].values.tolist()).str.join("\x1f")
+                if drop:
+                    # Careful: Do not delete the fields here yet, other models
+                    # might still use them
+                    to_drop.extend(fields)
+            self.drop(to_drop, axis=1, inplace=True)
+        else:
+            df = self.copy()
+            df.fields_as_columns_to_flds(
+                inplace=True,
+                prepended=prepended,
+                drop=drop,
+            )
+            return df
+
+    # todo: implement
+    def convert_tags_list(inplace=False):
+        """ Converts space separated tags to a list.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+
+        Returns:
+            New :class:`pandas.DataFrame` if inplace==True, else None
+        """
+        raise NotImplementedError
+
 
     def help(self, *args, **kwargs):
         df = convenience.table_help(*args, **kwargs)
