@@ -1,5 +1,6 @@
 Name,Tables,Description,Native
 *,notes,Field,FALSE
+cid,revlog,Card ID,TRUE
 csum,notes,Field checksum used for duplicate check: Integer representation of first 8 digits of sha1 hash of the first field,TRUE
 data,"cards, notes",Currently unused,TRUE
 did,cards,ID of the deck,TRUE
@@ -29,4 +30,4 @@ sfld,notes,Content of the sort field.,TRUE
 tags,notes,Tags of the note as space-separated string,TRUE
 time,revlog,"How many milliseconds your review took, up to 60000 (60s)",TRUE
 type,"cards, revlog","This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
-usn,"cards, notes",This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE
+usn,"cards, notes, revlog",This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE
