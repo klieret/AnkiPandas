@@ -35,6 +35,7 @@ def _copy_docstring(other, desc=None):
     return copy_docstring_decorator
 
 
+
 class AnkiDataFrame(pd.DataFrame):
     #: Additional attributes of a :class:`AnkiDataFrame` that a normal
     #: :class:`pandas.DataFrame` does not posess. These will be copied in the
@@ -206,8 +207,66 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             return "cid"
 
+    @property
+    def _mid_column(self):
+        return "mid"
+
     # Public methods
     # ==========================================================================
+
+    @property
+    def nid(self):
+        if self._nid_column in self.columns:
+            return self[self._nid_column]
+        else:
+            if self._anki_table == "revlog":
+                cards = core.get_cards(self.db)
+                cid2nid = dict(zip(cards["id"], cards["nid"]))
+                return self.cid.map(cid2nid)
+            else:
+                raise ValueError(
+                    "Note IDs unavailable for table of "
+                    "type {}!".format(self._anki_table)
+                )
+
+    @property
+    def cid(self):
+        if self._cid_column in self.columns:
+            return self[self._cid_column]
+        else:
+            raise ValueError(
+                    "Note IDs unavailable for table of "
+                    "type {}!".format(self._anki_table)
+            )
+
+    @property
+    def mid(self):
+        if self._cid_column in self.columns:
+            return self[self._cid_column]
+        else:
+            if self._anki_table in ["revlog", "cards"]:
+                notes = core.get_notes(self.db)
+                nid2mid = dict(zip(notes["id"], notes["mid"]))
+                return self.cid.map(nid2mid)
+            else:
+                raise ValueError(
+                    "Note IDs unavailable for table of "
+                    "type {}!".format(self._anki_table)
+                )
+
+    @property
+    def mname(self):
+        if "mname" in self.columns:
+            return self["mname"]
+        else:
+            return self.mid.map(core.get_model_names(self.db))
+
+    @property
+    def dname(self):
+        if "dname" in self.columns:
+            return self["mname"]
+        else:
+            return self.cid.map(core.get_deck_names(self.db))
 
     def merge_notes(self, inplace=False, columns=None,
                     drop_columns=None, prepend="n",
@@ -265,61 +324,21 @@ class AnkiDataFrame(pd.DataFrame):
             prepend_clash_only=prepend_clash_only
         )
 
-    def add_nids(self, inplace=False):
-        """ Add note IDs to a dataframe that only contains card ids.
-
-        Args:
-            inplace: If False, return new dataframe, else update old one
-
-        Returns:
-            New :class:`pandas.DataFrame` if inplace==True, else None
-        """
-        return core.merge_dfs(
-            df=self,
-            df_add=core.get_cards(self.db),
-            id_df=self._cid_column,
-            inplace=inplace,
-            columns=["nid"],
-            id_add="id",
-            prepend="",
-            replace=True
-        )
-
-    def add_mids(self, inplace=False):
-        """ Add model IDs to a dataframe that only contains note ids.
-
-        Args:
-            inplace: If False, return new dataframe, else update old one
-
-        Returns:
-            New :class:`pandas.DataFrame` if inplace==True, else None
-        """
-        # Todo: Perhaps call add_nids, if nid column not found
-        return core.merge_dfs(
-            df=self,
-            df_add=core.get_notes(self.db),
-            id_df=self._nid_column,
-            inplace=inplace,
-            columns=["mid"],
-            id_add=self._nid_column,
-            prepend="",
-            replace=True
-        )
-
-    def add_mnames(self, inplace=False):
+    def add_mnames(self, format="name", inplace=False):
         """ Add model names to a dataframe that contains model IDs.
 
         Args:
+            format: "name", "id"
             inplace: If False, return new dataframe, else update old one
 
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
         # todo: add it then?
-        if "mid" not in self.columns:
+        if self._mid_column not in self.columns:
             raise ValueError("Could not find model id column 'mid'")
         if inplace:
-            self["mname"] = self["mid"].astype(str).map(
+            self["mname"] = self[self._mid_column].astype(str).map(
                 core.get_model_names(self.db)
             )
         else:
@@ -329,7 +348,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     # todo: add checker
 
-    def add_dnames(self, inplace=False):
+    def add_dnames(self, format="name", inplace=False):
         """
         Add deck names to a dataframe that contains deck IDs.
 
@@ -361,7 +380,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
-        if "mid" not in self.columns:
+        if self._mid_column not in self.columns:
             raise ValueError("Could not find model id column 'mid'.")
         if "flds" not in self.columns:
             raise ValueError(
@@ -369,12 +388,12 @@ class AnkiDataFrame(pd.DataFrame):
             )
         # fixme: What if one field column is one that is already in use?
         if inplace:
-            mids = self["mid"].unique()
+            mids = self[self._mid_column].unique()
             for mid in mids:
-                df_model = self[self["mid"] == mid]
+                df_model = self[self[self._mid_column] == mid]
                 fields = df_model["flds"].str.split("\x1f", expand=True)
                 for ifield, field in enumerate(core.get_field_names(self.db)[str(mid)]):
-                    self.loc[self["mid"] == mid, prepend + field] = fields[ifield]
+                    self.loc[self[self._mid_column] == mid, prepend + field] = fields[ifield]
         else:
             df = self.copy(True)
             df.add_fields_as_columns(inplace=True, prepend=prepend)
@@ -396,16 +415,16 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
-        if "mid" not in self.columns:
+        if self._mid_column not in self.columns:
             raise ValueError("Could not find model id column 'mid'.")
         if inplace:
-            mids = self["mid"].unique()
+            mids = self[self._mid_column].unique()
             to_drop = []
             for mid in mids:
                 fields = core.get_field_names(self.db)[str(mid)]
                 if prepended:
                     fields = [prepended + field for field in fields]
-                self.loc[self["mid"] == mid, "flds"] = \
+                self.loc[self[self._mid_column] == mid, "flds"] = \
                     pd.Series(self[fields].values.tolist()).str.join("\x1f")
                 if drop:
                     # Careful: Do not delete the fields here yet, other models
@@ -421,18 +440,18 @@ class AnkiDataFrame(pd.DataFrame):
             )
             return df
 
-    # todo: implement
-    def convert_tags_list(inplace=False):
+    # todo: implement. Actually set would be best!
+    def convert_tags(format="list", inplace=False):
         """ Converts space separated tags to a list.
 
         Args:
+            format: 'list' or 'string'
             inplace: If False, return new dataframe, else update old one
 
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
         raise NotImplementedError
-
 
     def help(self, *args, **kwargs):
         df = convenience.table_help(*args, **kwargs)

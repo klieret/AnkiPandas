@@ -138,19 +138,19 @@ class TestCoreWrite(unittest.TestCase):
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
-                notes2.loc[notes2["id"] == 1555579337683, "tags"] = "mytesttag"
+                notes2.loc[notes2["id"] == "1555579337683", "tags"] = "mytesttag"
                 set_notes(self.db_write, notes2, mode)
                 if mode == "append":
                     self._check_db_equal()
                 else:
                     notes2 = get_notes(self.db_write)
-                    chtag = notes2.loc[notes2["id"] == 1555579337683, "tags"]
+                    chtag = notes2.loc[notes2["id"] == "1555579337683", "tags"]
                     self.assertListEqual(
                         list(chtag.values.tolist()),
                         ["mytesttag"]
                     )
-                    unchanged = notes.loc[notes["id"] != 1555579337683, :]
-                    unchanged2 = notes2.loc[notes2["id"] != 1555579337683, :]
+                    unchanged = notes.loc[notes["id"] != "1555579337683", :]
+                    unchanged2 = notes2.loc[notes2["id"] != "1555579337683", :]
 
                     self.assertListEqual(
                         list(unchanged.values.tolist()),

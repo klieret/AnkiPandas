@@ -5,7 +5,7 @@ csum,notes,Field checksum used for duplicate check: Integer representation of fi
 data,cards,Currently unused,TRUE
 data,notes,Currently unused,TRUE
 did,cards,ID of the deck,TRUE
-dname,cards,Name of the card,FALSE
+deck,cards,Name of the deck,FALSE
 due,cards,"Due is used differently for different card types: new: note id or random int, due: integer day, relative to the collection's creation time, learning: integer timestamp",TRUE
 ease,revlog,"Which button you pushed to score your recall: review:  1(wrong), 2(hard), 3(ok), 4(easy), learn/relearn:   1(wrong), 2(ok), 3(easy)",TRUE
 factor,cards,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE
@@ -23,7 +23,7 @@ lapses,cards,"The number of times the card went from a ""was answered correctly"
 lastIvl,revlog,Last interval,TRUE
 left,cards,"Of the form ``a*1000+b``, with: ``b`` the number of reps left till graduation and ``a`` the number of reps left today",TRUE
 mid,notes,Model ID,TRUE
-mname,notes,Name of the model,FALSE
+model,notes,Name of the model,FALSE
 mod,cards,Modification time [epoch seconds],TRUE
 mod,notes,"Modification timestamp, epoch seconds",TRUE
 nid,cards,ID of the note,TRUE

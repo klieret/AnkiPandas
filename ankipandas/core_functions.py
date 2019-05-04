@@ -58,7 +58,7 @@ def close_db(db: sqlite3.Connection) -> None:
 # Basic getters
 # ==============================================================================
 
-def _get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
+def _get_table(db: sqlite3.Connection, table: str, convert_dict=None) -> pd.DataFrame:
     """ Get a table from the Anki database.
 
     Args:
@@ -68,7 +68,10 @@ def _get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
     Returns:
         :class:`pandas.DataFrame`
     """
+    # todo: why not read_sql_table?
     df = pd.read_sql_query("SELECT * FROM {}".format(table), db)
+    if convert_dict is not None:
+        df = df.astype(convert_dict)
     return df
 
 
@@ -82,7 +85,7 @@ def get_cards(db: sqlite3.Connection) -> pd.DataFrame:
     Returns:
         :class:`pandas.DataFrame`
     """
-    return _get_table(db, "cards")
+    return _get_table(db, "cards", {"id": str, "nid": str, "did": str})
 
 
 def get_notes(db: sqlite3.Connection) -> pd.DataFrame:
@@ -95,7 +98,7 @@ def get_notes(db: sqlite3.Connection) -> pd.DataFrame:
     Returns:
         :class:`pandas.DataFrame`
     """
-    return _get_table(db, "notes")
+    return _get_table(db, "notes", {"id": str})
 
 
 def get_revs(db: sqlite3.Connection) -> pd.DataFrame:
@@ -108,7 +111,7 @@ def get_revs(db: sqlite3.Connection) -> pd.DataFrame:
     Returns:
         :class:`pandas.DataFrame`
     """
-    return _get_table(db, "revlog")
+    return _get_table(db, "revlog", {"id": str, "cid": str})
 
 
 @lru_cache(CACHE_SIZE)
@@ -158,9 +161,18 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
     Returns:
         None
     """
-    df_old = pd.read_sql_query("SELECT * FROM {}".format(table), db)
+    if table == "cards":
+        df_old = get_cards(db)
+    elif table == "notes":
+        df_old = get_notes(db)
+    elif table == "revlog":
+        df_old = get_revs(db)
+    else:
+        raise ValueError("Unknown table: {}".format(table))
     old_indices = set(df_old[id_column])
     new_indices = set(df[id_column])
+    print("old indices", old_indices)
+    print("new indices", new_indices)
     if mode == "update":
         indices = set(old_indices)
     elif mode == "append":
@@ -330,6 +342,7 @@ def set_revs(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
 # ==============================================================================
 
 
+# fixme: This removes items whenever it can't merge!
 # todo: move to util
 def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
               inplace=False, id_add="id", prepend="", replace=False,
@@ -383,8 +396,7 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
 
     if replace:
         # Simply remove all potential clashes
-        replaced_columns = \
-            (set(df_add.columns) - {id_add}).intersection(set(df.columns))
+        replaced_columns = set(df_add.columns).intersection(set(df.columns))
         df = df.drop(replaced_columns, axis=1)
 
     df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
@@ -394,6 +406,7 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
             (drop_columns and id_add in drop_columns):
         df_merge.drop(id_add, axis=1, inplace=True)
     if inplace:
+        # fixme: doesn't seem to work with add_nids
         replace_df_inplace(df, df_merge)
     else:
         return df_merge

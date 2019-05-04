@@ -43,20 +43,20 @@ class TestAnkiDF(unittest.TestCase):
             ))
         )
 
-    def test_add_nids(self):
-        cards = AnkiDF.cards(self.db_path).add_nids()
-        self.assertIn("nid", list(cards.columns))
-        self.assertListEqual(
-            sorted(list(cards["nid"].unique())),
-            sorted(list(get_notes(self.db)["id"].unique()))
-        )
+    # def test_add_nids(self):
+    #     cards = AnkiDF.cards(self.db_path).add_nids()
+    #     self.assertIn("nid", list(cards.columns))
+    #     self.assertListEqual(
+    #         sorted(list(cards["nid"].unique())),
+    #         sorted(list(get_notes(self.db)["id"].unique()))
+    #     )
 
-    def test_add_mids(self):
-        notes = AnkiDF.notes(self.db_path).add_mids()
-        self.assertEqual(
-            len(notes["mid"].unique()),
-            2  # we don't have notesfor every model
-        )
+    # def test_add_mids(self):
+    #     notes = AnkiDF.notes(self.db_path).add_mids()
+    #     self.assertEqual(
+    #         len(notes["mid"].unique()),
+    #         2  # we don't have notesfor every model
+    #     )
 
     def test_add_mnames(self):
         # todo: add_mids() should soon be called automatically
