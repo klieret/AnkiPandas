@@ -11,7 +11,7 @@ import pathlib
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
 from ankipandas.util.dataframe import replace_df_inplace
-from ankipandas.data.columns import columns_anki2ours, tables_ours2anki
+from ankipandas.columns import columns_anki2ours, tables_ours2anki
 from ankipandas.util.misc import invert_dict
 
 
@@ -123,12 +123,12 @@ class AnkiDataFrame(pd.DataFrame):
             df["nflds"] = df["nflds"].str.split("\x1f")
 
             # Model field
-            df["model"] = df["mid"].map(core.get_model_names(self.db))
+            df["nmodel"] = df["mid"].map(core.get_model_names(self.db))
             df.drop("mid", axis=1, inplace=True)
 
         if table == "cards":
             # Deck field
-            df["deck"] = df["did"].map(core.get_deck_names(self.db))
+            df["cdeck"] = df["did"].map(core.get_deck_names(self.db))
             df.drop("did", axis=1, inplace=True)
 
         replace_df_inplace(self, df)
@@ -252,18 +252,18 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def mid(self):
         if self._anki_table in ["notes"]:
-            if "model" not in self.columns:
+            if "nmodel" not in self.columns:
                 raise ValueError(
-                    "You seem to have removed the 'model' column. That was not "
+                    "You seem to have removed the 'nmodel' column. That was not "
                     "a good idea. Cannot get model ID anymore."
                 )
             else:
-                return self["model"].map(
+                return self["nmodel"].map(
                     invert_dict(core.get_model_names(self.db))
                 )
         if self._anki_table in ["revs", "cards"]:
-            if "model" in self.columns:
-                return self["model"].map(
+            if "nmodel" in self.columns:
+                return self["nmodel"].map(
                     invert_dict(core.get_model_names(self.db))
                 )
             else:
@@ -277,12 +277,12 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def did(self):
         if self._anki_table == "cards":
-            if "deck" not in self.columns:
+            if "cdeck" not in self.columns:
                 raise ValueError(
-                    "You seem to have removed the 'deck' column. That was not "
+                    "You seem to have removed the 'cdeck' column. That was not "
                     "a good idea. Cannot get deck ID anymore."
                 )
-            return self["deck"].map(invert_dict(core.get_deck_names(self.db)))
+            return self["cdeck"].map(invert_dict(core.get_deck_names(self.db)))
         elif self._anki_table == "notes":
             raise ValueError(
                 "Notes can belong to multiple decks. Therefore it is impossible"

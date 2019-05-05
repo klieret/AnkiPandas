@@ -12,7 +12,7 @@ from randomfiletree import sample_random_elements, iterative_gaussian_tree
 
 # ours
 import ankipandas.convenience_functions as convenience
-from ankipandas.data.columns import *
+from ankipandas.columns import *
 
 
 def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:

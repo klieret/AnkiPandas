@@ -1,42 +1,41 @@
-Column,AnkiColumn,Table,Description,Native
-nfld_*,,notes,Field,FALSE
-cid,cid,revs,Card ID,TRUE
-ncsum,csum,notes,Field checksum used for duplicate check: Integer representation of first 8 digits of sha1 hash of the first field,TRUE
-cdata,data,cards,Currently unused,TRUE
-ndata,data,notes,Currently unused,TRUE
-did,did,cards,ID of the deck,TRUE
-cdeck,,cards,Name of the deck,FALSE
-cdue,due,cards,"Due is used differently for different card types: new: note id or random int, due: integer day, relative to the collection's creation time, learning: integer timestamp",TRUE
-rease,ease,revs,"Which button you pushed to score your recall: review:  1(wrong), 2(hard), 3(ok), 4(easy), learn/relearn:   1(wrong), 2(ok), 3(easy)",TRUE
-cfactor,factor,cards,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE
-rfactor,factor,revs,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE
-cflags,flags,cards,Currently unused,TRUE
-nflags,flags,notes,Currently unused,TRUE
-nflds,flds,notes,Fields of the card as list.,TRUE
-nguid,guid,notes,"Globally unique id, almost certainly used for syncing",TRUE
-cid,id,cards,ID of the card (this corresponds to a epoch millisecond time stamp from the creating time),TRUE
-nid,id,notes,ID of the note (this corresponds to a epoch millisecond time stamp from the creating time),TRUE
-rid,id,revs,ID of the review (this corresponds to a epoch millisecond time stamp from the creating time),TRUE
-civl,ivl,cards,"The new interval that the card was pushed to after the review. Positive values are in days, negative values are in seconds (for learning cards).",TRUE
-rivl,ivl,revs,"The new interval that the card was pushed to after the review. Positive values are in days, negative values are in seconds (for learning cards).",TRUE
-clapses,lapses,cards,"The number of times the card went from a ""was answered correctly"" to ""was answered incorrectly"" state",TRUE
-rlastIvl,lastIvl,revs,Last interval,TRUE
-cleft,left,cards,"Of the form ``a*1000+b``, with: ``b`` the number of reps left till graduation and ``a`` the number of reps left today",TRUE
-mid,mid,notes,Model ID,TRUE
-nmodel,,notes,Name of the model,FALSE
-cmod,mod,cards,Modification time [epoch seconds],TRUE
-nmod,mod,notes,"Modification timestamp, epoch seconds",TRUE
-nid,nid,cards,ID of the note,TRUE
-codid,odid,cards,Original did: only used when the card is currently in filtered deck,TRUE
-codue,odue,cards,Original due: only used when the card is currently in filtered deck,TRUE
-cord,ord,cards,Identifies which of the card templates the card corresponds to. Valid values are from 0 to num templates -1,TRUE
-cqueue,queue,cards,"-3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review",TRUE
-creps,reps,cards,Number of reviews,TRUE
-nsfld,sfld,notes,Content of the sort field.,TRUE
-ntags,tags,notes,Tags of the note as list,TRUE
-rtime,time,revs,"How many milliseconds your review took, up to 60000 (60s)",TRUE
-ctype,type,cards,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
-rtype,type,revs,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
-cusn,usn,cards,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE
-nusn,usn,notes,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE
-rusn,usn,revs,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE
+Column,AnkiColumn,Table,Description,Native,Default
+cid,cid,revs,Card ID,TRUE,TRUE
+ncsum,csum,notes,Field checksum used for duplicate check: Integer representation of first 8 digits of sha1 hash of the first field,TRUE,TRUE
+cdata,data,cards,Currently unused,TRUE,TRUE
+ndata,data,notes,Currently unused,TRUE,TRUE
+did,did,cards,ID of the deck,TRUE,FALSE
+cdeck,,cards,Name of the deck,FALSE,TRUE
+cdue,due,cards,"Due is used differently for different card types: new: note id or random int, due: integer day, relative to the collection's creation time, learning: integer timestamp",TRUE,TRUE
+rease,ease,revs,"Which button you pushed to score your recall: review:  1(wrong), 2(hard), 3(ok), 4(easy), learn/relearn:   1(wrong), 2(ok), 3(easy)",TRUE,TRUE
+cfactor,factor,cards,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE,TRUE
+rfactor,factor,revs,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE,TRUE
+cflags,flags,cards,Currently unused,TRUE,TRUE
+nflags,flags,notes,Currently unused,TRUE,TRUE
+nflds,flds,notes,Fields of the card as list. Anki database: fields as string joined by ‘\\x1f’ characters.,TRUE,TRUE
+nguid,guid,notes,"Globally unique id, almost certainly used for syncing",TRUE,TRUE
+cid,id,cards,ID of the card (this corresponds to a epoch millisecond time stamp from the creating time),TRUE,TRUE
+nid,id,notes,ID of the note (this corresponds to a epoch millisecond time stamp from the creating time),TRUE,TRUE
+rid,id,revs,ID of the review (this corresponds to a epoch millisecond time stamp from the creating time),TRUE,TRUE
+civl,ivl,cards,"The new interval that the card was pushed to after the review. Positive values are in days, negative values are in seconds (for learning cards).",TRUE,TRUE
+rivl,ivl,revs,"The new interval that the card was pushed to after the review. Positive values are in days, negative values are in seconds (for learning cards).",TRUE,TRUE
+clapses,lapses,cards,"The number of times the card went from a ""was answered correctly"" to ""was answered incorrectly"" state",TRUE,TRUE
+rlastIvl,lastIvl,revs,Last interval,TRUE,TRUE
+cleft,left,cards,"Of the form ``a*1000+b``, with: ``b`` the number of reps left till graduation and ``a`` the number of reps left today",TRUE,TRUE
+mid,mid,notes,Model ID,TRUE,FALSE
+nmodel,,notes,Name of the model,FALSE,TRUE
+cmod,mod,cards,Modification time [epoch seconds],TRUE,TRUE
+nmod,mod,notes,"Modification timestamp, epoch seconds",TRUE,TRUE
+nid,nid,cards,ID of the note,TRUE,TRUE
+codid,odid,cards,Original did: only used when the card is currently in filtered deck,TRUE,TRUE
+codue,odue,cards,Original due: only used when the card is currently in filtered deck,TRUE,TRUE
+cord,ord,cards,Identifies which of the card templates the card corresponds to. Valid values are from 0 to num templates -1,TRUE,TRUE
+cqueue,queue,cards,"-3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review",TRUE,TRUE
+creps,reps,cards,Number of reviews,TRUE,TRUE
+nsfld,sfld,notes,Content of the sort field.,TRUE,TRUE
+ntags,tags,notes,Tags of the note as list. Anki database: tags as space joined string.,TRUE,TRUE
+rtime,time,revs,"How many milliseconds your review took, up to 60000 (60s)",TRUE,TRUE
+ctype,type,cards,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE,TRUE
+rtype,type,revs,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE,TRUE
+cusn,usn,cards,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE,TRUE
+nusn,usn,notes,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE,TRUE
+rusn,usn,revs,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE,TRUE

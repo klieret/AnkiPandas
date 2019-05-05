@@ -8,7 +8,7 @@ import tempfile
 # ours
 from ankipandas.core_functions import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas.data.columns import our_columns
+from ankipandas.columns import our_columns
 
 
 class TestCoreFunctionsRead(unittest.TestCase):

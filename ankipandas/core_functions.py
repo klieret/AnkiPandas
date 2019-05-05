@@ -18,7 +18,7 @@ import numpy as np
 # ours
 from ankipandas.util.dataframe import replace_df_inplace
 from ankipandas.util.log import log
-from ankipandas.data.columns import columns_anki2ours, tables_ours2anki
+from ankipandas.columns import columns_anki2ours, tables_ours2anki
 
 CACHE_SIZE = 32
 

@@ -13,7 +13,7 @@ import copy
 
 # ours
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas.data.columns import our_columns
+from ankipandas.columns import our_columns
 import ankipandas.core_functions as core
 
 
@@ -223,11 +223,11 @@ class TestAnkiDF(unittest.TestCase):
     # Help
     # ==========================================================================
 
-    def test_table_help(self):
+    def test_help_cols(self):
         df = self.notes.help_cols()
         self.assertListEqual(
             list(df.columns),
-            ["Column", "AnkiColumn", "Table", "Description", "Native"]
+            ["Column", "AnkiColumn", "Table", "Description", "Native", "Default"]
         )
         self.assertGreater(
             len(df),
@@ -236,7 +236,7 @@ class TestAnkiDF(unittest.TestCase):
 
     # fixme
     @unittest.skip
-    def test_table_help_auto(self):
+    def test_help_cols_auto(self):
         for table in self.adfs:
             with self.subTest(table=table):
                 df = self.adfs[table].help_cols(column="auto")
