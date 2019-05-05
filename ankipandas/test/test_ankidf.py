@@ -220,6 +220,89 @@ class TestAnkiDF(unittest.TestCase):
             sorted(our_columns["notes"])
         )
 
+    # Tags
+    # ==========================================================================
+
+    def test_remove_tags(self):
+        notes = AnkiDF.notes(self.db_path)
+        notes = notes.remove_tag(None)
+        self.assertEqual(
+            list(set(map(tuple, notes["ntags"]))),
+            [()]
+        )
+
+    def test_add_tags(self):
+        notes = AnkiDF.notes(self.db_path).remove_tag(None).add_tag("1145")
+        self.assertListEqual(
+            list(set(map(tuple, notes["ntags"]))),
+            [('1145', )]
+        )
+        notes.add_tag("abc", inplace=True)
+        self.assertListEqual(
+            list(set(map(tuple, notes["ntags"]))),
+            [('1145', "abc")]
+        )
+        notes.add_tag(["abc", "def"], inplace=True)
+        self.assertListEqual(
+            list(set(map(tuple, notes["ntags"]))),
+            [('1145', "abc", "def")]
+        )
+        notes.add_tag([], inplace=True)
+        self.assertListEqual(
+            list(set(map(tuple, notes["ntags"]))),
+            [('1145', "abc", "def")]
+        )
+
+    def test_has_tag(self):
+        notes = AnkiDF.notes(self.db_path).remove_tag(None).add_tag("1145")
+        self.assertListEqual(
+            list(notes.has_tag("1145").unique()),
+            [True]
+        )
+        self.assertListEqual(
+            list(notes.has_tag("asdf").unique()),
+            [False]
+        )
+        self.assertListEqual(
+            list(notes.has_tag().unique()),
+            [True]
+        )
+        self.assertListEqual(
+            list(notes.has_tag(["asdf", "1145"]).unique()),
+            [True]
+        )
+
+    def test_has_tag_natural(self):
+        notes = AnkiDF.notes(self.db_path)
+        self.assertListEqual(
+            sorted(list(notes.has_tag(["some_test_tag"]).unique())),
+            [False, True]
+        )
+
+    def test_has_tags(self):
+        notes = AnkiDF.notes(self.db_path).remove_tag(None).add_tag("1145")
+        self.assertListEqual(
+            list(notes.has_tags("1145").unique()),
+            [True]
+        )
+        self.assertListEqual(
+            list(notes.has_tags("asdf").unique()),
+            [False]
+        )
+        self.assertListEqual(
+            list(notes.has_tags().unique()),
+            [True]
+        )
+        self.assertListEqual(
+            list(notes.has_tags(["asdf", "1145"]).unique()),
+            [False]
+        )
+        notes = notes.add_tag("asdf")
+        self.assertListEqual(
+            list(notes.has_tags(["asdf", "1145"]).unique()),
+            [True]
+        )
+
     # Help
     # ==========================================================================
 

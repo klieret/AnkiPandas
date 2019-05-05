@@ -285,6 +285,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self._invalid_table()
 
+    # Merge tables
     # ==========================================================================
 
     # todo: use .nids rather than .nid_columns
@@ -346,6 +347,10 @@ class AnkiDataFrame(pd.DataFrame):
             prepend_clash_only=prepend_clash_only
         )
 
+
+    # Toggle format
+    # ==========================================================================
+
     def fields_as_columns(self, inplace=False):
         """
         In the 'notes' table, the field contents of the notes is contained in
@@ -391,7 +396,7 @@ class AnkiDataFrame(pd.DataFrame):
             inplace: If False, return new dataframe, else update old one
 
         Returns:
-            New :class:`pandas.DataFrame` if inplace==True, else None
+            New :class:`AnkiDataFrame` if inplace==True, else None
         """
         if inplace:
             mids = self.mid.unique()
@@ -416,6 +421,122 @@ class AnkiDataFrame(pd.DataFrame):
                 inplace=True,
             )
             return df
+
+    # Quick access
+    # ==========================================================================
+
+    def _check_tag_col(self):
+        if "ntags" not in self.columns:
+            raise ValueError(
+                "Tag column 'ntags' doesn't exist. Perhaps you forgot to merge "
+                "the notes into your table?"
+            )
+
+    def has_tag(self, tags=None):
+        """ Checks whether row has a certain tag ('ntags' column).
+
+        Args:
+            tags: String or list thereof. In the latter case, True is returned
+                if the row contains any of the specified tags.
+                If None (default), True is returned if the row has any tag at
+                all.
+
+        Returns:
+            Boolean :class:`pd.Series`
+        """
+        self._check_tag_col()
+
+        if isinstance(tags, str):
+            tags = [tags]
+
+        if tags is not None:
+
+            def _has_tag(other):
+                return not set(tags).isdisjoint(other)
+
+            return self["ntags"].apply(_has_tag)
+
+        else:
+            return self["ntags"].apply(bool)
+
+    def has_tags(self, tags=None):
+        """ Checks whether row contains at least the supplied tags.
+
+        Args:
+            tags: String or list thereof.
+                If None (default), True is returned if the row has any tag at
+                all.
+
+        Returns:
+            Boolean :class:`pd.Series`
+        """
+        if tags is None:
+            return self.has_tag(None)
+        self._check_tag_col()
+        if isinstance(tags, str):
+            tags = [tags]
+        _has_tags = set(tags).issubset
+        return self["ntags"].apply(_has_tags)
+
+    def add_tag(self, tags, inplace=False):
+        """ Adds tag ('ntags' column).
+
+        Args:
+            tags: String or list thereof.
+            inplace: If False, return new dataframe, else update old one
+
+        Returns:
+            New :class:`AnkiDataFrame` if inplace==True, else None
+        """
+        if not inplace:
+            df = self.copy()  # deep?
+            df.add_tag(tags, inplace=True)
+            return df
+
+        self._check_tag_col()
+        if isinstance(tags, str):
+            tags = [tags]
+
+        if len(tags) == 0:
+            return
+
+        def _add_tags(other):
+            return other + sorted(list(set(tags) - set(other)))
+
+        self["ntags"] = self["ntags"].apply(_add_tags)
+
+    def remove_tag(self, tags, inplace=False):
+        """ Removes tag ('ntags' column).
+
+        Args:
+            tags: String or list thereof. If None, all tags are removed.
+            inplace: If False, return new dataframe, else update old one
+
+        Returns:
+            New :class:`AnkiDataFrame` if inplace==True, else None
+        """
+        if not inplace:
+            df = self.copy()  # deep?
+            df.remove_tag(tags, inplace=True)
+            return df
+
+        self._check_tag_col()
+        if isinstance(tags, str):
+            tags = [tags]
+
+        if tags is not None:
+
+            def _remove_tags(other):
+                return [tag for tag in other if tag not in tags]
+
+            self["ntags"] = self["ntags"].apply(_remove_tags)
+
+        else:
+            self["ntags"] = pd.Series([[]]*len(self))
+
+
+    # Help
+    # ==========================================================================
 
     def help_cols(self, column='auto', table='all', ankicolumn='all') \
             -> pd.DataFrame:
