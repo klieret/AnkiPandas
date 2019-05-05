@@ -12,29 +12,7 @@ import pathlib
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
 from ankipandas.util.dataframe import replace_df_inplace
-from ankipandas.util.docstrings import parse_docstring, format_docstring
 from ankipandas.data.columns import columns_anki2ours, tables_ours2anki
-
-
-def _copy_docstring(other, desc=None):
-    """ Use this as a decorator in order to copy the docstring from the
-    first argument.
-    Drops the ``df`` and ``db`` arguments from the parameter description.
-
-    Args:
-        desc: Replace description with this description
-    """
-    def copy_docstring_decorator(this):
-        docs = other.__doc__
-        _desc, _args, _ret = parse_docstring(docs)
-        if desc:
-            _desc = desc
-        this.__doc__ = format_docstring(
-            _desc, _args, _ret, drop_arg=["df", "db"]
-        )
-        return this
-    return copy_docstring_decorator
-
 
 
 class AnkiDataFrame(pd.DataFrame):
