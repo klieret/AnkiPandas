@@ -29,6 +29,9 @@ AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 
 **NOTE: THIS PROJECT IS STILL AT AN EARLY DEVELOPMENT VERSION. TRY OUT WITH CARE AND EXPECT INTERFACE CHANGES.**
 
+**CURRENT STATUS**: Most read access is working and tested. Write access will be
+added soon.
+
 Description
 -----------
 
