@@ -96,7 +96,7 @@ many things easy. For example:
 
     # For each card, merge all information from the corresponding note into
     # the dataframe
-    cards.merge_note_info(inplace=True)
+    cards.merge_notes(inplace=True)
 
     # Add deck names (rather than just IDs)
     cards.add_deck_names(inplace=True)
@@ -110,10 +110,6 @@ available methods!
 
 .. _documentation: https://ankipandas.readthedocs.io/
 
-The basic implementation is done in a functional way, so if you prefer
-the vanilla pandas ``DataFrame``, you can also just use these functions to manipulate
-them.
-Again, the documentation_ is a good starting point!
 
 Columns
 -------
