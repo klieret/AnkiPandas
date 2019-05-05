@@ -141,49 +141,5 @@ class TestFindDatabase(unittest.TestCase):
             d.cleanup()
 
 
-class TestHelp(unittest.TestCase):
-    def test_table_help(self):
-        df = convenience.help_cols()
-        self.assertListEqual(
-            list(df.columns),
-            ["Column", "AnkiColumn", "Table", "Description", "Native"]
-        )
-        self.assertGreater(
-            len(df),
-            10
-        )
-
-    # fixme
-    @unittest.skip
-    def test_table_help_search_table(self):
-        for table in ["notes", "cards", "revs"]:
-            with self.subTest(table=table):
-                df = convenience.help_cols(table=table, native=True)
-                self.assertListEqual(
-                    sorted(list(df["Column"].unique())),
-                    sorted(our_columns[table])
-                )
-
-    def test_table_help_search_column(self):
-        for table in ["notes", "cards", "revs"]:
-            with self.subTest(table=table):
-                df = convenience.help_cols(table=table, column=table[0]+"id")
-                df2 = convenience.help_cols(
-                    table=table, column=table[0]+"id", native=False
-                )
-                self.assertEqual(len(df), 1)
-                self.assertEqual(len(df2), 0)
-
-    def test_table_help_search_ankicolumn(self):
-        for table in ["notes", "cards", "revs"]:
-            with self.subTest(table=table):
-                df = convenience.help_cols(table=table, ankicolumn="id")
-                df2 = convenience.help_cols(
-                    table=table, ankicolumn="id", native=False
-                )
-                self.assertEqual(len(df), 1)
-                self.assertEqual(len(df2), 0)
-
-
 if __name__ == "__main__":
     unittest.main()

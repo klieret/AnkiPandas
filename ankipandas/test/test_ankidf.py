@@ -24,6 +24,16 @@ class TestAnkiDF(unittest.TestCase):
                        "few_basic_cards" / "collection.anki2"
         self.db = core.load_db(self.db_path)
 
+        # Do not modify this one!
+        self.notes = AnkiDF.notes(self.db_path)
+        self.cards = AnkiDF.cards(self.db_path)
+        self.revs = AnkiDF.revs(self.db_path)
+        self.adfs = {
+            "notes": self.notes,
+            "cards": self.cards,
+            "revs": self.revs
+        }
+
     # Test constructors
     # ==========================================================================
 
@@ -209,6 +219,32 @@ class TestAnkiDF(unittest.TestCase):
             sorted(list(notes.columns)),
             sorted(our_columns["notes"])
         )
+
+    # Help
+    # ==========================================================================
+
+    def test_table_help(self):
+        df = self.notes.help_cols()
+        self.assertListEqual(
+            list(df.columns),
+            ["Column", "AnkiColumn", "Table", "Description", "Native"]
+        )
+        self.assertGreater(
+            len(df),
+            10
+        )
+
+    # fixme
+    @unittest.skip
+    def test_table_help_auto(self):
+        for table in self.adfs:
+            with self.subTest(table=table):
+                df = self.adfs[table].help_cols(column="auto")
+                self.assertListEqual(
+                    sorted(list(set(df["Column"]))),
+                    sorted(list(set(self.adfs[table].columns)))
+                )
+    # todo: expand tests!
 
     def test_help(self):
         notes = AnkiDF.notes(self.db_path)

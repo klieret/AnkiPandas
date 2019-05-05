@@ -428,10 +428,44 @@ class AnkiDataFrame(pd.DataFrame):
             )
             return df
 
-    def help_cols(self, *args, **kwargs):
-        df = convenience.help_cols(*args, **kwargs)
+    def help_cols(self, column='auto', table='all', ankicolumn='all') \
+            -> pd.DataFrame:
+        """
+        Return a pandas dataframe containing descriptions of every field in the
+        anki database. The arguments below help to filter it.
+
+        Args:
+            column: Name of a field or column (as used by us) or list thereof.
+                If 'auto' (default), all columns from the current dataframe will
+                be shown.
+                If 'all' no filtering based on the table will be performed
+            table: Possible values: 'notes', 'cards', 'revlog' or list thereof.
+                If 'all' no filtering based on the table will be performed
+            ankicolumn: Name of a field or column (as used by Anki) or list
+                thereof.
+                If 'all' no filtering based on the table will be performed
+
+        Returns:
+            Pandas DataFrame with all matches.
+        """
+        help_path = pathlib.Path(__file__).parent / "data" / "anki_fields.csv"
+        df = pd.read_csv(help_path)
+        if column == 'auto':
+            column = list(self.columns)
+        if table is not 'all':
+            if isinstance(table, str):
+                table = [table]
+            df = df[df["Table"].isin(table)]
+        if column is not 'all':
+            if isinstance(column, str):
+                column = [column]
+            df = df[df["Column"].isin(column)]
+        if ankicolumn is not 'all':
+            if isinstance(ankicolumn, str):
+                ankicolumn = [ankicolumn]
+            df = df[df["AnkiColumn"].isin(ankicolumn)]
+
         return df
-    help.__doc__ = convenience.help_cols.__doc__
 
     def help(self):
         # todo
