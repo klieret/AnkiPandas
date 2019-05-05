@@ -2,7 +2,6 @@
 
 # std
 import sqlite3
-import copy
 
 # 3rd
 import pandas as pd
@@ -14,8 +13,6 @@ import ankipandas.core_functions as core
 from ankipandas.util.dataframe import replace_df_inplace
 from ankipandas.data.columns import columns_anki2ours, tables_ours2anki
 from ankipandas.util.misc import invert_dict
-from ankipandas.util.log import log
-
 
 
 class AnkiDataFrame(pd.DataFrame):
@@ -211,13 +208,11 @@ class AnkiDataFrame(pd.DataFrame):
     def _invalid_table(self):
         raise ValueError("Invalid table: {}.".format(self._anki_table))
 
-
     # IDs
     # ==========================================================================
 
     # todo: call nidS etc. to avoid clashes with attributes?
 
-    # todo: test
     @property
     def nid(self):
         if self._anki_table in ["notes", "cards"]:
@@ -236,7 +231,6 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self._invalid_table()
 
-    # todo: test
     @property
     def cid(self):
         if self._anki_table in ["cards", "revs"]:
@@ -255,7 +249,6 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self._invalid_table()
 
-    # todo: test
     @property
     def mid(self):
         if self._anki_table in ["notes"]:
@@ -265,10 +258,14 @@ class AnkiDataFrame(pd.DataFrame):
                     "a good idea. Cannot get model ID anymore."
                 )
             else:
-                return self["model"].map(invert_dict(core.get_model_names(self.db)))
+                return self["model"].map(
+                    invert_dict(core.get_model_names(self.db))
+                )
         if self._anki_table in ["revs", "cards"]:
             if "model" in self.columns:
-                return self["model"].map(invert_dict(core.get_model_names(self.db)))
+                return self["model"].map(
+                    invert_dict(core.get_model_names(self.db))
+                )
             else:
                 # todo: put function in core that does that
                 notes = AnkiDataFrame.notes(self.db_path)
@@ -277,7 +274,6 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self._invalid_table()
 
-    # todo: test
     @property
     def did(self):
         if self._anki_table == "cards":
@@ -369,13 +365,11 @@ class AnkiDataFrame(pd.DataFrame):
 
         Args:
             inplace: If False, return new dataframe, else update old one
-            prepend: Prepend string to all new column names
 
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
         if "nflds" not in self.columns:
-            print(list(self.columns))
             raise ValueError(
                 "Could not find fields column 'nflds'."
             )
@@ -401,9 +395,8 @@ class AnkiDataFrame(pd.DataFrame):
 
     def fields_as_list(self, inplace=False):
         """
-        This reverts :py:func:`~ankipandas.core_functions.add_fields_as_columns`,
-        all columns that represented field contents are now merged into one column
-        'flds'.
+        This reverts :meth:`.fields_as_columns`, all columns that represented
+        field contents are now merged into one column 'nflds'.
 
         Args:
             inplace: If False, return new dataframe, else update old one
@@ -424,7 +417,6 @@ class AnkiDataFrame(pd.DataFrame):
                 print(pd.Series(self[fields].values.tolist()))
                 self.loc[self.mid == mid, "nflds"] = \
                     pd.Series(self[fields].values.tolist())
-                    # pd.Series(self[fields].values.tolist()).str.join("\x1f")
                 # Careful: Do not delete the fields here yet, other models
                 # might still use them
                 to_drop.extend(fields)

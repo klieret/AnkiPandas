@@ -101,8 +101,6 @@ class TestAnkiDF(unittest.TestCase):
             len(revs.rid)
         )
 
-
-
     # Slightly more elaborate cases
     # --------------------------------------------------------------------------
 
@@ -167,7 +165,6 @@ class TestAnkiDF(unittest.TestCase):
 
     # ==========================================================================
 
-
     def test_merge_card_info(self):
         merged = AnkiDF.revs(self.db_path).merge_cards()
         self.assertListEqual(
@@ -176,7 +173,6 @@ class TestAnkiDF(unittest.TestCase):
                 set(our_columns["revs"]) | set(our_columns["cards"])
             ))
         )
-
 
     def test_fields_as_columns(self):
         notes = AnkiDF.notes(self.db_path).fields_as_columns()

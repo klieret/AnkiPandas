@@ -205,7 +205,8 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
 
 
 # todo: move to ankidf and by default give exactly our columns
-def help_cols(table=None, column=None, ankicolumn=None, native=None) -> pd.DataFrame:
+def help_cols(table=None, column=None, ankicolumn=None,
+              native=None) -> pd.DataFrame:
     """
     Return a pandas dataframe containing descriptions of every field in the
     anki database. The arguments below help to filter it.
