@@ -17,11 +17,23 @@ from ankipandas.data.columns import our_columns
 from ankipandas.core_functions import check_dnames_did, load_db
 
 
+# todo: add more notes to test deck
 class TestAnkiDF(unittest.TestCase):
     def setUp(self):
         self.db_path = pathlib.Path(__file__).parent / "data" / \
                        "few_basic_cards" / "collection.anki2"
         self.db = load_db(self.db_path)
+
+    def test_tags(self):
+        notes = AnkiDF.notes(self.db_path)
+        self.assertListEqual(
+            list(notes.query("nid=='1555579337683'")["ntags"].values)[0],
+            ['other_test_tag']
+        )
+        self.assertListEqual(
+            list(notes.query("nid=='1555579352896'")["ntags"].values)[0],
+            ['some_test_tag']
+        )
 
     def test_merge_note_info(self):
         merged = AnkiDF.cards(self.db_path).merge_notes()

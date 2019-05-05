@@ -12,7 +12,6 @@ from functools import lru_cache
 from typing import Union
 
 # ours
-import ankipandas.core_functions as apd
 from ankipandas.util.log import log
 
 

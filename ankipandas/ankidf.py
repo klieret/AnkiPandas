@@ -109,6 +109,14 @@ class AnkiDataFrame(pd.DataFrame):
         )
         df = df.astype(dtypes)  # type: pd.DataFrame
         df.rename(columns=columns_anki2ours[table], inplace=True)
+
+        if table == "notes":
+            # Tags as list, rather than string joined by space
+            df["ntags"] = \
+                df["ntags"].apply(
+                    lambda joined: [item for item in joined.split(" ") if item]
+                )
+
         replace_df_inplace(self, df)
         self._anki_table = table
 
@@ -416,25 +424,10 @@ class AnkiDataFrame(pd.DataFrame):
             )
             return df
 
-    # todo: should be default anyhow
-    def convert_tags(format="list", inplace=False):
-        """ Converts space separated tags to a list.
-
-        Args:
-            format: 'list' or 'string'
-            inplace: If False, return new dataframe, else update old one
-
-        Returns:
-            New :class:`pandas.DataFrame` if inplace==True, else None
-        """
-        raise NotImplementedError
-
-
     def help_cols(self, *args, **kwargs):
         df = convenience.help_cols(*args, **kwargs)
         return df
     help.__doc__ = convenience.help_cols.__doc__
-
 
     def help(self):
         # todo
