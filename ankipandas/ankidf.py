@@ -116,6 +116,8 @@ class AnkiDataFrame(pd.DataFrame):
                 df["ntags"].apply(
                     lambda joined: [item for item in joined.split(" ") if item]
                 )
+            # Fields as list, rather than as string joined by \x1f
+            df["nflds"] = df["nflds"].str.split("\x1f")
 
         replace_df_inplace(self, df)
         self._anki_table = table
@@ -375,9 +377,13 @@ class AnkiDataFrame(pd.DataFrame):
             mids = self["mid"].unique()
             for mid in mids:
                 df_model = self[self["mid"] == mid]
-                fields = df_model["nflds"].str.split("\x1f", expand=True)
-                for ifield, field in enumerate(core.get_field_names(self.db)[str(mid)]):
-                    self.loc[self["mid"] == mid, prepend + field] = fields[ifield]
+                fields = pd.DataFrame(df_model["nflds"].tolist())
+                field_names = core.get_field_names(self.db)[str(mid)]
+                for field in field_names:
+                    if prepend + field not in self.columns:
+                        self[prepend + field] = ""
+                for ifield, field in enumerate(field_names):
+                    self.loc[self["mid"] == mid, [prepend + field]] = fields[ifield].tolist()
         else:
             df = self.copy(True)
             df.add_fields_as_columns(inplace=True, prepend=prepend)
@@ -406,17 +412,20 @@ class AnkiDataFrame(pd.DataFrame):
             to_drop = []
             for mid in mids:
                 fields = core.get_field_names(self.db)[str(mid)]
-                if prepended:
-                    fields = [prepended + field for field in fields]
+                fields = [prepended + field for field in fields]
+                print(mid, fields)
+                print(self[fields])
+                print(pd.Series(self[fields].values.tolist()))
                 self.loc[self["mid"] == mid, "nflds"] = \
-                    pd.Series(self[fields].values.tolist()).str.join("\x1f")
+                    pd.Series(self[fields].values.tolist())
+                    # pd.Series(self[fields].values.tolist()).str.join("\x1f")
                 if drop:
                     # Careful: Do not delete the fields here yet, other models
                     # might still use them
                     to_drop.extend(fields)
             self.drop(to_drop, axis=1, inplace=True)
         else:
-            df = self.copy()
+            df = self.copy()  # deep?
             df.fields_as_columns_to_flds(
                 inplace=True,
                 prepended=prepended,
