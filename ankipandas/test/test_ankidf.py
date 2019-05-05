@@ -86,26 +86,33 @@ class TestAnkiDF(unittest.TestCase):
             check_dnames_did(self.db, cards)
         )
 
-    def test_add_fields_as_columns(self):
+    def test_fields_as_columns(self):
         # todo: add_mnames shouldn't be necessary
-        notes = AnkiDF.notes(self.db_path).add_mnames().add_fields_as_columns()
+        notes = AnkiDF.notes(self.db_path).add_mnames().fields_as_columns()
+        cols = our_columns["notes"].copy()
+        cols.remove("nflds")
+        prefix = notes.fields_as_columns_prefix
+        new_cols = [
+            prefix + item
+            for item in ["Front", "Back"]
+        ]
         self.assertEqual(
             sorted(list(notes.columns)),
-            sorted(our_columns["notes"] + ["mname", "Front", "Back"])
+            sorted(cols + ["mname"] + new_cols)
         )
         self.assertEqual(
-            list(notes.query("mname=='Basic'")["Front"].unique()),
+            list(notes.query("mname=='Basic'")[prefix + "Front"].unique()),
             ["Basic: Front"]
         )
 
-    def test_fields_as_columns_to_flds(self):
+    def test_fields_as_list(self):
         # Add fields as column, remove original 'flds' column, then
         # add it back from the field columns and see if things still check
         # out
-        notes = AnkiDF.notes(self.db_path).add_fields_as_columns()
+        notes = AnkiDF.notes(self.db_path)
         flds = copy.copy(notes["nflds"].values)
-        notes["nflds"] = ""
-        notes.fields_as_columns_to_flds(inplace=True, drop=True)
+        notes.fields_as_columns(inplace=True)
+        notes.fields_as_list(inplace=True)
         self.assertEqual(
             list(flds),
             list(notes["nflds"].values)
@@ -113,16 +120,6 @@ class TestAnkiDF(unittest.TestCase):
         self.assertListEqual(
             sorted(list(notes.columns)),
             sorted(our_columns["notes"])
-        )
-
-    def test_fields_as_columns_to_flds_2(self):
-        notes = AnkiDF.notes(self.db_path).add_fields_as_columns(prepend="fld_")
-        flds = copy.deepcopy(notes["nflds"].values)
-        notes["nflds"] = ""
-        notes = notes.fields_as_columns_to_flds(drop=True, prepended="fld_")
-        self.assertListEqual(
-            list(flds),
-            list(notes["nflds"].values)
         )
 
     def test_help(self):

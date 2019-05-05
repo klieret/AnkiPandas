@@ -54,6 +54,9 @@ class AnkiDataFrame(pd.DataFrame):
         #: the meaning of the ID row.
         self._anki_table = None  # type: str
 
+        #: Prefix for fields as columns
+        self.fields_as_columns_prefix = "fld_"
+
     @property
     def _constructor(self):
         """ This needs to be overriden so that any DataFrame operations do not
@@ -352,7 +355,7 @@ class AnkiDataFrame(pd.DataFrame):
             source="dids"
         )
 
-    def add_fields_as_columns(self, inplace=False, prepend=""):
+    def fields_as_columns(self, inplace=False):
         """
         In the 'notes' table, the field contents of the notes is contained in
         one column ('flds') by default. With this method, this column can be
@@ -373,6 +376,7 @@ class AnkiDataFrame(pd.DataFrame):
                 "Could not find fields column 'nflds'."
             )
         # fixme: What if one field column is one that is already in use?
+        prefix = self.fields_as_columns_prefix
         if inplace:
             mids = self["mid"].unique()
             for mid in mids:
@@ -380,17 +384,18 @@ class AnkiDataFrame(pd.DataFrame):
                 fields = pd.DataFrame(df_model["nflds"].tolist())
                 field_names = core.get_field_names(self.db)[str(mid)]
                 for field in field_names:
-                    if prepend + field not in self.columns:
-                        self[prepend + field] = ""
+                    if prefix + field not in self.columns:
+                        self[prefix + field] = ""
                 for ifield, field in enumerate(field_names):
-                    self.loc[self["mid"] == mid, [prepend + field]] = fields[ifield].tolist()
+                    self.loc[self["mid"] == mid, [prefix + field]] = \
+                        fields[ifield].tolist()
+            self.drop("nflds", axis=1, inplace=True)
         else:
             df = self.copy(True)
-            df.add_fields_as_columns(inplace=True, prepend=prepend)
+            df.fields_as_columns(inplace=True)
             return df
 
-    def fields_as_columns_to_flds(self, inplace=False,
-                                  prepended="", drop=False):
+    def fields_as_list(self, inplace=False):
         """
         This reverts :py:func:`~ankipandas.core_functions.add_fields_as_columns`,
         all columns that represented field contents are now merged into one column
@@ -400,7 +405,6 @@ class AnkiDataFrame(pd.DataFrame):
             inplace: If False, return new dataframe, else update old one
             prepended: Use this, if the name of columns that contained the fields
                 had a string prepended to them
-            drop: Drop columns that were now merged into the 'flds' column
 
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
@@ -412,24 +416,23 @@ class AnkiDataFrame(pd.DataFrame):
             to_drop = []
             for mid in mids:
                 fields = core.get_field_names(self.db)[str(mid)]
-                fields = [prepended + field for field in fields]
+                fields = [
+                    self.fields_as_columns_prefix + field for field in fields
+                ]
                 print(mid, fields)
                 print(self[fields])
                 print(pd.Series(self[fields].values.tolist()))
                 self.loc[self["mid"] == mid, "nflds"] = \
                     pd.Series(self[fields].values.tolist())
                     # pd.Series(self[fields].values.tolist()).str.join("\x1f")
-                if drop:
-                    # Careful: Do not delete the fields here yet, other models
-                    # might still use them
-                    to_drop.extend(fields)
+                # Careful: Do not delete the fields here yet, other models
+                # might still use them
+                to_drop.extend(fields)
             self.drop(to_drop, axis=1, inplace=True)
         else:
             df = self.copy()  # deep?
-            df.fields_as_columns_to_flds(
+            df.fields_as_list(
                 inplace=True,
-                prepended=prepended,
-                drop=drop,
             )
             return df
 
