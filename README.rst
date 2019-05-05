@@ -95,7 +95,15 @@ It's as easy as this:
     cards = AnkiDataFrame.cards()
 
 And you have a dataframe containing all cards, with additional methods that make
-many things easy. For example:
+many things easy.
+If called without any argument ``AnkiDataFrame.cards()`` tries to find the location
+of your Anki database by itself. However this might take some time.
+To make it easier, simply supply (part of) the path to the database and (if you have
+more than one user) your Anki user name, e.g.
+``AnkiDataFrame.cards(".local/share/Anki2/", user="User 1")`` on many Linux
+installations.
+
+For example:
 
 .. code:: python
 
