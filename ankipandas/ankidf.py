@@ -181,30 +181,14 @@ class AnkiDataFrame(pd.DataFrame):
         """
         return cls._table_constructor(path, user, "revs")
 
-    # Internal helpers
-    # ==========================================================================
-
-    # todo: all obsolete
-    @property
-    def _nid_column(self):
-        return "nid"
-
-    @property
-    def _cid_column(self):
-        return "cid"
-
-    @property
-    def _mid_column(self):
-        return "mid"
-
     # Public methods
     # ==========================================================================
 
     # todo: test
     @property
     def nid(self):
-        if self._nid_column in self.columns:
-            return self[self._nid_column]
+        if "nid" in self.columns:
+            return self["nid"]
         else:
             if self._anki_table == "revs":
                 cards = AnkiDataFrame.cards(self.db_path)
@@ -218,8 +202,8 @@ class AnkiDataFrame(pd.DataFrame):
     # todo: test
     @property
     def cid(self):
-        if self._cid_column in self.columns:
-            return self[self._cid_column]
+        if "cid" in self.columns:
+            return self["cid"]
         else:
             raise ValueError(
                     "Note IDs unavailable for table of "
@@ -229,8 +213,8 @@ class AnkiDataFrame(pd.DataFrame):
     # todo: test
     @property
     def mid(self):
-        if self._cid_column in self.columns:
-            return self[self._cid_column]
+        if "cid" in self.columns:
+            return self["cid"]
         else:
             if self._anki_table in ["revs", "cards"]:
                 notes = AnkiDataFrame.notes(self.db_path)
@@ -278,7 +262,7 @@ class AnkiDataFrame(pd.DataFrame):
         return core.merge_dfs(
             df=self,
             df_add=AnkiDataFrame.notes(self.db_path),
-            id_df=self._nid_column,
+            id_df="nid",
             id_add="nid",
             inplace=inplace,
             prepend=prepend,
@@ -307,7 +291,7 @@ class AnkiDataFrame(pd.DataFrame):
         return core.merge_dfs(
             df=self,
             df_add=AnkiDataFrame.cards(self.db_path),
-            id_df=self._cid_column,
+            id_df="cid",
             inplace=inplace,
             columns=columns,
             drop_columns=drop_columns,
@@ -327,10 +311,10 @@ class AnkiDataFrame(pd.DataFrame):
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
         # todo: add it then?
-        if self._mid_column not in self.columns:
+        if "mid" not in self.columns:
             raise ValueError("Could not find model id column 'mid'")
         if inplace:
-            self["mname"] = self[self._mid_column].astype(str).map(
+            self["mname"] = self["mid"].astype(str).map(
                 core.get_model_names(self.db)
             )
         else:
@@ -371,7 +355,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
-        if self._mid_column not in self.columns:
+        if "mid" not in self.columns:
             raise ValueError("Could not find model id column 'mid'.")
         if "nflds" not in self.columns:
             print(list(self.columns))
@@ -380,12 +364,12 @@ class AnkiDataFrame(pd.DataFrame):
             )
         # fixme: What if one field column is one that is already in use?
         if inplace:
-            mids = self[self._mid_column].unique()
+            mids = self["mid"].unique()
             for mid in mids:
-                df_model = self[self[self._mid_column] == mid]
+                df_model = self[self["mid"] == mid]
                 fields = df_model["nflds"].str.split("\x1f", expand=True)
                 for ifield, field in enumerate(core.get_field_names(self.db)[str(mid)]):
-                    self.loc[self[self._mid_column] == mid, prepend + field] = fields[ifield]
+                    self.loc[self["mid"] == mid, prepend + field] = fields[ifield]
         else:
             df = self.copy(True)
             df.add_fields_as_columns(inplace=True, prepend=prepend)
@@ -407,16 +391,16 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
-        if self._mid_column not in self.columns:
+        if "mid" not in self.columns:
             raise ValueError("Could not find model id column 'mid'.")
         if inplace:
-            mids = self[self._mid_column].unique()
+            mids = self["mid"].unique()
             to_drop = []
             for mid in mids:
                 fields = core.get_field_names(self.db)[str(mid)]
                 if prepended:
                     fields = [prepended + field for field in fields]
-                self.loc[self[self._mid_column] == mid, "nflds"] = \
+                self.loc[self["mid"] == mid, "nflds"] = \
                     pd.Series(self[fields].values.tolist()).str.join("\x1f")
                 if drop:
                     # Careful: Do not delete the fields here yet, other models
