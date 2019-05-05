@@ -103,12 +103,9 @@ many things easy. For example:
     # the dataframe
     cards.merge_notes(inplace=True)
 
-    # Add deck names (rather than just IDs)
-    cards.add_deck_names(inplace=True)
-
     # Add all fields from the notes as new columns to the dataframe (instead of
     # being merged in one field ``flds`` as by default):
-    cards.add_fields_as_columns(inplace=True)
+    cards.fields_as_columns(inplace=True)
 
 Take a look at the documentation_ to find out more about more about the
 available methods!
