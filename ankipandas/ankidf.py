@@ -11,7 +11,7 @@ import pathlib
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
 from ankipandas.util.dataframe import replace_df_inplace
-from ankipandas.columns import columns_anki2ours, our_columns
+from ankipandas.columns import columns_anki2ours, our_columns, value_maps
 from ankipandas.util.misc import invert_dict
 
 
@@ -125,6 +125,11 @@ class AnkiDataFrame(pd.DataFrame):
             # Deck field
             df["cdeck"] = df["did"].map(core.get_deck_names(self.db))
 
+        # For example we sometimes interpret cryptic numeric values
+        if table in value_maps:
+            for column in value_maps[table]:
+                df[column] = df[column].map(value_maps[table][column])
+
         drop_columns = set(df.columns) - set(our_columns[table])
         for drop_column in drop_columns:
             df.drop(drop_column, axis=1, inplace=True)
@@ -213,6 +218,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def nid(self):
+        """ Note ID as :class:`pandas.Series` of strings. """
         if self._anki_table in ["notes", "cards"]:
             if "nid" not in self.columns:
                 raise ValueError(
@@ -228,6 +234,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def cid(self):
+        """ Card ID as :class:`pandas.Series` of strings. """
         if self._anki_table in ["cards", "revs"]:
             if "cid" not in self.columns:
                 raise ValueError(
@@ -246,6 +253,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def mid(self):
+        """ Model ID as :class:`pandas.Series` of strings. """
         if self._anki_table in ["notes"]:
             if "nmodel" not in self.columns:
                 raise ValueError(
@@ -268,6 +276,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def did(self):
+        """ Deck ID as :class:`pandas.Series` of strings. """
         if self._anki_table == "cards":
             if "cdeck" not in self.columns:
                 raise ValueError(

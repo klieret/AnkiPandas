@@ -29,13 +29,13 @@ nid,nid,cards,ID of the note,TRUE,TRUE
 codid,odid,cards,Original did: only used when the card is currently in filtered deck,TRUE,TRUE
 codue,odue,cards,Original due: only used when the card is currently in filtered deck,TRUE,TRUE
 cord,ord,cards,Identifies which of the card templates the card corresponds to. Valid values are from 0 to num templates -1,TRUE,TRUE
-cqueue,queue,cards,"-3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review",TRUE,TRUE
+cqueue,queue,cards,"In the Anki db this is -3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review. In AnkiPandas this is already translated.",TRUE,TRUE
 creps,reps,cards,Number of reviews,TRUE,TRUE
 nsfld,sfld,notes,Content of the sort field.,TRUE,TRUE
 ntags,tags,notes,Tags of the note as list. Anki database: tags as space joined string.,TRUE,TRUE
 rtime,time,revs,"How many milliseconds your review took, up to 60000 (60s)",TRUE,TRUE
-ctype,type,cards,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE,TRUE
-rtype,type,revs,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE,TRUE
+ctype,type,cards,"In the Anki db this is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due). In AnkiPandas this is already translated.",TRUE,TRUE
+rtype,type,revs,"In the Anki db this  is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due). In AnkiPandas this is already translated.",TRUE,TRUE
 cusn,usn,cards,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE,TRUE
 nusn,usn,notes,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE,TRUE
 rusn,usn,revs,This column is used to keep track of the sync state of reviews and provides no useful information for analysis.,TRUE,TRUE

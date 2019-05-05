@@ -44,3 +44,31 @@ columns_anki2ours = {
     table: invert_dict(columns_ours2anki[table])
     for table in our_tables
 }
+
+value_maps = {
+    "cards": {
+        "cqueue": {
+            -3: "sched buried",
+            -2: "user buried",
+            -1: "suspended",
+            0: "new",
+            1: "learning",
+            2: "due",
+            3: "in learning"
+        },
+        "ctype": {
+            0: "learning",
+            1: "review",
+            2: "relearn",
+            3: "cram"
+        }
+    },
+    "revs": {
+        "rtype": {
+            0: "learning",
+            1: "review",
+            2: "relearn",
+            3: "cram"
+        }
+    }
+}
