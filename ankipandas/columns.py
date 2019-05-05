@@ -72,3 +72,9 @@ value_maps = {
         }
     }
 }
+
+dtype_casts = {
+    "notes": {"id": str, "mid": str},
+    "cards": {"id": str, "nid": str, "did": str},
+    "revs": {"id": str, "cid": str}
+}

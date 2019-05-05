@@ -11,7 +11,7 @@ import pathlib
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
 from ankipandas.util.dataframe import replace_df_inplace
-from ankipandas.columns import columns_anki2ours, our_columns, value_maps
+import ankipandas.columns
 from ankipandas.util.misc import invert_dict
 
 
@@ -95,19 +95,14 @@ class AnkiDataFrame(pd.DataFrame):
 
         # Note: Conversion of dtypes happens first ==> use original
         # column names!
-        # todo: this needs to be saved in columns.py
-        if table == "notes":
-            dtypes = {"id": str, "mid": str}
-        elif table == "cards":
-            dtypes = {"id": str, "nid": str, "did": str}
-        elif table == "revs":
-            dtypes = {"id": str, "cid": str}
-        else:
-            raise ValueError("Invalid table name: {}.".format(table))
+        dtypes = ankipandas.columns.dtype_casts[table]
 
         df = core.get_table(self.db, table)
         df = df.astype(dtypes)  # type: pd.DataFrame
-        df.rename(columns=columns_anki2ours[table], inplace=True)
+        df.rename(
+            columns=ankipandas.columns.columns_anki2ours[table],
+            inplace=True
+        )
 
         if table == "notes":
             # Tags as list, rather than string joined by space
@@ -126,11 +121,14 @@ class AnkiDataFrame(pd.DataFrame):
             df["cdeck"] = df["did"].map(core.get_deck_names(self.db))
 
         # For example we sometimes interpret cryptic numeric values
-        if table in value_maps:
-            for column in value_maps[table]:
-                df[column] = df[column].map(value_maps[table][column])
+        if table in ankipandas.columns.value_maps:
+            for column in ankipandas.columns.value_maps[table]:
+                df[column] = df[column].map(
+                    ankipandas.columns.value_maps[table][column]
+                )
 
-        drop_columns = set(df.columns) - set(our_columns[table])
+        drop_columns = \
+            set(df.columns) - set(ankipandas.columns.our_columns[table])
         for drop_column in drop_columns:
             df.drop(drop_column, axis=1, inplace=True)
 
@@ -356,7 +354,6 @@ class AnkiDataFrame(pd.DataFrame):
             prepend_clash_only=prepend_clash_only
         )
 
-
     # Toggle format
     # ==========================================================================
 
@@ -542,7 +539,6 @@ class AnkiDataFrame(pd.DataFrame):
 
         else:
             self["ntags"] = pd.Series([[]]*len(self))
-
 
     # Help
     # ==========================================================================
