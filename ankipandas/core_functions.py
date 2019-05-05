@@ -18,6 +18,7 @@ import numpy as np
 # ours
 from ankipandas.util.dataframe import replace_df_inplace
 from ankipandas.util.log import log
+from ankipandas.data.columns import columns_anki2ours, tables_ours2anki
 
 CACHE_SIZE = 32
 
@@ -58,61 +59,23 @@ def close_db(db: sqlite3.Connection) -> None:
 # Basic getters
 # ==============================================================================
 
-def _get_table(db: sqlite3.Connection, table: str, convert_dict=None) -> pd.DataFrame:
-    """ Get a table from the Anki database.
+def get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
+    """ Get raw table from the Anki database.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
-        table: Internal name of the table in the Anki database
+        table: ``cards``, ``notes`` or ``revs``
 
     Returns:
         :class:`pandas.DataFrame`
     """
-    # todo: why not read_sql_table?
-    df = pd.read_sql_query("SELECT * FROM {}".format(table), db)
-    if convert_dict is not None:
-        df = df.astype(convert_dict)
+
+    # todo: switch to read_sql_table?
+    df = pd.read_sql_query(
+        "SELECT * FROM {}".format(tables_ours2anki[table]),
+        db
+    )
     return df
-
-
-def get_cards(db: sqlite3.Connection) -> pd.DataFrame:
-    """
-    Get all cards as a dataframe.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-
-    Returns:
-        :class:`pandas.DataFrame`
-    """
-    return _get_table(db, "cards", {"id": str, "nid": str, "did": str})
-
-
-def get_notes(db: sqlite3.Connection) -> pd.DataFrame:
-    """
-    Get all notes as a dataframe.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-
-    Returns:
-        :class:`pandas.DataFrame`
-    """
-    return _get_table(db, "notes", {"id": str})
-
-
-def get_revs(db: sqlite3.Connection) -> pd.DataFrame:
-    """
-    Get the revision log as a dataframe.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-
-    Returns:
-        :class:`pandas.DataFrame`
-    """
-    return _get_table(db, "revlog", {"id": str, "cid": str})
-
 
 @lru_cache(CACHE_SIZE)
 def get_info(db: sqlite3.Connection) -> dict:
@@ -141,6 +104,10 @@ def get_info(db: sqlite3.Connection) -> dict:
 # Basic Setters
 # ==============================================================================
 
+# fixme: Table names changed
+# fixme: Need to change data types again
+# fixme: need to pop first letters
+# fixme: id_column is now dependent
 def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
                mode: str, id_column="id", same_columns=True,
                drop_new_columns=True
@@ -161,14 +128,7 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
     Returns:
         None
     """
-    if table == "cards":
-        df_old = get_cards(db)
-    elif table == "notes":
-        df_old = get_notes(db)
-    elif table == "revlog":
-        df_old = get_revs(db)
-    else:
-        raise ValueError("Unknown table: {}".format(table))
+    df_old = get_table(db, table)
     old_indices = set(df_old[id_column])
     new_indices = set(df[id_column])
     print("old indices", old_indices)
@@ -188,6 +148,7 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
     else:
         raise ValueError("Unknown mode '{}'.".format(mode))
     # Remove everything not indices
+    # fixme: Do we need to make a deepcopy?
     df = df[df[id_column].isin(indices)]
     old_cols = list(df_old.columns)
     new_cols = list(df.columns)
@@ -335,15 +296,15 @@ def set_revs(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
     Returns:
         None
     """
-    _set_table(db, df, "revlog", mode)
+    _set_table(db, df, "revs", mode)
 
 
 # Merging information
 # ==============================================================================
 
-
 # fixme: This removes items whenever it can't merge!
 # todo: move to util
+# todo: id_add needs shouldn't have default
 def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
               inplace=False, id_add="id", prepend="", replace=False,
               prepend_clash_only=True, columns=None,
@@ -405,9 +366,18 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
     if (columns and id_add not in columns) or \
             (drop_columns and id_add in drop_columns):
         df_merge.drop(id_add, axis=1, inplace=True)
+
+    # todo: make optional
+    # Make sure we don't have two ID columns
+    new_id_add_col = id_add
+    if id_add in rename_dict:
+        new_id_add_col = rename_dict[id_add]
+    if new_id_add_col in df_merge.columns and id_df != new_id_add_col:
+        print("removing", new_id_add_col)
+        df_merge.drop(new_id_add_col, axis=1, inplace=True)
+
     if inplace:
-        # fixme: doesn't seem to work with add_nids
-        replace_df_inplace(df, df_merge)
+        return replace_df_inplace(df, df_merge)
     else:
         return df_merge
 

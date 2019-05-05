@@ -13,8 +13,8 @@ import copy
 
 # ours
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas.data.columns import columns
-from ankipandas.core_functions import get_notes, check_dnames_did, load_db
+from ankipandas.data.columns import our_columns
+from ankipandas.core_functions import check_dnames_did, load_db
 
 
 class TestAnkiDF(unittest.TestCase):
@@ -28,8 +28,7 @@ class TestAnkiDF(unittest.TestCase):
         self.assertListEqual(
             sorted(list(merged.columns)),
             sorted(list(
-                set(columns["cards"]) | set(columns["notes"]) |
-                {"ndata", "nflags", "nmod", "nusn"}  # clashes
+                set(our_columns["cards"]) | set(our_columns["notes"])
             ))
         )
 
@@ -38,8 +37,7 @@ class TestAnkiDF(unittest.TestCase):
         self.assertListEqual(
             sorted(list(merged.columns)),
             sorted(list(
-                set(columns["revlog"]) | set(columns["cards"]) |
-                {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
+                set(our_columns["revs"]) | set(our_columns["cards"])
             ))
         )
 
@@ -81,7 +79,7 @@ class TestAnkiDF(unittest.TestCase):
         notes = AnkiDF.notes(self.db_path).add_mnames().add_fields_as_columns()
         self.assertEqual(
             sorted(list(notes.columns)),
-            sorted(columns["notes"] + ["mname", "Front", "Back"])
+            sorted(our_columns["notes"] + ["mname", "Front", "Back"])
         )
         self.assertEqual(
             list(notes.query("mname=='Basic'")["Front"].unique()),
@@ -93,35 +91,33 @@ class TestAnkiDF(unittest.TestCase):
         # add it back from the field columns and see if things still check
         # out
         notes = AnkiDF.notes(self.db_path).add_fields_as_columns()
-        print("####")
-        print(notes)
-        print("#####")
-        flds = copy.copy(notes["flds"].values)
-        notes["flds"] = ""
+        flds = copy.copy(notes["nflds"].values)
+        notes["nflds"] = ""
         notes.fields_as_columns_to_flds(inplace=True, drop=True)
         self.assertEqual(
             list(flds),
-            list(notes["flds"].values)
+            list(notes["nflds"].values)
         )
         self.assertListEqual(
             sorted(list(notes.columns)),
-            sorted(columns["notes"])
+            sorted(our_columns["notes"])
         )
 
     def test_fields_as_columns_to_flds_2(self):
         notes = AnkiDF.notes(self.db_path).add_fields_as_columns(prepend="fld_")
-        flds = copy.deepcopy(notes["flds"].values)
-        notes["flds"] = ""
+        flds = copy.deepcopy(notes["nflds"].values)
+        notes["nflds"] = ""
         notes = notes.fields_as_columns_to_flds(drop=True, prepended="fld_")
         self.assertListEqual(
             list(flds),
-            list(notes["flds"].values)
+            list(notes["nflds"].values)
         )
 
     def test_help(self):
         notes = AnkiDF.notes(self.db_path)
         hlp = notes.help()
         # todo
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -205,15 +205,15 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
         raise ValueError("Database could not be found.")
 
 
-# todo: rename table_help?
-def help_cols(table=None, column=None, native=None) -> pd.DataFrame:
+def help_cols(table=None, column=None, ankicolumn=None, native=None) -> pd.DataFrame:
     """
     Return a pandas dataframe containing descriptions of every field in the
     anki database. The arguments below help to filter it.
 
     Args:
         table: Possible values: 'notes', 'cards', 'revlog' or list thereof.
-        column: Name of a field or column or list thereof.
+        column: Name of a field or column (as used by us) or list thereof.
+        ankicolumn: Name of a field or column (as used by Anki) or list thereof.
         native: If true, only columns that are present in the official anki
             columns are shown.
 
@@ -230,6 +230,10 @@ def help_cols(table=None, column=None, native=None) -> pd.DataFrame:
         if isinstance(column, str):
             column = [column]
         df = df[df["Column"].isin(column)]
+    if ankicolumn:
+        if isinstance(ankicolumn, str):
+            ankicolumn = [ankicolumn]
+        df = df[df["AnkiColumn"].isin(ankicolumn)]
     if native is not None:
         df = df.query("Native=={}".format(native))
 

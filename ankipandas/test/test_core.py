@@ -8,7 +8,7 @@ import tempfile
 # ours
 from ankipandas.core_functions import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas.data.columns import columns
+from ankipandas.data.columns import our_columns
 
 
 class TestCoreFunctionsRead(unittest.TestCase):
@@ -20,35 +20,29 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def tearDown(self):
         close_db(self.db)
 
-    def test_get_cards(self):
-        cards1 = get_cards(self.db)
-        cards2 = AnkiDF.cards(self.db_path)
-        for cards in [cards1, cards2]:
-            self.assertEqual(len(cards), 3)
-            self.assertEqual(
-                list(sorted(cards.columns)),
-                sorted(columns["cards"])
-            )
+    def test_cards(self):
+        cards = AnkiDF.cards(self.db_path)
+        self.assertEqual(len(cards), 3)
+        self.assertEqual(
+            list(sorted(cards.columns)),
+            sorted(our_columns["cards"])
+        )
 
-    def test_get_notes(self):
-        notes1 = get_notes(self.db)
-        notes2 = AnkiDF.notes(self.db_path)
-        for notes in [notes1, notes2]:
-            self.assertEqual(len(notes), 2)
-            self.assertEqual(
-                list(sorted(notes.columns)),
-                sorted(columns["notes"])
-            )
+    def test_notes(self):
+        notes = AnkiDF.notes(self.db_path)
+        self.assertEqual(len(notes), 2)
+        self.assertEqual(
+            list(sorted(notes.columns)),
+            sorted(our_columns["notes"])
+        )
 
-    def test_get_revlog(self):
-        revlog1 = get_revs(self.db)
-        revlog2 = AnkiDF.revs(self.db_path)
-        for revlog in [revlog1, revlog2]:
-            # todo assert length
-            self.assertEqual(
-                list(sorted(revlog.columns)),
-                sorted(columns["revlog"])
-            )
+    def test_get_revs(self):
+        revs = AnkiDF.revs(self.db_path)
+        # todo assert length
+        self.assertEqual(
+            list(sorted(revs.columns)),
+            sorted(our_columns["revs"])
+        )
 
     def test_get_deck_info(self):
         get_deck_info(self.db)
@@ -104,12 +98,12 @@ class TestCoreWrite(unittest.TestCase):
         self.db_write_dir.cleanup()
 
     def _check_db_equal(self):
-        notes = get_notes(self.db_read)
-        cards = get_cards(self.db_read)
-        revlog = get_revs(self.db_read)
-        notes2 = get_notes(self.db_write)
-        cards2 = get_cards(self.db_write)
-        revlog2 = get_revs(self.db_write)
+        notes = get_table(self.db_read, "notes")
+        cards = get_table(self.db_read, "cards")
+        revlog = get_table(self.db_read, "revs")
+        notes2 = get_table(self.db_write, "notes")
+        cards2 = get_table(self.db_write, "cards")
+        revlog2 = get_table(self.db_write, "revs")
         self.assertListEqual(
             list(notes.values.tolist()), list(notes2.values.tolist())
         )
@@ -121,9 +115,9 @@ class TestCoreWrite(unittest.TestCase):
         )
 
     def test_rw_identical(self):
-        notes = get_notes(self.db_read)
-        cards = get_cards(self.db_read)
-        revlog = get_revs(self.db_read)
+        notes = get_table(self.db_read, "notes")
+        cards = get_table(self.db_read, "cards")
+        revlog = get_table(self.db_read, "revs")
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
@@ -133,24 +127,24 @@ class TestCoreWrite(unittest.TestCase):
                 self._check_db_equal()
 
     def test_update(self):
-        notes2 = get_notes(self.db_read)
-        notes = get_notes(self.db_read)
+        notes2 = get_table(self.db_read, "notes")
+        notes = get_table(self.db_read, "notes")
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
-                notes2.loc[notes2["id"] == "1555579337683", "tags"] = "mytesttag"
+                notes2.loc[notes2["id"] == 1555579337683, "tags"] = "mytesttag"
                 set_notes(self.db_write, notes2, mode)
                 if mode == "append":
                     self._check_db_equal()
                 else:
-                    notes2 = get_notes(self.db_write)
-                    chtag = notes2.loc[notes2["id"] == "1555579337683", "tags"]
+                    notes2 = get_table(self.db_write, "notes")
+                    chtag = notes2.loc[notes2["id"] == 1555579337683, "tags"]
                     self.assertListEqual(
                         list(chtag.values.tolist()),
                         ["mytesttag"]
                     )
-                    unchanged = notes.loc[notes["id"] != "1555579337683", :]
-                    unchanged2 = notes2.loc[notes2["id"] != "1555579337683", :]
+                    unchanged = notes.loc[notes["id"] != 1555579337683, :]
+                    unchanged2 = notes2.loc[notes2["id"] != 1555579337683, :]
 
                     self.assertListEqual(
                         list(unchanged.values.tolist()),
@@ -199,7 +193,7 @@ class TestMergeDfs(unittest.TestCase):
         )
         self.assertListEqual(
             sorted(list(df_merged.columns)),
-            ['_clash', '_drop', '_id_add', '_ignore', '_value', 'clash',
+            ['_clash', '_drop', '_ignore', '_value', 'clash',
              'id_df']
         )
 
@@ -214,7 +208,7 @@ class TestMergeDfs(unittest.TestCase):
         )
         self.assertListEqual(
             sorted(list(df.columns)),
-            ['clash_x', 'clash_y', 'drop', 'id_add', 'id_df', 'ignore', 'value']
+            ['clash_x', 'clash_y', 'drop', 'id_df', 'ignore', 'value']
         )
         self.assertListEqual(sorted(list(df["value"])), [4, 4, 4, 5, 6])
 
