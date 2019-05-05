@@ -27,6 +27,8 @@ AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 
 .. start-body
 
+**NOTE: THIS PROJECT IS STILL AT AN EARLY DEVELOPMENT VERSION. TRY OUT WITH CARE AND EXPECT INTERFACE CHANGES.**
+
 Description
 -----------
 
@@ -131,9 +133,9 @@ Most of this information is from the `ankidroid documentation`_.
 Troubleshooting
 ---------------
 
-See the documentation_.
+See the `troubleshooting section in the documentation`_.
 
-.. _documentation: https://ankipandas.readthedocs.io/en/latest/troubleshooting.html
+.. _troubleshooting section in the documentation: https://ankipandas.readthedocs.io/en/latest/troubleshooting.html
 
 Contributing
 ------------
@@ -145,7 +147,7 @@ If you want to code something yourself, you are very welcome to submit a `pull r
 
 .. _github issues: https://github.com/klieret/ankipandas/issues
 .. _gitter community: https://gitter.im/ankipandas/community
-.. _pull requests: https://github.com/klieret/AnkiPandas/pulls
+.. _pull request: https://github.com/klieret/AnkiPandas/pulls
 
 
 License
@@ -153,6 +155,6 @@ License
 
 This software is licenced under the `MIT license`_.
 
-.. _MIT  license: https://github.com/klieret/ankipandas/blob/master/LICENSE.txt
+.. _MIT license: https://github.com/klieret/ankipandas/blob/master/LICENSE.txt
 
 .. end-body
