@@ -303,6 +303,19 @@ class TestAnkiDF(unittest.TestCase):
             [True]
         )
 
+    def test_remove_tag(self):
+        notes = AnkiDF.notes(self.db_path).add_tag(["1145", "asdf"])
+        notes.remove_tag("1145", inplace=True)
+        self.assertListEqual(
+            list(notes.has_tag(["1145"]).unique()),
+            [False]
+        )
+        self.assertListEqual(
+            list(notes.has_tag(["asdf"]).unique()),
+            [True]
+        )
+
+
     # Help
     # ==========================================================================
 
