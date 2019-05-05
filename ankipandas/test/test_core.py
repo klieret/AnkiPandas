@@ -8,7 +8,7 @@ import tempfile
 # ours
 from ankipandas.core_functions import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas.data.columns import columns
+from ankipandas.columns import our_columns
 
 
 class TestCoreFunctionsRead(unittest.TestCase):
@@ -20,35 +20,29 @@ class TestCoreFunctionsRead(unittest.TestCase):
     def tearDown(self):
         close_db(self.db)
 
-    def test_get_cards(self):
-        cards1 = get_cards(self.db)
-        cards2 = AnkiDF.cards(self.db_path)
-        for cards in [cards1, cards2]:
-            self.assertEqual(len(cards), 3)
-            self.assertEqual(
-                list(sorted(cards.columns)),
-                sorted(columns["cards"])
-            )
+    def test_cards(self):
+        cards = AnkiDF.cards(self.db_path)
+        self.assertEqual(len(cards), 3)
+        self.assertEqual(
+            list(sorted(cards.columns)),
+            sorted(our_columns["cards"])
+        )
 
-    def test_get_notes(self):
-        notes1 = get_notes(self.db)
-        notes2 = AnkiDF.notes(self.db_path)
-        for notes in [notes1, notes2]:
-            self.assertEqual(len(notes), 2)
-            self.assertEqual(
-                list(sorted(notes.columns)),
-                sorted(columns["notes"])
-            )
+    def test_notes(self):
+        notes = AnkiDF.notes(self.db_path)
+        self.assertEqual(len(notes), 2)
+        self.assertEqual(
+            list(sorted(notes.columns)),
+            sorted(our_columns["notes"])
+        )
 
-    def test_get_revlog(self):
-        revlog1 = get_revs(self.db)
-        revlog2 = AnkiDF.revs(self.db_path)
-        for revlog in [revlog1, revlog2]:
-            # todo assert length
-            self.assertEqual(
-                list(sorted(revlog.columns)),
-                sorted(columns["revlog"])
-            )
+    def test_get_revs(self):
+        revs = AnkiDF.revs(self.db_path)
+        # todo assert length
+        self.assertEqual(
+            list(sorted(revs.columns)),
+            sorted(our_columns["revs"])
+        )
 
     def test_get_deck_info(self):
         get_deck_info(self.db)
@@ -73,144 +67,15 @@ class TestCoreFunctionsRead(unittest.TestCase):
 
     def test_get_field_names(self):
         fnames = get_field_names(self.db)
-        mnames = get_model_names(self.db)
+        models = get_model_names(self.db)
         fnames = {
-            mnames[mid]: fnames[mid]
-            for mid in mnames
+            models[mid]: fnames[mid]
+            for mid in models
         }
         self.assertEqual(len(fnames), len(get_model_names(self.db)))
         self.assertListEqual(
             fnames["Basic"], ["Front", "Back"]
         )
-
-    def test_merge_note_info(self):
-        cards1 = get_cards(self.db)
-        merged1 = merge_notes(self.db, cards1)
-        cards2 = AnkiDF.cards(self.db_path)
-        merged2 = cards2.merge_notes()
-        for merged in [merged1, merged2]:
-            self.assertListEqual(
-                sorted(list(merged.columns)),
-                sorted(list(
-                    set(columns["cards"]) | set(columns["notes"]) |
-                    {"ndata", "nflags", "nmod", "nusn"}  # clashes
-                ))
-            )
-
-    def test_merge_card_info(self):
-        revlog1 = get_revs(self.db)
-        merged1 = merge_cards(self.db, revlog1)
-        merged2 = AnkiDF.revs(self.db_path).merge_cards()
-        for merged in [merged1, merged2]:
-            self.assertListEqual(
-                sorted(list(merged.columns)),
-                sorted(list(
-                    set(columns["revlog"]) | set(columns["cards"]) |
-                    {"civl", "ctype", "cusn", "cid", "cfactor"}  # clashes
-                ))
-            )
-
-    def test_add_nids(self):
-        cards1 = get_cards(self.db)
-        cards1 = add_nids(self.db, cards1)
-        cards2 = AnkiDF.cards(self.db_path).add_nids()
-        for cards in [cards1, cards2]:
-            self.assertIn("nid", list(cards.columns))
-            self.assertListEqual(
-                sorted(list(cards["nid"].unique())),
-                sorted(list(get_notes(self.db)["id"].unique()))
-            )
-
-    def test_add_mids(self):
-        notes1 = get_notes(self.db)
-        notes1 = add_mids(self.db, notes1)
-        notes2 = AnkiDF.notes(self.db_path).add_mids()
-        for notes in [notes1, notes2]:
-            self.assertEqual(
-                len(notes["mid"].unique()),
-                2  # we don't have notesfor every model
-            )
-
-    def test_add_model_names(self):
-        notes1 = get_notes(self.db)
-        notes1 = add_mids(self.db, notes1)
-        notes1 = add_mnames(self.db, notes1)
-        # todo: add_mids() should soon be called automatically
-        notes2 = AnkiDF.notes(self.db_path).add_mids().add_mnames()
-        for notes in [notes1, notes2]:
-            self.assertEqual(
-                sorted(list(notes["mname"].unique())),
-                ["Basic", 'Basic (and reversed card)']
-            )
-
-    def test_add_deck_names(self):
-        cards1 = get_cards(self.db)
-        cards1 = add_dnames(self.db, cards1)
-        cards2 = AnkiDF.cards(self.db_path).add_dnames()
-        for cards in [cards1, cards2]:
-            self.assertEqual(
-                sorted(list(cards["dname"].unique())),
-                ["Default"]
-            )
-            self.assertTrue(
-                check_dnames_did(self.db, cards1)
-            )
-
-    def test_add_fields_as_columns(self):
-        notes1 = get_notes(self.db)
-        notes1 = add_fields_as_columns(self.db, notes1)
-        notes1 = add_mnames(self.db, notes1)
-        notes2 = AnkiDF.notes(self.db_path).add_mnames()
-        notes2 = notes2.add_fields_as_columns()
-        for notes in [notes1, notes2]:
-            self.assertEqual(
-                sorted(list(notes.columns)),
-                sorted(columns["notes"] + ["mname", "Front", "Back"])
-            )
-            self.assertEqual(
-                list(notes.query("mname=='Basic'")["Front"].unique()),
-                ["Basic: Front"]
-            )
-
-    def test_fields_as_columns_to_flds(self):
-        # Add fields as column, remove original 'flds' column, then
-        # add it back from the field columns and see if things still check
-        # out
-        notes1 = get_notes(self.db)
-        notes1 = add_fields_as_columns(self.db, notes1)
-        flds = copy.copy(notes1["flds"].values)
-        notes1["flds"] = ""
-        notes1 = fields_as_columns_to_flds(self.db, notes1, drop=True)
-        notes2 = AnkiDF.notes(self.db_path).add_fields_as_columns()
-        notes2["flds"] = ""
-        notes2.fields_as_columns_to_flds(inplace=True, drop=True)
-        for notes in [notes1, notes2]:
-            self.assertEqual(
-                list(flds),
-                list(notes["flds"].values)
-            )
-            self.assertListEqual(
-                sorted(list(notes.columns)),
-                sorted(columns["notes"])
-            )
-
-    def test_fields_as_columns_to_flds_2(self):
-        notes1 = get_notes(self.db)
-        notes1 = add_fields_as_columns(self.db, notes1, prepend="fld_")
-        flds = copy.copy(notes1["flds"].values)
-        notes1["flds"] = ""
-        notes1 = fields_as_columns_to_flds(
-            self.db, notes1, drop=True, prepended="fld_"
-        )
-        notes2 = AnkiDF.notes(self.db_path)
-        notes2 = notes2.add_fields_as_columns(prepend="fld_")
-        notes2["flds"] = ""
-        notes2 = notes2.fields_as_columns_to_flds(drop=True, prepended="fld_")
-        for notes in [notes1, notes2]:
-            self.assertListEqual(
-                list(flds),
-                list(notes["flds"].values)
-            )
 
 
 class TestCoreWrite(unittest.TestCase):
@@ -233,12 +98,12 @@ class TestCoreWrite(unittest.TestCase):
         self.db_write_dir.cleanup()
 
     def _check_db_equal(self):
-        notes = get_notes(self.db_read)
-        cards = get_cards(self.db_read)
-        revlog = get_revs(self.db_read)
-        notes2 = get_notes(self.db_write)
-        cards2 = get_cards(self.db_write)
-        revlog2 = get_revs(self.db_write)
+        notes = get_table(self.db_read, "notes")
+        cards = get_table(self.db_read, "cards")
+        revlog = get_table(self.db_read, "revs")
+        notes2 = get_table(self.db_write, "notes")
+        cards2 = get_table(self.db_write, "cards")
+        revlog2 = get_table(self.db_write, "revs")
         self.assertListEqual(
             list(notes.values.tolist()), list(notes2.values.tolist())
         )
@@ -250,9 +115,9 @@ class TestCoreWrite(unittest.TestCase):
         )
 
     def test_rw_identical(self):
-        notes = get_notes(self.db_read)
-        cards = get_cards(self.db_read)
-        revlog = get_revs(self.db_read)
+        notes = get_table(self.db_read, "notes")
+        cards = get_table(self.db_read, "cards")
+        revlog = get_table(self.db_read, "revs")
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
@@ -262,8 +127,8 @@ class TestCoreWrite(unittest.TestCase):
                 self._check_db_equal()
 
     def test_update(self):
-        notes2 = get_notes(self.db_read)
-        notes = get_notes(self.db_read)
+        notes2 = get_table(self.db_read, "notes")
+        notes = get_table(self.db_read, "notes")
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
@@ -272,7 +137,7 @@ class TestCoreWrite(unittest.TestCase):
                 if mode == "append":
                     self._check_db_equal()
                 else:
-                    notes2 = get_notes(self.db_write)
+                    notes2 = get_table(self.db_write, "notes")
                     chtag = notes2.loc[notes2["id"] == 1555579337683, "tags"]
                     self.assertListEqual(
                         list(chtag.values.tolist()),
@@ -328,7 +193,7 @@ class TestMergeDfs(unittest.TestCase):
         )
         self.assertListEqual(
             sorted(list(df_merged.columns)),
-            ['_clash', '_drop', '_id_add', '_ignore', '_value', 'clash',
+            ['_clash', '_drop', '_ignore', '_value', 'clash',
              'id_df']
         )
 
@@ -343,7 +208,7 @@ class TestMergeDfs(unittest.TestCase):
         )
         self.assertListEqual(
             sorted(list(df.columns)),
-            ['clash_x', 'clash_y', 'drop', 'id_add', 'id_df', 'ignore', 'value']
+            ['clash_x', 'clash_y', 'drop', 'id_df', 'ignore', 'value']
         )
         self.assertListEqual(sorted(list(df["value"])), [4, 4, 4, 5, 6])
 

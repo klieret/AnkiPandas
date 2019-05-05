@@ -12,7 +12,7 @@ from randomfiletree import sample_random_elements, iterative_gaussian_tree
 
 # ours
 import ankipandas.convenience_functions as convenience
-from ankipandas.data.columns import *
+from ankipandas.columns import *
 
 
 def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:
@@ -139,96 +139,6 @@ class TestFindDatabase(unittest.TestCase):
     def tearDown(self):
         for d in self.dirs.values():
             d.cleanup()
-
-
-class TestHelp(unittest.TestCase):
-    def test_table_help(self):
-        df = convenience.table_help()
-        self.assertListEqual(
-            list(df.columns),
-            ["Column", "Table", "Description", "Native"]
-        )
-        self.assertGreater(
-            len(df),
-            10
-        )
-
-    def test_table_help_search_table(self):
-        for table in ["notes", "cards", "revlog"]:
-            with self.subTest(table=table):
-                df = convenience.table_help(table=table, native=True)
-                self.assertListEqual(
-                    sorted(list(df["Column"].unique())),
-                    columns[table]
-                )
-
-    def test_table_help_search_column(self):
-        for table in ["notes", "cards", "revlog"]:
-            with self.subTest(table=table):
-                df = convenience.table_help(table=table, column="id")
-                df2 = convenience.table_help(
-                    table=table, column="id", native=False
-                )
-                self.assertEqual(len(df), 1)
-                self.assertEqual(len(df2), 0)
-
-
-class TestLoaders(unittest.TestCase):
-    def setUp(self):
-        self.path = Path(__file__).parent / "data" / "few_basic_cards" / \
-                    "collection.anki2"
-
-    def test_load_notes_no_expand(self):
-        notes = convenience.load_notes(self.path, expand_fields=False)
-        self.assertEqual(
-            sorted(list(notes.columns)),
-            sorted(columns["notes"] + ["mname"])
-        )
-
-    def test_load_notes_expand(self):
-        notes = convenience.load_notes(self.path, expand_fields=True)
-        self.assertEqual(
-            sorted(list(notes.columns)),
-            sorted(columns["notes"] + ["mname", "Front", "Back"])
-        )
-
-    def test_load_cards(self):
-        cards = convenience.load_cards(self.path)
-        self.assertEqual(
-            sorted(list(cards.columns)),
-            sorted(list(set(
-                columns["cards"] + columns["notes"] +
-                ["dname", "mname", "Front", "Back"] +
-                ["ndata", "nflags", "nmod", "nusn"]
-            )))  # clashes
-        )
-
-    def test_load_cards_nomerge(self):
-        cards = convenience.load_cards(self.path, merge_notes=False)
-        self.assertEqual(
-            sorted(list(cards.columns)),
-            sorted(columns["cards"] + ["dname"])
-        )
-
-    def test_load_revs(self):
-        revs = convenience.load_revs(self.path)
-        self.assertEqual(
-            sorted(list(revs.columns)),
-            sorted(list(set(
-                columns["revlog"] + columns["cards"] + columns["notes"] +
-                ["dname", "mname", "Front", "Back"] +
-                ["ndata", "nflags", "nmod", "nusn"] +
-                ["civl", "cfactor", "cusn", "ctype"]
-            )))
-        )
-
-    def test_load_revs_nomerge(self):
-        revs = convenience.load_revs(self.path, merge_cards=False,
-                                     merge_notes=False)
-        self.assertEqual(
-            sorted(list(revs.columns)),
-            sorted(columns["revlog"])
-        )
 
 
 if __name__ == "__main__":

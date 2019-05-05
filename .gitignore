@@ -1,6 +1,7 @@
 *.swp
 .idea/**
 doc/_build/**
+.~*
 
 examples/jupyter_notebooks/tests.ipynb
 

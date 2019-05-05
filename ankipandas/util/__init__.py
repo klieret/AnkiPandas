@@ -10,5 +10,4 @@
 """
 
 import ankipandas.util.dataframe
-import ankipandas.util.docstrings
 import ankipandas.util.log

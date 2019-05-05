@@ -16,6 +16,4 @@ line of code!
     :caption: Module documentation
 
     ankidf
-    convenience_functions
-    core_functions
     util
