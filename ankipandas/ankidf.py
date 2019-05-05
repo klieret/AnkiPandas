@@ -214,6 +214,7 @@ class AnkiDataFrame(pd.DataFrame):
     # Public methods
     # ==========================================================================
 
+    # todo: test
     @property
     def nid(self):
         if self._nid_column in self.columns:
@@ -228,7 +229,7 @@ class AnkiDataFrame(pd.DataFrame):
                     "Note IDs unavailable for table of "
                     "type {}!".format(self._anki_table)
                 )
-
+    # todo: test
     @property
     def cid(self):
         if self._cid_column in self.columns:
@@ -239,6 +240,7 @@ class AnkiDataFrame(pd.DataFrame):
                     "type {}!".format(self._anki_table)
             )
 
+    # todo: test
     @property
     def mid(self):
         if self._cid_column in self.columns:
@@ -254,6 +256,7 @@ class AnkiDataFrame(pd.DataFrame):
                     "type {}!".format(self._anki_table)
                 )
 
+    # todo: test
     @property
     def mname(self):
         if "mname" in self.columns:
@@ -261,6 +264,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             return self.mid.map(core.get_model_names(self.db))
 
+    # todo: test
     @property
     def dname(self):
         if "dname" in self.columns:
@@ -268,6 +272,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             return self.cid.map(core.get_deck_names(self.db))
 
+    # todo: use .nids rather than .nid_columns
     def merge_notes(self, inplace=False, columns=None,
                     drop_columns=None, prepend="n",
                     prepend_clash_only=True):
@@ -296,6 +301,7 @@ class AnkiDataFrame(pd.DataFrame):
             drop_columns=drop_columns
         )
 
+    # todo: use .cids rather than .cid_columns
     def merge_cards(self, inplace=False, columns=None, drop_columns=None,
                     prepend="c", prepend_clash_only=True):
         """
@@ -324,7 +330,7 @@ class AnkiDataFrame(pd.DataFrame):
             prepend_clash_only=prepend_clash_only
         )
 
-    def add_mnames(self, format="name", inplace=False):
+    def add_mnames(self, inplace=False):
         """ Add model names to a dataframe that contains model IDs.
 
         Args:
@@ -347,8 +353,7 @@ class AnkiDataFrame(pd.DataFrame):
             return df
 
     # todo: add checker
-
-    def add_dnames(self, format="name", inplace=False):
+    def add_dnames(self, inplace=False):
         """
         Add deck names to a dataframe that contains deck IDs.
 
@@ -440,7 +445,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
             return df
 
-    # todo: implement. Actually set would be best!
+    # todo: should be default anyhow
     def convert_tags(format="list", inplace=False):
         """ Converts space separated tags to a list.
 
@@ -453,7 +458,13 @@ class AnkiDataFrame(pd.DataFrame):
         """
         raise NotImplementedError
 
-    def help(self, *args, **kwargs):
-        df = convenience.table_help(*args, **kwargs)
+
+    def help_cols(self, *args, **kwargs):
+        df = convenience.help_cols(*args, **kwargs)
         return df
-    help.__doc__ = convenience.table_help.__doc__
+    help.__doc__ = convenience.help_cols.__doc__
+
+
+    def help(self):
+        # todo
+        return ""

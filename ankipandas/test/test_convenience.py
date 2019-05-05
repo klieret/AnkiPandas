@@ -143,7 +143,7 @@ class TestFindDatabase(unittest.TestCase):
 
 class TestHelp(unittest.TestCase):
     def test_table_help(self):
-        df = convenience.table_help()
+        df = convenience.help_cols()
         self.assertListEqual(
             list(df.columns),
             ["Column", "Table", "Description", "Native"]
@@ -156,7 +156,7 @@ class TestHelp(unittest.TestCase):
     def test_table_help_search_table(self):
         for table in ["notes", "cards", "revlog"]:
             with self.subTest(table=table):
-                df = convenience.table_help(table=table, native=True)
+                df = convenience.help_cols(table=table, native=True)
                 self.assertListEqual(
                     sorted(list(df["Column"].unique())),
                     columns[table]
@@ -165,8 +165,8 @@ class TestHelp(unittest.TestCase):
     def test_table_help_search_column(self):
         for table in ["notes", "cards", "revlog"]:
             with self.subTest(table=table):
-                df = convenience.table_help(table=table, column="id")
-                df2 = convenience.table_help(
+                df = convenience.help_cols(table=table, column="id")
+                df2 = convenience.help_cols(
                     table=table, column="id", native=False
                 )
                 self.assertEqual(len(df), 1)

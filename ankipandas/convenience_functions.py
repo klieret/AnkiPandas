@@ -206,7 +206,7 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
 
 
 # todo: rename table_help?
-def table_help(table=None, column=None, native=None) -> pd.DataFrame:
+def help_cols(table=None, column=None, native=None) -> pd.DataFrame:
     """
     Return a pandas dataframe containing descriptions of every field in the
     anki database. The arguments below help to filter it.
