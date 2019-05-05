@@ -105,11 +105,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             raise ValueError("Invalid table name: {}.".format(table))
 
-        # todo: use core.get_table
-        df = pd.read_sql_query(
-            "SELECT * FROM {}".format(tables_ours2anki[table]),
-            self.db
-        )
+        df = core.get_table(self.db, table)
         df = df.astype(dtypes)  # type: pd.DataFrame
         df.rename(columns=columns_anki2ours[table], inplace=True)
 
@@ -224,10 +220,7 @@ class AnkiDataFrame(pd.DataFrame):
             else:
                 return self["nid"]
         elif self._anki_table == "revs":
-            # todo: move
-            cards = AnkiDataFrame.cards(self.db_path)
-            cid2nid = dict(zip(cards.cid, cards.nid))
-            return self.cid.map(cid2nid)
+            return self.cid.map(core.cid2nid(self.db))
         else:
             self._invalid_table()
 
@@ -254,8 +247,8 @@ class AnkiDataFrame(pd.DataFrame):
         if self._anki_table in ["notes"]:
             if "nmodel" not in self.columns:
                 raise ValueError(
-                    "You seem to have removed the 'nmodel' column. That was not "
-                    "a good idea. Cannot get model ID anymore."
+                    "You seem to have removed the 'nmodel' column. That was not"
+                    " a good idea. Cannot get model ID anymore."
                 )
             else:
                 return self["nmodel"].map(
@@ -267,10 +260,7 @@ class AnkiDataFrame(pd.DataFrame):
                     invert_dict(core.get_model_names(self.db))
                 )
             else:
-                # todo: put function in core that does that
-                notes = AnkiDataFrame.notes(self.db_path)
-                nid2mid = dict(zip(notes.nid, notes.mid))
-                return self.nid.map(nid2mid)
+                return self.nid.map(core.nid2mid(self.db))
         else:
             self._invalid_table()
 
@@ -289,10 +279,7 @@ class AnkiDataFrame(pd.DataFrame):
                 " to associate a deck ID with them."
             )
         elif self._anki_table == "revs":
-            # todo: put function in core that does that
-            cards = AnkiDataFrame.cards(self.db_path)
-            cid2did = dict(zip(cards.cid, cards.did))
-            return self.cid.map(cid2did)
+            return self.cid.map(core.cid2did(self.db))
         else:
             self._invalid_table()
 

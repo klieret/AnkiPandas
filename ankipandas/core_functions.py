@@ -70,12 +70,12 @@ def get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
         :class:`pandas.DataFrame`
     """
 
-    # todo: switch to read_sql_table?
     df = pd.read_sql_query(
         "SELECT * FROM {}".format(tables_ours2anki[table]),
         db
     )
     return df
+
 
 @lru_cache(CACHE_SIZE)
 def get_info(db: sqlite3.Connection) -> dict:
@@ -301,6 +301,48 @@ def set_revs(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
 
 # Merging information
 # ==============================================================================
+
+@lru_cache(CACHE_SIZE)
+def cid2nid(db: sqlite3.Connection) -> dict:
+    """ Mapping card ID to note ID.
+
+    Args:
+        db:  Database (:class:`sqlite3.Connection`)
+
+    Returns:
+        Dictionary
+    """
+    cards = get_table(db, "cards")
+    return dict(zip(cards["id"].astype(str), cards["nid"].astype(str)))
+
+
+@lru_cache(CACHE_SIZE)
+def cid2did(db: sqlite3.Connection) -> dict:
+    """ Mapping card ID to deck ID.
+
+    Args:
+        db:  Database (:class:`sqlite3.Connection`)
+
+    Returns:
+        Dictionary
+    """
+    cards = get_table(db, "cards")
+    return dict(zip(cards["id"].astype(str), cards["did"].astype(str)))
+
+
+@lru_cache(CACHE_SIZE)
+def nid2mid(db: sqlite3.Connection) -> dict:
+    """ Mapping note ID to model ID.
+
+    Args:
+        db:  Database (:class:`sqlite3.Connection`)
+
+    Returns:
+        Dictionary
+    """
+    notes = get_table(db, "notes")
+    return dict(zip(notes["id"].astype(str), notes["mid"].astype(str)))
+
 
 # fixme: This removes items whenever it can't merge!
 # todo: move to util
