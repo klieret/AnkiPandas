@@ -204,6 +204,7 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
         raise ValueError("Database could not be found.")
 
 
+# todo: move to ankidf and by default give exactly our columns
 def help_cols(table=None, column=None, ankicolumn=None, native=None) -> pd.DataFrame:
     """
     Return a pandas dataframe containing descriptions of every field in the

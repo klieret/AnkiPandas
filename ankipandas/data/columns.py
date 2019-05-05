@@ -69,3 +69,8 @@ our_columns = {
     table: sorted(list(columns_ours2anki[table].keys()))
     for table in columns_ours2anki
 }
+
+our_columns["notes"].remove("mid")
+our_columns["cards"].remove("did")
+our_columns["notes"].append("model")
+our_columns["cards"].append("deck")

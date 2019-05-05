@@ -392,19 +392,19 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
 # ------------------------------------------------------------------------------
 
 
-def sync_dnames_did(db: sqlite3.Connection, df: pd.DataFrame, source="dnames",
-                    inplace=False, did_column="did", dname_column="dname"):
+def sync_decks_did(db: sqlite3.Connection, df: pd.DataFrame, source="decks",
+                    inplace=False, did_column="did", deck_column="deck"):
     """
     Update deck names based on deck IDs or vice versa.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
         df: :class:`pandas.DataFrame` to merge information into
-        source: ``dnames`` (to overwrite deck IDs) or ``dids`` (to overwrite
+        source: ``decks`` (to overwrite deck IDs) or ``dids`` (to overwrite
             deck names)
         inplace: If False, return new dataframe, else update old one
         did_column: Column with deck ID (did)
-        dname_column: Name of column with deck names
+        deck_column: Name of column with deck names
 
     Returns:
         New :class:`pandas.DataFrame` if inplace==True, else None
@@ -414,34 +414,34 @@ def sync_dnames_did(db: sqlite3.Connection, df: pd.DataFrame, source="dnames",
             "Could not find deck id column '{}'. You can specify a custom one "
             "using the did_column option.".format(did_column)
         )
-    if source == "dnames" and did_column not in df.columns:
+    if source == "decks" and did_column not in df.columns:
         raise ValueError(
             "Could not find deck name column '{}'. You can specify a custom one"
-            " using the dname_column option.".format(dname_column)
+            " using the deck_column option.".format(deck_column)
         )
     if inplace:
         if source == "dids":
-            df[dname_column] = df[did_column].astype(str).map(get_deck_names(db))
-        elif source == "dnames":
+            df[deck_column] = df[did_column].astype(str).map(get_deck_names(db))
+        elif source == "decks":
             # fixme
-            df[dname_column] = df[did_column].astype(str).map(get_deck_names(db))
+            df[deck_column] = df[did_column].astype(str).map(get_deck_names(db))
         else:
             raise ValueError("Unknown source: '{}'.".format(source))
     else:
         df = copy.deepcopy(df)
-        sync_dnames_did(
+        sync_decks_did(
             db,
             df,
             source=source,
             did_column=did_column,
-            dname_column=dname_column,
+            deck_column=deck_column,
             inplace=True
         )
         return df
 
 
-def check_dnames_did(db: sqlite3.Connection, df: pd.DataFrame,
-                     did_column="did", dname_column="dname",
+def check_decks_did(db: sqlite3.Connection, df: pd.DataFrame,
+                     did_column="did", deck_column="deck",
                      mask=False):
     """
     Check whether deck IDs and deck names still match or whether the user
@@ -451,7 +451,7 @@ def check_dnames_did(db: sqlite3.Connection, df: pd.DataFrame,
         db: Database (:class:`sqlite3.Connection`)
         df: :class:`pandas.DataFrame` to merge information into
         did_column: Column with deck ID (did)
-        dname_column: Name of column with deck names
+        deck_column: Name of column with deck names
         mask: Rather than just returning True/False, return the full vector of
             comparison results.
 
@@ -464,14 +464,14 @@ def check_dnames_did(db: sqlite3.Connection, df: pd.DataFrame,
             "Could not find deck id column '{}'. You can specify a custom one "
             "using the did_column option.".format(did_column)
         )
-    if dname_column not in df.columns:
+    if deck_column not in df.columns:
         raise ValueError(
             "Could not find deck name column '{}'. You can specify a custom one"
-            " using the dname_column option.".format(dname_column)
+            " using the deck_column option.".format(deck_column)
         )
-    dnames_from_dids = df[did_column].astype(str).map(get_deck_names(db))
-    dnames = df[dname_column]
+    decks_from_dids = df[did_column].astype(str).map(get_deck_names(db))
+    decks = df[deck_column]
     if mask:
-        return dnames_from_dids == dnames
+        return decks_from_dids == decks
     else:
-        return np.all(dnames_from_dids == dnames)
+        return np.all(decks_from_dids == decks)

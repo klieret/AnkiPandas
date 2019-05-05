@@ -67,10 +67,10 @@ class TestCoreFunctionsRead(unittest.TestCase):
 
     def test_get_field_names(self):
         fnames = get_field_names(self.db)
-        mnames = get_model_names(self.db)
+        models = get_model_names(self.db)
         fnames = {
-            mnames[mid]: fnames[mid]
-            for mid in mnames
+            models[mid]: fnames[mid]
+            for mid in models
         }
         self.assertEqual(len(fnames), len(get_model_names(self.db)))
         self.assertListEqual(

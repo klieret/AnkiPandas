@@ -13,6 +13,9 @@ import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
 from ankipandas.util.dataframe import replace_df_inplace
 from ankipandas.data.columns import columns_anki2ours, tables_ours2anki
+from ankipandas.util.misc import invert_dict
+from ankipandas.util.log import log
+
 
 
 class AnkiDataFrame(pd.DataFrame):
@@ -97,7 +100,7 @@ class AnkiDataFrame(pd.DataFrame):
         # column names!
         # todo: this needs to be saved in columns.py
         if table == "notes":
-            dtypes = {"id": str}
+            dtypes = {"id": str, "mid": str}
         elif table == "cards":
             dtypes = {"id": str, "nid": str, "did": str}
         elif table == "revs":
@@ -121,6 +124,15 @@ class AnkiDataFrame(pd.DataFrame):
                 )
             # Fields as list, rather than as string joined by \x1f
             df["nflds"] = df["nflds"].str.split("\x1f")
+
+            # Model field
+            df["model"] = df["mid"].map(core.get_model_names(self.db))
+            df.drop("mid", axis=1, inplace=True)
+
+        if table == "cards":
+            # Deck field
+            df["deck"] = df["did"].map(core.get_deck_names(self.db))
+            df.drop("did", axis=1, inplace=True)
 
         replace_df_inplace(self, df)
         self._anki_table = table
@@ -194,66 +206,97 @@ class AnkiDataFrame(pd.DataFrame):
         """
         return cls._table_constructor(path, user, "revs")
 
-    # Public methods
+    # ==========================================================================
+
+    def _invalid_table(self):
+        raise ValueError("Invalid table: {}.".format(self._anki_table))
+
+
+    # IDs
     # ==========================================================================
 
     # todo: test
     @property
     def nid(self):
-        if "nid" in self.columns:
-            return self["nid"]
-        else:
-            if self._anki_table == "revs":
-                cards = AnkiDataFrame.cards(self.db_path)
-                cid2nid = dict(zip(cards["cid"], cards["nid"]))
-                return self.cid.map(cid2nid)
-            else:
+        if self._anki_table in ["notes", "cards"]:
+            if "nid" not in self.columns:
                 raise ValueError(
-                    "Note IDs unavailable for table of "
-                    "type {}!".format(self._anki_table)
+                    "You seem to have removed the 'nid' column. That was not "
+                    "a good idea. Cannot get note ID anymore."
                 )
+            else:
+                return self["nid"]
+        elif self._anki_table == "revs":
+            # todo: move
+            cards = AnkiDataFrame.cards(self.db_path)
+            cid2nid = dict(zip(cards.cid, cards.nid))
+            return self.cid.map(cid2nid)
+        else:
+            self._invalid_table()
+
     # todo: test
     @property
     def cid(self):
-        if "cid" in self.columns:
-            return self["cid"]
-        else:
+        if self._anki_table in ["cards", "revs"]:
+            if "cid" not in self.columns:
+                raise ValueError(
+                    "You seem to have removed the 'cid' column. That was not "
+                    "a good idea. Cannot get card ID anymore."
+                )
+        elif self._anki_table == "notes":
             raise ValueError(
-                    "Note IDs unavailable for table of "
-                    "type {}!".format(self._anki_table)
+                "Notes can belong to multiple cards. Therefore it is impossible"
+                " to associate a card ID with them."
             )
+        else:
+            self._invalid_table()
 
     # todo: test
     @property
     def mid(self):
-        if "cid" in self.columns:
-            return self["cid"]
-        else:
-            if self._anki_table in ["revs", "cards"]:
-                notes = AnkiDataFrame.notes(self.db_path)
-                nid2mid = dict(zip(notes["nid"], notes["mid"]))
-                return self.cid.map(nid2mid)
-            else:
+        if self._anki_table in ["notes"]:
+            if "model" not in self.columns:
                 raise ValueError(
-                    "Note IDs unavailable for table of "
-                    "type {}!".format(self._anki_table)
+                    "You seem to have removed the 'model' column. That was not "
+                    "a good idea. Cannot get model ID anymore."
                 )
+            else:
+                return self["model"].map(invert_dict(core.get_model_names(self.db)))
+        if self._anki_table in ["revs", "cards"]:
+            if "model" in self.columns:
+                return self["model"].map(invert_dict(core.get_model_names(self.db)))
+            else:
+                # todo: put function in core that does that
+                notes = AnkiDataFrame.notes(self.db_path)
+                nid2mid = dict(zip(notes.nid, notes.mid))
+                return self.cid.map(nid2mid)
+        else:
+            self._invalid_table()
 
     # todo: test
     @property
-    def mname(self):
-        if "mname" in self.columns:
-            return self["mname"]
+    def did(self):
+        if self._anki_table == "cards":
+            if "deck" not in self.columns:
+                raise ValueError(
+                    "You seem to have removed the 'deck' column. That was not "
+                    "a good idea. Cannot get deck ID anymore."
+                )
+            return self["deck"].map(invert_dict(core.get_deck_names(self.db)))
+        elif self._anki_table == "notes":
+            raise ValueError(
+                "Notes can belong to multiple decks. Therefore it is impossible"
+                " to associate a deck ID with them."
+            )
+        elif self._anki_table == "revs":
+            # todo: put function in core that does that
+            cards = AnkiDataFrame.cards(self.db_path)
+            cid2did = dict(zip(cards["cid"], cards["did"]))
+            return self.cid.map(cid2did)
         else:
-            return self.mid.map(core.get_model_names(self.db))
+            self._invalid_table()
 
-    # todo: test
-    @property
-    def dname(self):
-        if "dname" in self.columns:
-            return self["mname"]
-        else:
-            return self.cid.map(core.get_deck_names(self.db))
+    # ==========================================================================
 
     # todo: use .nids rather than .nid_columns
     def merge_notes(self, inplace=False, columns=None,
@@ -284,6 +327,7 @@ class AnkiDataFrame(pd.DataFrame):
             drop_columns=drop_columns
         )
 
+    # todo: support merging into notes frame
     # todo: use .cids rather than .cid_columns
     def merge_cards(self, inplace=False, columns=None, drop_columns=None,
                     prepend="c", prepend_clash_only=True):
@@ -313,48 +357,6 @@ class AnkiDataFrame(pd.DataFrame):
             prepend_clash_only=prepend_clash_only
         )
 
-    def add_mnames(self, inplace=False):
-        """ Add model names to a dataframe that contains model IDs.
-
-        Args:
-            format: "name", "id"
-            inplace: If False, return new dataframe, else update old one
-
-        Returns:
-            New :class:`pandas.DataFrame` if inplace==True, else None
-        """
-        # todo: add it then?
-        if "mid" not in self.columns:
-            raise ValueError("Could not find model id column 'mid'")
-        if inplace:
-            self["mname"] = self["mid"].astype(str).map(
-                core.get_model_names(self.db)
-            )
-        else:
-            df = self.copy(True)
-            df.add_mnames(inplace=True)
-            return df
-
-    # todo: add checker
-    def add_dnames(self, inplace=False):
-        """
-        Add deck names to a dataframe that contains deck IDs.
-
-        Args:
-            inplace: If False, return new dataframe, else update old one
-
-        Returns:
-            New :class:`pandas.DataFrame` if inplace==True, else None
-        """
-        return core.sync_dnames_did(
-            db=self.db,
-            df=self,
-            inplace=inplace,
-            did_column="did",
-            dname_column="dname",
-            source="dids"
-        )
-
     def fields_as_columns(self, inplace=False):
         """
         In the 'notes' table, the field contents of the notes is contained in
@@ -368,8 +370,6 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
-        if "mid" not in self.columns:
-            raise ValueError("Could not find model id column 'mid'.")
         if "nflds" not in self.columns:
             print(list(self.columns))
             raise ValueError(
@@ -378,16 +378,16 @@ class AnkiDataFrame(pd.DataFrame):
         # fixme: What if one field column is one that is already in use?
         prefix = self.fields_as_columns_prefix
         if inplace:
-            mids = self["mid"].unique()
+            mids = self.mid.unique()
             for mid in mids:
-                df_model = self[self["mid"] == mid]
+                df_model = self[self.mid == mid]
                 fields = pd.DataFrame(df_model["nflds"].tolist())
                 field_names = core.get_field_names(self.db)[str(mid)]
                 for field in field_names:
                     if prefix + field not in self.columns:
                         self[prefix + field] = ""
                 for ifield, field in enumerate(field_names):
-                    self.loc[self["mid"] == mid, [prefix + field]] = \
+                    self.loc[self.mid == mid, [prefix + field]] = \
                         fields[ifield].tolist()
             self.drop("nflds", axis=1, inplace=True)
         else:
@@ -403,16 +403,12 @@ class AnkiDataFrame(pd.DataFrame):
 
         Args:
             inplace: If False, return new dataframe, else update old one
-            prepended: Use this, if the name of columns that contained the fields
-                had a string prepended to them
 
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
-        if "mid" not in self.columns:
-            raise ValueError("Could not find model id column 'mid'.")
         if inplace:
-            mids = self["mid"].unique()
+            mids = self.mid.unique()
             to_drop = []
             for mid in mids:
                 fields = core.get_field_names(self.db)[str(mid)]
@@ -422,7 +418,7 @@ class AnkiDataFrame(pd.DataFrame):
                 print(mid, fields)
                 print(self[fields])
                 print(pd.Series(self[fields].values.tolist()))
-                self.loc[self["mid"] == mid, "nflds"] = \
+                self.loc[self.mid == mid, "nflds"] = \
                     pd.Series(self[fields].values.tolist())
                     # pd.Series(self[fields].values.tolist()).str.join("\x1f")
                 # Careful: Do not delete the fields here yet, other models
