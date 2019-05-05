@@ -12,7 +12,7 @@ cfactor,factor,cards,"The new ease factor of the card in permille (parts per tho
 rfactor,factor,revs,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE
 cflags,flags,cards,Currently unused,TRUE
 nflags,flags,notes,Currently unused,TRUE
-nflds,flds,notes,Fields of the card as a concatenated string with fields separated by the ``\x1f`` character. The field names can be retrieved from the corresponding model.,TRUE
+nflds,flds,notes,Fields of the card as list.,TRUE
 nguid,guid,notes,"Globally unique id, almost certainly used for syncing",TRUE
 cid,id,cards,ID of the card (this corresponds to a epoch millisecond time stamp from the creating time),TRUE
 nid,id,notes,ID of the note (this corresponds to a epoch millisecond time stamp from the creating time),TRUE
@@ -33,7 +33,7 @@ cord,ord,cards,Identifies which of the card templates the card corresponds to. V
 cqueue,queue,cards,"-3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review",TRUE
 creps,reps,cards,Number of reviews,TRUE
 nsfld,sfld,notes,Content of the sort field.,TRUE
-ntags,tags,notes,Tags of the note as space-separated string,TRUE
+ntags,tags,notes,Tags of the note as list,TRUE
 rtime,time,revs,"How many milliseconds your review took, up to 60000 (60s)",TRUE
 ctype,type,cards,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
 rtype,type,revs,"This is 0 for learning cards, 1 for review cards, 2 for relearn cards, and 3 for cram cards (cards being studied in a filtered deck when they are not due).",TRUE
