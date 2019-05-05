@@ -11,7 +11,7 @@ import pathlib
 import ankipandas.convenience_functions as convenience
 import ankipandas.core_functions as core
 from ankipandas.util.dataframe import replace_df_inplace
-from ankipandas.columns import columns_anki2ours, tables_ours2anki
+from ankipandas.columns import columns_anki2ours, our_columns
 from ankipandas.util.misc import invert_dict
 
 
@@ -120,12 +120,14 @@ class AnkiDataFrame(pd.DataFrame):
 
             # Model field
             df["nmodel"] = df["mid"].map(core.get_model_names(self.db))
-            df.drop("mid", axis=1, inplace=True)
 
         if table == "cards":
             # Deck field
             df["cdeck"] = df["did"].map(core.get_deck_names(self.db))
-            df.drop("did", axis=1, inplace=True)
+
+        drop_columns = set(df.columns) - set(our_columns[table])
+        for drop_column in drop_columns:
+            df.drop(drop_column, axis=1, inplace=True)
 
         replace_df_inplace(self, df)
         self._anki_table = table

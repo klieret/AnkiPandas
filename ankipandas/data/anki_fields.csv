@@ -1,16 +1,16 @@
 Column,AnkiColumn,Table,Description,Native,Default
 cid,cid,revs,Card ID,TRUE,TRUE
-ncsum,csum,notes,Field checksum used for duplicate check: Integer representation of first 8 digits of sha1 hash of the first field,TRUE,TRUE
-cdata,data,cards,Currently unused,TRUE,TRUE
-ndata,data,notes,Currently unused,TRUE,TRUE
+ncsum,csum,notes,Field checksum used for duplicate check: Integer representation of first 8 digits of sha1 hash of the first field,TRUE,FALSE
+cdata,data,cards,Currently unused,TRUE,FALSE
+ndata,data,notes,Currently unused,TRUE,FALSE
 did,did,cards,ID of the deck,TRUE,FALSE
 cdeck,,cards,Name of the deck,FALSE,TRUE
 cdue,due,cards,"Due is used differently for different card types: new: note id or random int, due: integer day, relative to the collection's creation time, learning: integer timestamp",TRUE,TRUE
 rease,ease,revs,"Which button you pushed to score your recall: review:  1(wrong), 2(hard), 3(ok), 4(easy), learn/relearn:   1(wrong), 2(ok), 3(easy)",TRUE,TRUE
 cfactor,factor,cards,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE,TRUE
 rfactor,factor,revs,"The new ease factor of the card in permille (parts per thousand). If the ease factor is 2500, the card’s interval will be multiplied by 2.5 the next time you press Good.",TRUE,TRUE
-cflags,flags,cards,Currently unused,TRUE,TRUE
-nflags,flags,notes,Currently unused,TRUE,TRUE
+cflags,flags,cards,Currently unused,TRUE,FALSE
+nflags,flags,notes,Currently unused,TRUE,FALSE
 nflds,flds,notes,Fields of the card as list. Anki database: fields as string joined by ‘\\x1f’ characters.,TRUE,TRUE
 nguid,guid,notes,"Globally unique id, almost certainly used for syncing",TRUE,TRUE
 cid,id,cards,ID of the card (this corresponds to a epoch millisecond time stamp from the creating time),TRUE,TRUE

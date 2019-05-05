@@ -229,10 +229,6 @@ class TestAnkiDF(unittest.TestCase):
             list(df.columns),
             ["Column", "AnkiColumn", "Table", "Description", "Native", "Default"]
         )
-        self.assertGreater(
-            len(df),
-            10
-        )
 
     # fixme
     @unittest.skip
