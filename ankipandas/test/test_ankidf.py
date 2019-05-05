@@ -137,7 +137,7 @@ class TestAnkiDF(unittest.TestCase):
         )
 
     def test_cids_notes(self):
-        notes = AnkiDF.notes()
+        notes = AnkiDF.notes(self.db_path)
         with self.assertRaises(ValueError):
             # noinspection PyStatementEffect
             notes.cid
