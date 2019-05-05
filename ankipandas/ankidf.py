@@ -215,6 +215,8 @@ class AnkiDataFrame(pd.DataFrame):
     # IDs
     # ==========================================================================
 
+    # todo: call nidS etc. to avoid clashes with attributes?
+
     # todo: test
     @property
     def nid(self):
@@ -243,6 +245,8 @@ class AnkiDataFrame(pd.DataFrame):
                     "You seem to have removed the 'cid' column. That was not "
                     "a good idea. Cannot get card ID anymore."
                 )
+            else:
+                return self["cid"]
         elif self._anki_table == "notes":
             raise ValueError(
                 "Notes can belong to multiple cards. Therefore it is impossible"
@@ -269,7 +273,7 @@ class AnkiDataFrame(pd.DataFrame):
                 # todo: put function in core that does that
                 notes = AnkiDataFrame.notes(self.db_path)
                 nid2mid = dict(zip(notes.nid, notes.mid))
-                return self.cid.map(nid2mid)
+                return self.nid.map(nid2mid)
         else:
             self._invalid_table()
 
@@ -291,7 +295,7 @@ class AnkiDataFrame(pd.DataFrame):
         elif self._anki_table == "revs":
             # todo: put function in core that does that
             cards = AnkiDataFrame.cards(self.db_path)
-            cid2did = dict(zip(cards["cid"], cards["did"]))
+            cid2did = dict(zip(cards.cid, cards.did))
             return self.cid.map(cid2did)
         else:
             self._invalid_table()
