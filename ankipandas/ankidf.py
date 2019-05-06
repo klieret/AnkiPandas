@@ -573,6 +573,19 @@ class AnkiDataFrame(pd.DataFrame):
 
         Returns:
             Boolean :class:`pd.Series`
+
+        Examples:
+
+            .. code-block::
+
+                # Get all tagged notes:
+                notes[notes.has_tag()]
+                # Get all untagged notes:
+                notes[~notes.has_tag()]
+                # Get all notes tagged Japanese:
+                japanese_notes = notes[notes.has_tag("Japanese")]
+                # Get all notes tagged either Japanese or Chinese:
+                asian_notes = notes[notes.has_tag(["Japanese", "Chinese"])]
         """
         self._check_our_format()
         self._check_tag_col()
@@ -600,6 +613,15 @@ class AnkiDataFrame(pd.DataFrame):
 
         Returns:
             Boolean :class:`pd.Series`
+
+        Examples:
+
+            .. code-block::
+
+                # Get all notes tagged BOTH Japanese or Chinese
+                bilingual_notes = notes[notes.has_tags(["Japanese", "Chinese"])]
+                # Note the difference to
+                asian_notes = notes[notes.has_tag(["Japanese", "Chinese"])]
         """
         self._check_our_format()
         if tags is None:
@@ -1118,6 +1140,15 @@ class AnkiDataFrame(pd.DataFrame):
 
         return df
 
-    def help(self):
-        # todo
-        return ""
+    # fixme: fill in link
+    @staticmethod
+    def help() -> str:
+        """ Display short help text. """
+        h = "This is the help for the class AnkiDataFrame, a subclass of " \
+            "pandas.DataFrame. The full documentation of all class methods " \
+            "unique to AnkiDataFrame can be found on " \
+            "ankipandas.readthedocs.io. The inherited methods from " \
+            "pandas.DataFrame are documented at ." \
+            "To get information abou the fields currently in this table, " \
+            "please use the help_cols() method."
+        return h

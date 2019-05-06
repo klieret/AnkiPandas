@@ -212,8 +212,7 @@ class TestAnkiDF(unittest.TestCase):
         # out
         notes = AnkiDF.notes(self.db_path)
         flds = copy.copy(notes["nflds"].values)
-        notes.fields_as_columns(inplace=True)
-        notes.fields_as_list(inplace=True)
+        notes = notes.fields_as_columns().fields_as_list()
         self.assertEqual(
             list(flds),
             list(notes["nflds"].values)
@@ -642,8 +641,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_help(self):
         notes = AnkiDF.notes(self.db_path)
         hlp = notes.help()
-        # todo
-
+        self.assertTrue(isinstance(hlp, str))
 
 if __name__ == "__main__":
     unittest.main()

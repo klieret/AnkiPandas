@@ -3,6 +3,7 @@
 doc/_build/**
 .~*
 
+examples/**
 examples/jupyter_notebooks/tests.ipynb
 
 # Created by https://www.gitignore.io/api/python
