@@ -13,7 +13,7 @@ import ankipandas.paths
 import ankipandas.raw as raw
 import ankipandas.util.dataframe
 from ankipandas.util.dataframe import replace_df_inplace
-import ankipandas._columns
+import ankipandas._columns as _columns
 from ankipandas.util.misc import invert_dict
 from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
@@ -199,7 +199,15 @@ class AnkiDataFrame(pd.DataFrame):
     def append(self, *args, **kwargs):
         ret = super(AnkiDataFrame, self).append(*args, **kwargs)
         self._copy_attrs_to(ret)
+        ret.astype(_columns.dtype_casts2[self._anki_table])
         return ret
+
+    # todo: skip doc
+    def update(self, *args, **kwargs):
+        super(AnkiDataFrame, self).update(*args, **kwargs)
+        # Fix https://github.com/pandas-dev/pandas/issues/4094
+        for col, typ in _columns.dtype_casts2[self._anki_table].items():
+            self[col] = self[col].astype(typ)
 
     # ==========================================================================
 
@@ -637,7 +645,7 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     # todo: other comparison source
-    def was_modified(self, other: pd.DataFrame = None, default=True,
+    def was_modified(self, other: pd.DataFrame = None, na=True,
                      _force=False):
         """ Compare with original table, show which rows have changed.
 
@@ -645,7 +653,7 @@ class AnkiDataFrame(pd.DataFrame):
             other: Compare with this :class:`pandas.DataFrame`.
                 If None (default), use original unmodified dataframe as reloaded
                 from the database.
-            default: Value for new or deleted columns
+            na: Value for new or deleted columns
             _force: internal use
 
         Returns:
@@ -661,7 +669,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         other_nids = set(other.index)
         inters = set(self.index).intersection(other_nids)
-        result = pd.Series(default, index=self.index)
+        result = pd.Series(na, index=self.index)
         new_bools = np.any(
             other[other.index.isin(inters)].values !=
             self[self.index.isin(inters)].values,
@@ -753,6 +761,16 @@ class AnkiDataFrame(pd.DataFrame):
         deleted_indices = other_nids - set(self.index)
         return sorted(list(deleted_indices))
 
+    # Update modification stamps
+    # ==========================================================================
+
+    def _set_usn(self):
+        if self._anki_table in ["revs", "notes"]:
+            self.loc[
+                self.was_modified(na=True),
+                _columns.columns_anki2ours[self._anki_table]["usn"]
+            ] = -1
+
     # Raw and normalized
     # ==========================================================================
 
@@ -793,14 +811,14 @@ class AnkiDataFrame(pd.DataFrame):
         # Dtypes
         # ------
 
-        for column, type in ankipandas._columns.dtype_casts[table].items():
+        for column, type in _columns.dtype_casts[table].items():
             self[column] = self[column].astype(type)
 
         # Renames
         # -------
 
         self.rename(
-            columns=ankipandas._columns.columns_anki2ours[table],
+            columns=_columns.columns_anki2ours[table],
             inplace=True
         )
 
@@ -808,16 +826,16 @@ class AnkiDataFrame(pd.DataFrame):
         # ----------
         # We sometimes interpret cryptic numeric values
 
-        if table in ankipandas._columns.value_maps:
-            for column in ankipandas._columns.value_maps[table]:
+        if table in _columns.value_maps:
+            for column in _columns.value_maps[table]:
                 self[column] = self[column].map(
-                    ankipandas._columns.value_maps[table][column]
+                    _columns.value_maps[table][column]
                 )
 
         # IDs
         # ---
 
-        self.set_index(ankipandas._columns.table2index[table], inplace=True)
+        self.set_index(_columns.table2index[table], inplace=True)
 
         if table == "cards":
             self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
@@ -846,7 +864,7 @@ class AnkiDataFrame(pd.DataFrame):
         # ------------
 
         drop_columns = \
-            set(self.columns) - set(ankipandas._columns.our_columns[table])
+            set(self.columns) - set(_columns.our_columns[table])
         self.drop(drop_columns, axis=1, inplace=True)
 
         self._df_format = "ours"
@@ -940,26 +958,26 @@ class AnkiDataFrame(pd.DataFrame):
         # Value Maps
         # ----------
 
-        if table in ankipandas._columns.value_maps:
-            for column in ankipandas._columns.value_maps[table]:
+        if table in _columns.value_maps:
+            for column in _columns.value_maps[table]:
                 if column not in self.columns:
                     continue
                 self[column] = self[column].map(
-                    invert_dict(ankipandas._columns.value_maps[table][column])
+                    invert_dict(_columns.value_maps[table][column])
                 )
 
         # Renames
         # -------
 
         self.rename(
-            columns=invert_dict(ankipandas._columns.columns_anki2ours[table]),
+            columns=invert_dict(_columns.columns_anki2ours[table]),
             inplace=True
         )
 
         # Dtypes
         # ------
 
-        for column, typ in ankipandas._columns.dtype_casts_back[table].items():
+        for column, typ in _columns.dtype_casts_back[table].items():
             self[column] = self[column].astype(typ)
 
         # Unused columns
@@ -973,7 +991,7 @@ class AnkiDataFrame(pd.DataFrame):
         # ------------------
 
         new = pd.DataFrame(
-            self[ankipandas._columns.anki_columns[table]]
+            self[_columns.anki_columns[table]]
         )
         self.drop(self.columns, axis=1, inplace=True)
         for col in new.columns:

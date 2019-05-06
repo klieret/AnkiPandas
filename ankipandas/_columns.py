@@ -142,3 +142,34 @@ dtype_casts_back = {
     "cards": {"id": int, "nid": int, "did": int},
     "revs": {"id": int, "cid": int}
 }
+
+# Avoiding problem with ints to floats such as here:
+# https://github.com/pandas-dev/pandas/issues/4094
+dtype_casts2 = {
+    "cards": {
+        "cord": int,
+        "cmod": int,
+        "cusn": int,
+        "cdue": int,
+        "civl": int,
+        "cfactor": int,
+        "creps": int,
+        "clapses": int,
+        "clef": int,
+        "codue": int,
+        "codid": int,
+    },
+    "notes": {
+        "nmod": int,
+        "nusn": int
+    },
+    "revs": {
+        "cid": int,
+        "rusn": int,
+        "rease": int,
+        "ivl": int,
+        "lastivl": int,
+        "rfactor": int,
+        "rtime": int,
+    }
+}
