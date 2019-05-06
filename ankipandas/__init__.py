@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import ankipandas.core
+import ankipandas.raw
 import ankipandas.paths
 import ankipandas.util
 from ankipandas.ankidf import AnkiDataFrame

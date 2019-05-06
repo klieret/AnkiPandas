@@ -13,8 +13,8 @@ import copy
 
 # ours
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas.columns import our_columns
-import ankipandas.core as core
+from ankipandas._columns import our_columns
+import ankipandas.raw as raw
 
 
 # todo: add more notes to test deck
@@ -22,7 +22,7 @@ class TestAnkiDF(unittest.TestCase):
     def setUp(self):
         self.db_path = pathlib.Path(__file__).parent / "data" / \
                        "few_basic_cards" / "collection.anki2"
-        self.db = core.load_db(self.db_path)
+        self.db = raw.load_db(self.db_path)
 
         # Do not modify this one!
         self.notes = AnkiDF.notes(self.db_path)
@@ -72,7 +72,7 @@ class TestAnkiDF(unittest.TestCase):
         )
         self.assertListEqual(
             list(notes["nid"].unique()),
-            list(map(str, core.get_table(self.db, "notes")["id"].unique()))
+            list(map(str, raw.get_table(self.db, "notes")["id"].unique()))
         )
         self.assertEqual(
             len(notes.nid.unique()),
@@ -88,7 +88,7 @@ class TestAnkiDF(unittest.TestCase):
         )
         self.assertListEqual(
             list(cards["cid"].unique()),
-            list(map(str, core.get_table(self.db, "cards")["id"].unique()))
+            list(map(str, raw.get_table(self.db, "cards")["id"].unique()))
         )
         self.assertEqual(
             len(cards.cid.unique()),
@@ -104,7 +104,7 @@ class TestAnkiDF(unittest.TestCase):
         )
         self.assertListEqual(
             list(revs["rid"].unique()),
-            list(map(str, core.get_table(self.db, "revs")["id"].unique()))
+            list(map(str, raw.get_table(self.db, "revs")["id"].unique()))
         )
         self.assertEqual(
             len(revs.rid.unique()),
@@ -158,7 +158,7 @@ class TestAnkiDF(unittest.TestCase):
             "cards": set(AnkiDF.cards(self.db_path).mid),
             "revs": set(AnkiDF.revs(self.db_path).mid)
         }
-        mids = set(core.get_mid2model(self.db).keys())
+        mids = set(raw.get_mid2model(self.db).keys())
         for table, mids2 in mids2s.items():
             with self.subTest(table=table):
                 self.assertTrue(mids2.issubset(mids))
@@ -168,7 +168,7 @@ class TestAnkiDF(unittest.TestCase):
             "cards": set(AnkiDF.cards(self.db_path).did),
             "revs": set(AnkiDF.revs(self.db_path).did)
         }
-        dids = set(core.get_did2deck(self.db).keys())
+        dids = set(raw.get_did2deck(self.db).keys())
         for table, dids2 in did2s.items():
             with self.subTest(table=table):
                 self.assertTrue(dids2.issubset(dids))
@@ -333,7 +333,7 @@ class TestAnkiDF(unittest.TestCase):
                 adf = AnkiDF._table_constructor(
                     path=self.db_path, user=None, table=table
                 ).raw()
-                df = core.get_table(self.db, table)
+                df = raw.get_table(self.db, table)
                 if table == "notes":
                     df["tags"] = df["tags"].str.strip()
                 self.assertTrue(adf.equals(df))

@@ -9,10 +9,10 @@ import pathlib
 
 # ours
 import ankipandas.paths
-import ankipandas.core as core
+import ankipandas.raw as raw
 import ankipandas.util.dataframe
 from ankipandas.util.dataframe import replace_df_inplace
-import ankipandas.columns
+import ankipandas._columns
 from ankipandas.util.misc import invert_dict
 from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
@@ -99,7 +99,7 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     def _load_db(self, path):
-        self.db = core.load_db(path)
+        self.db = raw.load_db(path)
         self.db_path = path
 
     def _get_table(self, path, user, table):
@@ -107,7 +107,7 @@ class AnkiDataFrame(pd.DataFrame):
             path = self.db_path
         self._load_db(ankipandas.paths.db_path_input(path, user=user))
 
-        df = core.get_table(self.db, table)
+        df = raw.get_table(self.db, table)
         replace_df_inplace(self, df)
         self._anki_table = table
         self._df_format = "anki"
@@ -245,7 +245,7 @@ class AnkiDataFrame(pd.DataFrame):
             else:
                 return self["nid"]
         elif self._anki_table == "revs":
-            return self.cid.map(core.get_cid2nid(self.db))
+            return self.cid.map(raw.get_cid2nid(self.db))
         else:
             self._invalid_table()
 
@@ -281,15 +281,15 @@ class AnkiDataFrame(pd.DataFrame):
                 )
             else:
                 return self["nmodel"].map(
-                    invert_dict(core.get_mid2model(self.db))
+                    invert_dict(raw.get_mid2model(self.db))
                 )
         if self._anki_table in ["revs", "cards"]:
             if "nmodel" in self.columns:
                 return self["nmodel"].map(
-                    invert_dict(core.get_mid2model(self.db))
+                    invert_dict(raw.get_mid2model(self.db))
                 )
             else:
-                return self.nid.map(core.get_nid2mid(self.db))
+                return self.nid.map(raw.get_nid2mid(self.db))
         else:
             self._invalid_table()
 
@@ -303,14 +303,14 @@ class AnkiDataFrame(pd.DataFrame):
                     "You seem to have removed the 'cdeck' column. That was not "
                     "a good idea. Cannot get deck ID anymore."
                 )
-            return self["cdeck"].map(invert_dict(core.get_did2deck(self.db)))
+            return self["cdeck"].map(invert_dict(raw.get_did2deck(self.db)))
         elif self._anki_table == "notes":
             raise ValueError(
                 "Notes can belong to multiple decks. Therefore it is impossible"
                 " to associate a deck ID with them."
             )
         elif self._anki_table == "revs":
-            return self.cid.map(core.get_cid2did(self.db))
+            return self.cid.map(raw.get_cid2did(self.db))
         else:
             self._invalid_table()
 
@@ -430,7 +430,7 @@ class AnkiDataFrame(pd.DataFrame):
         for mid in mids:
             df_model = self[self.mid == mid]
             fields = pd.DataFrame(df_model["nflds"].tolist())
-            field_names = core.get_mid2fields(self.db)[str(mid)]
+            field_names = raw.get_mid2fields(self.db)[str(mid)]
             for field in field_names:
                 if prefix + field not in self.columns:
                     self[prefix + field] = ""
@@ -481,7 +481,7 @@ class AnkiDataFrame(pd.DataFrame):
         mids = self.mid.unique()
         to_drop = []
         for mid in mids:
-            fields = core.get_mid2fields(self.db)[str(mid)]
+            fields = raw.get_mid2fields(self.db)[str(mid)]
             fields = [
                 self.fields_as_columns_prefix + field for field in fields
             ]
@@ -636,14 +636,14 @@ class AnkiDataFrame(pd.DataFrame):
         # Dtypes
         # ------
 
-        for column, type in ankipandas.columns.dtype_casts[table].items():
+        for column, type in ankipandas._columns.dtype_casts[table].items():
             self[column] = self[column].astype(type)
 
         # Renames
         # -------
 
         self.rename(
-            columns=ankipandas.columns.columns_anki2ours[table],
+            columns=ankipandas._columns.columns_anki2ours[table],
             inplace=True
         )
 
@@ -651,19 +651,19 @@ class AnkiDataFrame(pd.DataFrame):
         # ----------
         # We sometimes interpret cryptic numeric values
 
-        if table in ankipandas.columns.value_maps:
-            for column in ankipandas.columns.value_maps[table]:
+        if table in ankipandas._columns.value_maps:
+            for column in ankipandas._columns.value_maps[table]:
                 self[column] = self[column].map(
-                    ankipandas.columns.value_maps[table][column]
+                    ankipandas._columns.value_maps[table][column]
                 )
 
         # IDs
         # ---
 
         if table == "cards":
-            self["cdeck"] = self["did"].map(core.get_did2deck(self.db))
+            self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
         elif table == "notes":
-            self["nmodel"] = self["mid"].map(core.get_mid2model(self.db))
+            self["nmodel"] = self["mid"].map(raw.get_mid2model(self.db))
 
         # Tags
         # ----
@@ -687,7 +687,7 @@ class AnkiDataFrame(pd.DataFrame):
         # ------------
 
         drop_columns = \
-            set(self.columns) - set(ankipandas.columns.our_columns[table])
+            set(self.columns) - set(ankipandas._columns.our_columns[table])
         self.drop(drop_columns, axis=1, inplace=True)
 
         self._df_format = "ours"
@@ -748,36 +748,36 @@ class AnkiDataFrame(pd.DataFrame):
 
         if table == "cards" and "cdeck" in self.columns:
             self["did"] = self["cdeck"].map(
-                invert_dict(core.get_did2deck(self.db))
+                invert_dict(raw.get_did2deck(self.db))
             )
         if table == "notes" and "nmodel" in self.columns:
             self["mid"] = self["nmodel"].map(
-                invert_dict(core.get_mid2model(self.db))
+                invert_dict(raw.get_mid2model(self.db))
             )
 
         # Value Maps
         # ----------
 
-        if table in ankipandas.columns.value_maps:
-            for column in ankipandas.columns.value_maps[table]:
+        if table in ankipandas._columns.value_maps:
+            for column in ankipandas._columns.value_maps[table]:
                 if column not in self.columns:
                     continue
                 self[column] = self[column].map(
-                    invert_dict(ankipandas.columns.value_maps[table][column])
+                    invert_dict(ankipandas._columns.value_maps[table][column])
                 )
 
         # Renames
         # -------
 
         self.rename(
-            columns=invert_dict(ankipandas.columns.columns_anki2ours[table]),
+            columns=invert_dict(ankipandas._columns.columns_anki2ours[table]),
             inplace=True
         )
 
         # Dtypes
         # ------
 
-        for column, type in ankipandas.columns.dtype_casts_back[table].items():
+        for column, type in ankipandas._columns.dtype_casts_back[table].items():
             self[column] = self[column].astype(type)
 
         # Unused columns
@@ -791,7 +791,7 @@ class AnkiDataFrame(pd.DataFrame):
         # ------------------
 
         new = pd.DataFrame(
-            self[ankipandas.columns.anki_columns[table]]
+            self[ankipandas._columns.anki_columns[table]]
         )
         self.drop(self.columns, axis=1, inplace=True)
         for col in new.columns:

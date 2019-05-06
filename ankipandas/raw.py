@@ -16,7 +16,7 @@ import pandas as pd
 
 # ours
 from ankipandas.util.log import log
-from ankipandas.columns import tables_ours2anki
+from ankipandas._columns import tables_ours2anki
 
 CACHE_SIZE = 32
 

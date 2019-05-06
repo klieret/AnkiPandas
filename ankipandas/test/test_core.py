@@ -7,13 +7,13 @@ import shutil
 import tempfile
 
 # ours
-from ankipandas.core import *
+from ankipandas.raw import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas.columns import our_columns
+from ankipandas._columns import our_columns
 from ankipandas.util.dataframe import merge_dfs
 
 
-class TestCoreFunctionsRead(unittest.TestCase):
+class TestRawRead(unittest.TestCase):
     def setUp(self):
         self.db_path = pathlib.Path(__file__).parent / "data" / \
                        "few_basic_cards" / "collection.anki2"
@@ -80,7 +80,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
         )
 
 
-class TestCoreWrite(unittest.TestCase):
+class TestRawWrite(unittest.TestCase):
     def setUp(self):
         self.db_read_path = pathlib.Path(__file__).parent / "data" \
             / "few_basic_cards" / "collection.anki2"
