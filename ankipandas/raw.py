@@ -206,10 +206,13 @@ def get_did2deck(db: sqlite3.Connection) -> Dict[str, str]:
         Dictionary mapping of deck id to deck name
     """
     dinfo = get_deck_info(db)
-    return {
+    _did2dec = {
         did: dinfo[did]["name"]
         for did in dinfo
     }
+    # For odid column
+    _did2dec["0"] = ""
+    return _did2dec
 
 
 @lru_cache(CACHE_SIZE)

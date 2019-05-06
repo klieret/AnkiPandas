@@ -26,7 +26,8 @@ nmodel,,notes,Name of the model,FALSE,TRUE
 cmod,mod,cards,Modification time [epoch seconds],TRUE,TRUE
 nmod,mod,notes,"Modification timestamp, epoch seconds",TRUE,TRUE
 nid,nid,cards,ID of the note,TRUE,TRUE
-codid,odid,cards,Original did: only used when the card is currently in filtered deck,TRUE,TRUE
+codid,odid,cards,Original did: only used when the card is currently in filtered deck,TRUE,FALSE
+codeck,,cards,Origina deck: only used when the card is currently in filtered deck,FALSE,TRUE
 codue,odue,cards,Original due: only used when the card is currently in filtered deck,TRUE,TRUE
 cord,ord,cards,Identifies which of the card templates the card corresponds to. Valid values are from 0 to num templates -1,TRUE,TRUE
 cqueue,queue,cards,"In the Anki db this is -3=sched buried, -2=user buried, -1=suspended, 0=new, 1=learning, 2=due (as for type), 3=in learning, next rev in at least a day after the previous review. In AnkiPandas this is already translated.",TRUE,TRUE

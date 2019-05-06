@@ -344,6 +344,30 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self._invalid_table()
 
+    @property
+    def odid(self):
+        """ Original deck ID for cards in filtered deck as
+        :class:`pandas.Series` of strings.
+        """
+        self._check_our_format()
+        if self._anki_table == "cards":
+            if "odeck" not in self.columns:
+                raise ValueError(
+                    "You seem to have removed the 'odeck' column. That was not "
+                    "a good idea. Cannot get original deck ID anymore."
+                )
+            return self["odeck"].map(invert_dict(raw.get_did2deck(self.db)))
+        elif self._anki_table == "revs":
+            if "odeck" in self.columns:
+                return self["odeck"].map(invert_dict(raw.get_did2deck(self.db)))
+        elif self._anki_table == "notes":
+            raise ValueError(
+                "The original deck ID (odid) is not availabale for the notes "
+                "table."
+            )
+        else:
+            self._invalid_table()
+
     # Merge tables
     # ==========================================================================
 
@@ -848,6 +872,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         if table == "cards":
             self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
+            self["codeck"] = self["codid"].map(raw.get_did2deck(self.db))
         elif table == "notes":
             self["nmodel"] = self["mid"].map(raw.get_mid2model(self.db))
 
@@ -926,11 +951,14 @@ class AnkiDataFrame(pd.DataFrame):
         # Index as column:
         self.reset_index(inplace=True, drop=False)
 
-        if table == "cards" and "cdeck" in self.columns:
+        if table == "cards":
             self["did"] = self["cdeck"].map(
                 invert_dict(raw.get_did2deck(self.db))
             )
-        if table == "notes" and "nmodel" in self.columns:
+            self["odid"] = self["codeck"].map(
+                invert_dict(raw.get_did2deck(self.db))
+            )
+        if table == "notes":
             self["mid"] = self["nmodel"].map(
                 invert_dict(raw.get_mid2model(self.db))
             )

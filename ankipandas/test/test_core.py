@@ -54,7 +54,10 @@ class TestRawRead(unittest.TestCase):
         names = get_did2deck(self.db)
         self.assertDictEqual(
             names,
-            {"1": "Default"}
+            {
+                "1": "Default",
+                "0": ""
+            }
         )
 
     def test_get_model_info(self):

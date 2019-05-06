@@ -90,8 +90,8 @@ anki_columns = {
 
 columns_ours2anki = {
     table: dict(zip(
-        fields_df[fields_df["Table"] == table]["Column"],
-        fields_df[fields_df["Table"] == table]["AnkiColumn"]
+        fields_df[np.logical_and(fields_df["Table"] == table, fields_df["Native"] == True)]["Column"],
+        fields_df[np.logical_and(fields_df["Table"] == table, fields_df["Native"] == True)]["AnkiColumn"]
     ))
     for table in our_tables
 }
@@ -132,14 +132,14 @@ value_maps = {
 
 dtype_casts = {
     "notes": {"id": str, "mid": str},
-    "cards": {"id": str, "nid": str, "did": str},
+    "cards": {"id": str, "nid": str, "did": str, "odid": str},
     "revs": {"id": str, "cid": str}
 }
 
 # todo: more precise?
 dtype_casts_back = {
     "notes": {"id": int, "mid": int},
-    "cards": {"id": int, "nid": int, "did": int},
+    "cards": {"id": int, "nid": int, "did": int, "odid": int},
     "revs": {"id": int, "cid": int}
 }
 
