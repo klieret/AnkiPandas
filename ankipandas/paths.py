@@ -201,4 +201,3 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
         return result
     else:
         raise ValueError("Database could not be found.")
-

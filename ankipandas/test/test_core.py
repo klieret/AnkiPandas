@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # std
+import copy
 import unittest
 import shutil
 import tempfile
@@ -9,6 +10,7 @@ import tempfile
 from ankipandas.core import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
 from ankipandas.columns import our_columns
+from ankipandas.util.dataframe import merge_dfs
 
 
 class TestCoreFunctionsRead(unittest.TestCase):
@@ -49,7 +51,7 @@ class TestCoreFunctionsRead(unittest.TestCase):
         # todo
 
     def test_get_deck_names(self):
-        names = get_deck_names(self.db)
+        names = get_did2deck(self.db)
         self.assertDictEqual(
             names,
             {"1": "Default"}
@@ -60,19 +62,19 @@ class TestCoreFunctionsRead(unittest.TestCase):
         # todo
 
     def test_get_model_names(self):
-        names = get_model_names(self.db)
+        names = get_mid2model(self.db)
         self.assertIn("Basic", names.values())
         self.assertIn("Cloze", names.values())
         self.assertEqual(len(names), 5)
 
     def test_get_field_names(self):
-        fnames = get_field_names(self.db)
-        models = get_model_names(self.db)
+        fnames = get_mid2fields(self.db)
+        models = get_mid2model(self.db)
         fnames = {
             models[mid]: fnames[mid]
             for mid in models
         }
-        self.assertEqual(len(fnames), len(get_model_names(self.db)))
+        self.assertEqual(len(fnames), len(get_mid2model(self.db)))
         self.assertListEqual(
             fnames["Basic"], ["Front", "Back"]
         )
@@ -121,9 +123,9 @@ class TestCoreWrite(unittest.TestCase):
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
-                set_notes(self.db_write, notes, mode)
-                set_cards(self.db_write, cards, mode)
-                set_revs(self.db_write, revlog, mode)
+                set_table(self.db_write, notes, "notes", mode)
+                set_table(self.db_write, cards, "cards", mode)
+                set_table(self.db_write, revlog, "revs", mode)
                 self._check_db_equal()
 
     def test_update(self):
@@ -133,7 +135,7 @@ class TestCoreWrite(unittest.TestCase):
             with self.subTest(mode=mode):
                 self._reset()
                 notes2.loc[notes2["id"] == 1555579337683, "tags"] = "mytesttag"
-                set_notes(self.db_write, notes2, mode)
+                set_table(self.db_write, notes2, "notes", mode)
                 if mode == "append":
                     self._check_db_equal()
                 else:

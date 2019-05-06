@@ -9,5 +9,7 @@
 
 """
 
+import ankipandas.util.checksum
 import ankipandas.util.dataframe
 import ankipandas.util.log
+import ankipandas.util.misc

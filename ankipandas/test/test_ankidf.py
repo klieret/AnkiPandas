@@ -158,7 +158,7 @@ class TestAnkiDF(unittest.TestCase):
             "cards": set(AnkiDF.cards(self.db_path).mid),
             "revs": set(AnkiDF.revs(self.db_path).mid)
         }
-        mids = set(core.get_model_names(self.db).keys())
+        mids = set(core.get_mid2model(self.db).keys())
         for table, mids2 in mids2s.items():
             with self.subTest(table=table):
                 self.assertTrue(mids2.issubset(mids))
@@ -168,7 +168,7 @@ class TestAnkiDF(unittest.TestCase):
             "cards": set(AnkiDF.cards(self.db_path).did),
             "revs": set(AnkiDF.revs(self.db_path).did)
         }
-        dids = set(core.get_deck_names(self.db).keys())
+        dids = set(core.get_did2deck(self.db).keys())
         for table, dids2 in did2s.items():
             with self.subTest(table=table):
                 self.assertTrue(dids2.issubset(dids))

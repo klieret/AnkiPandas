@@ -10,11 +10,12 @@ import pathlib
 # ours
 import ankipandas.paths
 import ankipandas.core as core
+import ankipandas.util.dataframe
 from ankipandas.util.dataframe import replace_df_inplace
 import ankipandas.columns
 from ankipandas.util.misc import invert_dict
 from ankipandas.util.log import log
-from ankipandas.hash import field_checksum
+from ankipandas.util.checksum import field_checksum
 
 
 class AnkiDataFrame(pd.DataFrame):
@@ -244,7 +245,7 @@ class AnkiDataFrame(pd.DataFrame):
             else:
                 return self["nid"]
         elif self._anki_table == "revs":
-            return self.cid.map(core.cid2nid(self.db))
+            return self.cid.map(core.get_cid2nid(self.db))
         else:
             self._invalid_table()
 
@@ -280,15 +281,15 @@ class AnkiDataFrame(pd.DataFrame):
                 )
             else:
                 return self["nmodel"].map(
-                    invert_dict(core.get_model_names(self.db))
+                    invert_dict(core.get_mid2model(self.db))
                 )
         if self._anki_table in ["revs", "cards"]:
             if "nmodel" in self.columns:
                 return self["nmodel"].map(
-                    invert_dict(core.get_model_names(self.db))
+                    invert_dict(core.get_mid2model(self.db))
                 )
             else:
-                return self.nid.map(core.nid2mid(self.db))
+                return self.nid.map(core.get_nid2mid(self.db))
         else:
             self._invalid_table()
 
@@ -302,14 +303,14 @@ class AnkiDataFrame(pd.DataFrame):
                     "You seem to have removed the 'cdeck' column. That was not "
                     "a good idea. Cannot get deck ID anymore."
                 )
-            return self["cdeck"].map(invert_dict(core.get_deck_names(self.db)))
+            return self["cdeck"].map(invert_dict(core.get_did2deck(self.db)))
         elif self._anki_table == "notes":
             raise ValueError(
                 "Notes can belong to multiple decks. Therefore it is impossible"
                 " to associate a deck ID with them."
             )
         elif self._anki_table == "revs":
-            return self.cid.map(core.cid2did(self.db))
+            return self.cid.map(core.get_cid2did(self.db))
         else:
             self._invalid_table()
 
@@ -334,7 +335,7 @@ class AnkiDataFrame(pd.DataFrame):
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
         self._check_our_format()
-        return core.merge_dfs(
+        return ankipandas.util.dataframe.merge_dfs(
             df=self,
             df_add=AnkiDataFrame.notes(self.db_path),
             id_df="nid",
@@ -365,7 +366,7 @@ class AnkiDataFrame(pd.DataFrame):
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
         self._check_our_format()
-        return core.merge_dfs(
+        return ankipandas.util.dataframe.merge_dfs(
             df=self,
             df_add=AnkiDataFrame.cards(self.db_path),
             id_df="cid",
@@ -429,7 +430,7 @@ class AnkiDataFrame(pd.DataFrame):
         for mid in mids:
             df_model = self[self.mid == mid]
             fields = pd.DataFrame(df_model["nflds"].tolist())
-            field_names = core.get_field_names(self.db)[str(mid)]
+            field_names = core.get_mid2fields(self.db)[str(mid)]
             for field in field_names:
                 if prefix + field not in self.columns:
                     self[prefix + field] = ""
@@ -480,7 +481,7 @@ class AnkiDataFrame(pd.DataFrame):
         mids = self.mid.unique()
         to_drop = []
         for mid in mids:
-            fields = core.get_field_names(self.db)[str(mid)]
+            fields = core.get_mid2fields(self.db)[str(mid)]
             fields = [
                 self.fields_as_columns_prefix + field for field in fields
             ]
@@ -660,9 +661,9 @@ class AnkiDataFrame(pd.DataFrame):
         # ---
 
         if table == "cards":
-            self["cdeck"] = self["did"].map(core.get_deck_names(self.db))
+            self["cdeck"] = self["did"].map(core.get_did2deck(self.db))
         elif table == "notes":
-            self["nmodel"] = self["mid"].map(core.get_model_names(self.db))
+            self["nmodel"] = self["mid"].map(core.get_mid2model(self.db))
 
         # Tags
         # ----
@@ -747,11 +748,11 @@ class AnkiDataFrame(pd.DataFrame):
 
         if table == "cards" and "cdeck" in self.columns:
             self["did"] = self["cdeck"].map(
-                invert_dict(core.get_deck_names(self.db))
+                invert_dict(core.get_did2deck(self.db))
             )
         if table == "notes" and "nmodel" in self.columns:
             self["mid"] = self["nmodel"].map(
-                invert_dict(core.get_model_names(self.db))
+                invert_dict(core.get_mid2model(self.db))
             )
 
         # Value Maps

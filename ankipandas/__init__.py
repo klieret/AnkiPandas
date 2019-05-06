@@ -2,7 +2,6 @@
 
 import ankipandas.core
 import ankipandas.paths
-import ankipandas.hash
 import ankipandas.util
 from ankipandas.ankidf import AnkiDataFrame
 from ankipandas.util.log import log, set_log_level

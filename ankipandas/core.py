@@ -9,16 +9,14 @@ import sqlite3
 import json
 import pathlib
 from functools import lru_cache
-import copy
+from typing import Dict, List, Union
 
 # 3rd
 import pandas as pd
-import numpy as np
 
 # ours
-from ankipandas.util.dataframe import replace_df_inplace
 from ankipandas.util.log import log
-from ankipandas.columns import columns_anki2ours, tables_ours2anki
+from ankipandas.columns import tables_ours2anki
 
 CACHE_SIZE = 32
 
@@ -26,15 +24,15 @@ CACHE_SIZE = 32
 # Open/Close db
 # ==============================================================================
 
-def load_db(path):
+def load_db(path: Union[str, pathlib.PurePath]) -> sqlite3.Connection:
     """
-    Load database from path
+    Load database from path.
 
     Args:
-        path: String or pathlib path.
+        path: String or :class:`pathlib.PurePath`.
 
     Returns:
-        sqlite connection
+        :class:`sqlite3.Connection`
     """
     path = pathlib.Path(path)
     if not path.is_file():
@@ -108,17 +106,17 @@ def get_info(db: sqlite3.Connection) -> dict:
 # fixme: Need to change data types again
 # fixme: need to pop first letters
 # fixme: id_column is now dependent
-def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
-               mode: str, id_column="id", same_columns=True,
-               drop_new_columns=True
-               ) -> None:
+def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
+              mode: str, id_column="id", same_columns=True,
+              drop_new_columns=True
+              ) -> None:
     """
     Write table back to database.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
         df: The :class:`pandas.DataFrame` to write
-        table: Table to write to: 'notes', 'cards', 'revlog'
+        table: Table to write to: 'notes', 'cards', 'revs'
         mode: 'update': Update only existing entries, 'append': Only append new
             entries, but do not modify, 'replace': Append, modify and delete
         same_columns: Check that the columns will stay exactly the same
@@ -163,7 +161,7 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
         if_exists = "append"
     else:
         if_exists = "replace"
-    df.to_sql(table, db, if_exists=if_exists, index=False)
+    df.to_sql(tables_ours2anki[table], db, if_exists=if_exists, index=False)
 
 
 # Trivially derived getters
@@ -173,7 +171,7 @@ def _set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
 #  with sphinx but oh well.
 
 @lru_cache(CACHE_SIZE)
-def get_deck_info(db: sqlite3.Connection):
+def get_deck_info(db: sqlite3.Connection) -> dict:
     """ Get information about decks.
 
     Args:
@@ -186,7 +184,7 @@ def get_deck_info(db: sqlite3.Connection):
 
 
 @lru_cache(CACHE_SIZE)
-def get_deck_names(db: sqlite3.Connection):
+def get_did2deck(db: sqlite3.Connection) -> Dict[str, str]:
     """ Mapping of deck IDs (did) to deck names.
 
     Args:
@@ -203,7 +201,7 @@ def get_deck_names(db: sqlite3.Connection):
 
 
 @lru_cache(CACHE_SIZE)
-def get_model_info(db: sqlite3.Connection):
+def get_model_info(db: sqlite3.Connection) -> dict:
     """ Get information about models.
 
     Args:
@@ -216,7 +214,7 @@ def get_model_info(db: sqlite3.Connection):
 
 
 @lru_cache(CACHE_SIZE)
-def get_model_names(db: sqlite3.Connection):
+def get_mid2model(db: sqlite3.Connection) -> Dict[str, str]:
     """ Mapping of model IDs (mid) to model names.
 
     Args:
@@ -233,14 +231,14 @@ def get_model_names(db: sqlite3.Connection):
 
 
 @lru_cache(CACHE_SIZE)
-def get_field_names(db: sqlite3.Connection):
-    """ Get names of the fields in the notes
+def get_mid2fields(db: sqlite3.Connection) -> Dict[str, List[str]]:
+    """ Get mapping of model ID to field names.
 
     Args:
         db: Databse (:class:`sqlite3.Connection`)
 
     Returns:
-        Dictionary mapping of model id to list of field names
+        Dictionary mapping of model ID (mid) to list of field names.
     """
     minfo = get_model_info(db)
     return {
@@ -251,59 +249,8 @@ def get_field_names(db: sqlite3.Connection):
     }
 
 
-# Trivially derived setters
-# ==============================================================================
-
-def set_notes(db: sqlite3.Connection, df: pd.DataFrame, mode: str) -> None:
-    """ Write notes table back into database.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-        df: :class:`pandas.DataFrame`
-        mode: 'update': Update only existing entries, 'append': Only append new
-            entries, but do not modify, 'replace': Append, modify and delete
-
-    Returns:
-        None
-    """
-    _set_table(db, df, "notes", mode)
-
-
-def set_cards(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
-    """ Write cards table back into database.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-        df: :class:`pandas.DataFrame`
-        mode: 'update': Update only existing entries, 'append': Only append new
-            entries, but do not modify, 'replace': Append, modify and delete
-
-    Returns:
-        None
-    """
-    _set_table(db, df, "cards", mode)
-
-
-def set_revs(db: sqlite3.Connection, df: pd.DataFrame, mode: str):
-    """ Write review table back into database.
-
-    Args:
-        db: Database (:class:`sqlite3.Connection`)
-        df: :class:`pandas.DataFrame`
-        mode: 'update': Update only existing entries, 'append': Only append new
-            entries, but do not modify, 'replace': Append, modify and delete
-
-    Returns:
-        None
-    """
-    _set_table(db, df, "revs", mode)
-
-
-# Merging information
-# ==============================================================================
-
 @lru_cache(CACHE_SIZE)
-def cid2nid(db: sqlite3.Connection) -> dict:
+def get_cid2nid(db: sqlite3.Connection) -> Dict[str, str]:
     """ Mapping card ID to note ID.
 
     Args:
@@ -317,7 +264,7 @@ def cid2nid(db: sqlite3.Connection) -> dict:
 
 
 @lru_cache(CACHE_SIZE)
-def cid2did(db: sqlite3.Connection) -> dict:
+def get_cid2did(db: sqlite3.Connection) -> Dict[str, str]:
     """ Mapping card ID to deck ID.
 
     Args:
@@ -331,7 +278,7 @@ def cid2did(db: sqlite3.Connection) -> dict:
 
 
 @lru_cache(CACHE_SIZE)
-def nid2mid(db: sqlite3.Connection) -> dict:
+def get_nid2mid(db: sqlite3.Connection) -> Dict[str, str]:
     """ Mapping note ID to model ID.
 
     Args:
@@ -342,83 +289,3 @@ def nid2mid(db: sqlite3.Connection) -> dict:
     """
     notes = get_table(db, "notes")
     return dict(zip(notes["id"].astype(str), notes["mid"].astype(str)))
-
-
-# fixme: This removes items whenever it can't merge!
-# todo: move to util
-# todo: id_add needs shouldn't have default
-def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
-              inplace=False, id_add="id", prepend="", replace=False,
-              prepend_clash_only=True, columns=None,
-              drop_columns=None):
-    """
-    Merge information from two dataframes.
-
-    Args:
-        df: Original :class:`pandas.DataFrame`
-        df_add: :class:`pandas.DataFrame` to be merged with original
-            :class:`pandas.DataFrame`
-        id_df: Column of original dataframe that contains the id along which
-            we merge.
-        inplace: If False, return new dataframe, else update old one
-        id_add: Column of the new dataframe that contains the id along which
-            we merge
-        prepend: Prepend a string to the column names from the new dataframe
-        replace: Replace columns
-        prepend_clash_only: Only prepend string to the column names from the
-            new dataframe if there is a name clash.
-        columns: Keep only these columns
-        drop_columns: Drop these columns
-
-    Returns:
-        New merged :class:`pandas.DataFrame`
-    """
-    # Careful: Do not drop the id column until later (else we can't merge)
-    # Still, we want to remove as much as possible here, because it's probably
-    # better performing
-    if columns:
-        df_add = df_add.drop(
-            set(df_add.columns)-(set(columns) | {id_add}), axis=1
-        )
-    if drop_columns:
-        df_add = df_add.drop(set(drop_columns) - {id_add}, axis=1)
-    # Careful: Rename columns after dropping unwanted ones
-    if prepend_clash_only:
-        col_clash = set(df.columns) & set(df_add.columns)
-        rename_dict = {
-            col: prepend + col for col in col_clash
-        }
-    else:
-        rename_dict = {
-            col: prepend + col for col in df_add.columns
-        }
-    df_add = df_add.rename(columns=rename_dict)
-    # Careful: Might have renamed id_add as well
-    if id_add in rename_dict:
-        id_add = rename_dict[id_add]
-
-    if replace:
-        # Simply remove all potential clashes
-        replaced_columns = set(df_add.columns).intersection(set(df.columns))
-        df = df.drop(replaced_columns, axis=1)
-
-    df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
-    # Now remove id_add if it was to be removed
-    # Careful: 'in' doesn't work with None
-    if (columns and id_add not in columns) or \
-            (drop_columns and id_add in drop_columns):
-        df_merge.drop(id_add, axis=1, inplace=True)
-
-    # todo: make optional
-    # Make sure we don't have two ID columns
-    new_id_add_col = id_add
-    if id_add in rename_dict:
-        new_id_add_col = rename_dict[id_add]
-    if new_id_add_col in df_merge.columns and id_df != new_id_add_col:
-        print("removing", new_id_add_col)
-        df_merge.drop(new_id_add_col, axis=1, inplace=True)
-
-    if inplace:
-        return replace_df_inplace(df, df_merge)
-    else:
-        return df_merge
