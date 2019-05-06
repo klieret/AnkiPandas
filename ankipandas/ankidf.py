@@ -61,6 +61,9 @@ class AnkiDataFrame(pd.DataFrame):
         #: Fields format: ``none``, ``list`` or ``columns`` or ``in_progress``
         self._fields_format = "none"
 
+        #: Overal structure of the dataframe ``anki``, ``ours``, ``in_progress``
+        self._df_format = None  # type: str
+
         # todo: is this serving any purpose? Coverage shows it never runs.
         if len(args) == 1 and isinstance(args[0], AnkiDataFrame):
             self._copy_attrs_from(args[0])
@@ -101,48 +104,16 @@ class AnkiDataFrame(pd.DataFrame):
             path = self.db_path
         self._load_db(convenience.db_path_input(path, user=user))
 
+        df = core.get_table(self.db, table)
+
         # Note: Conversion of dtypes happens first ==> use original
         # column names!
         dtypes = ankipandas.columns.dtype_casts[table]
-
-        df = core.get_table(self.db, table)
         df = df.astype(dtypes)  # type: pd.DataFrame
-        df.rename(
-            columns=ankipandas.columns.columns_anki2ours[table],
-            inplace=True
-        )
-
-        if table == "notes":
-            # Tags as list, rather than string joined by space
-            df["ntags"] = \
-                df["ntags"].apply(
-                    lambda joined: [item for item in joined.split(" ") if item]
-                )
-            # Fields as list, rather than as string joined by \x1f
-            df["nflds"] = df["nflds"].str.split("\x1f")
-
-            self._fields_format = "list"
-
-            # Model field
-            df["nmodel"] = df["mid"].map(core.get_model_names(self.db))
-
-        if table == "cards":
-            # Deck field
-            df["cdeck"] = df["did"].map(core.get_deck_names(self.db))
-
-        # We sometimes interpret cryptic numeric values
-        if table in ankipandas.columns.value_maps:
-            for column in ankipandas.columns.value_maps[table]:
-                df[column] = df[column].map(
-                    ankipandas.columns.value_maps[table][column]
-                )
-
-        drop_columns = \
-            set(df.columns) - set(ankipandas.columns.our_columns[table])
-        df.drop(drop_columns, axis=1, inplace=True)
-
         replace_df_inplace(self, df)
         self._anki_table = table
+        self._df_format = "anki"
+        self.normalize(inplace=True)
 
     @classmethod
     def _table_constructor(cls, path, user, table):
@@ -588,10 +559,58 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self["ntags"] = pd.Series([[]]*len(self))
 
-    # Writing
+    # Raw and normalized
     # ==========================================================================
 
-    def prepare_write(self, inplace=False):
+    def normalize(self, inplace=False):
+        if not inplace:
+            df = self.copy()
+            df.normalize(inplace=True)
+            return df
+
+        self._df_format = "in_progress"
+
+        table = self._anki_table
+        if table not in ["cards", "revs", "notes"]:
+            self._invalid_table()
+
+        self.rename(
+            columns=ankipandas.columns.columns_anki2ours[table],
+            inplace=True
+        )
+
+        if table == "notes":
+            # Tags as list, rather than string joined by space
+            self["ntags"] = \
+                self["ntags"].apply(
+                    lambda joined: [item for item in joined.split(" ") if item]
+                )
+            # Fields as list, rather than as string joined by \x1f
+            self["nflds"] = self["nflds"].str.split("\x1f")
+
+            self._fields_format = "list"
+
+            # Model field
+            self["nmodel"] = self["mid"].map(core.get_model_names(self.db))
+
+        if table == "cards":
+            # Deck field
+            self["cdeck"] = self["did"].map(core.get_deck_names(self.db))
+
+        # We sometimes interpret cryptic numeric values
+        if table in ankipandas.columns.value_maps:
+            for column in ankipandas.columns.value_maps[table]:
+                self[column] = self[column].map(
+                    ankipandas.columns.value_maps[table][column]
+                )
+
+        drop_columns = \
+            set(self.columns) - set(ankipandas.columns.our_columns[table])
+        self.drop(drop_columns, axis=1, inplace=True)
+
+        self._df_format = "ours"
+
+    def raw(self, inplace=False):
         if not inplace:
             df = self.copy()  # deep?
             df.prepare_write(inplace=True)
