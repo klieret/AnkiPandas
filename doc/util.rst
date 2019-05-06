@@ -13,4 +13,10 @@ Utilities
     :members:
     :undoc-members:
 
+.. automodule:: ankipandas.util.misc
+    :members:
+    :undoc-members:
 
+.. automodule:: ankipandas.util.checksum
+    :members:
+    :undoc-members:

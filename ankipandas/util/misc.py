@@ -14,6 +14,8 @@ def invert_dict(dct: dict) -> dict:
         :class:`ValueError` if values are not unique.
     """
     if not len(set(dct.values())) == len(dct.values()):
+        print(dct)
+        print(sorted(list(dct.values())))
         raise ValueError(
             "Dictionary does not seem to be invertible."
         )

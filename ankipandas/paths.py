@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-""" Convenience functions that allow to load pandas dataframe with all the
-desired columns in just one line of code."""
+""" Convenience functions to find the database and other system locations
+without the user having to specify full paths.
+"""
 
 # std
 import os
 import collections
+import datetime
 import pathlib
-import pandas as pd
 from functools import lru_cache
+import shutil
 from typing import Union
 
 # ours
@@ -88,7 +90,7 @@ def find_db(
             multiple databases matching your criteria.
 
     Raises:
-        :class:`ValueError` if none ore more than one result is found.
+        If none ore more than one result is found: :class:`ValueError`
 
     Returns:
         pathlib.Path to the anki2 database
@@ -167,7 +169,7 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
 
     1. If no path is given, we search through some default locations
     2. If path points to a file: Take that file
-    3. If path poitns to a directory: Search in that directory
+    3. If path points to a directory: Search in that directory
 
     Args:
         path: Path to database or search path or None
@@ -177,8 +179,8 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
         Path to anki database as :class:`pathlib.Path` object
 
     Raises:
-        :class:`FileNotFoundError` if path does not exist
-        :class:`ValueError` in various other cases
+        If path does not exist: :class:`FileNotFoundError`
+        In various other cases: :class:`ValueError`
     """
     if path is None:
         result = find_db(user=user)
@@ -203,3 +205,68 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
     else:
         raise ValueError("Database could not be found.")
 
+
+def db_backup_file_name() -> str:
+    """ Time based file name of the backup file. """
+    return "backup-ankipandas-{}.anki2".format(
+        datetime.datetime.now().strftime("%Y-%m-%d-%H.%M.%S.%f")
+    )
+
+
+def get_anki_backup_folder(
+        path: Union[str, pathlib.PurePath],
+        nexist="raise") -> pathlib.Path:
+    """ Return path to Anki backup folder.
+
+    Args:
+        path: Path to Aki database as :class:`pathlib.Path`
+        nexist: What to do if backup folder doesn't seem to exist: ``raise`` or
+            ``ignore``.
+
+    Returns:
+        Path to Anki backup folder as :class:`pathlib.Path`.
+    """
+    path = pathlib.Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(
+            "Database path {} seems to be invalid.".format(path)
+        )
+    backup_folder = path.parent / "backups"
+    if nexist == "raise" and not backup_folder.is_dir():
+        raise ValueError(
+            "Anki backup folder corresponding to database at {} doesn't seem"
+            " to exist. Perhaps you can specify a custom back "
+            "folder?".format(path)
+        )
+    return backup_folder
+
+
+def backup_db(db_path: Union[str, pathlib.PurePath],
+              backup_folder: Union[str, pathlib.PurePath] = None) \
+        -> pathlib.Path:
+    """
+    Back up database file.
+
+    Args:
+        db_path: Path to database
+        backup_folder: Path to backup folder. If None is given, the backup is
+            created in the Anki backup directory.
+
+    Returns:
+        Path to newly created backup file as :class:`pathlib.Path`.
+    """
+    db_path = pathlib.Path(db_path)
+    if backup_folder:
+        backup_folder = pathlib.Path(backup_folder)
+        if not backup_folder.is_dir():
+            log.debug("Creating backup directory {}".format(str(backup_folder)))
+            backup_folder.mkdir(parents=True)
+    else:
+        backup_folder = get_anki_backup_folder(db_path, nexist="raise")
+    if not db_path.is_file():
+        raise FileNotFoundError(
+            "Database does not seem to exist."
+        )
+    backup_path = backup_folder / db_backup_file_name()
+    shutil.copy2(str(db_path), str(backup_path))
+    return backup_path
