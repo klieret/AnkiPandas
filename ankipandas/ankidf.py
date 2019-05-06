@@ -8,8 +8,8 @@ import pandas as pd
 import pathlib
 
 # ours
-import ankipandas.convenience_functions as convenience
-import ankipandas.core_functions as core
+import ankipandas.paths
+import ankipandas.core as core
 from ankipandas.util.dataframe import replace_df_inplace
 import ankipandas.columns
 from ankipandas.util.misc import invert_dict
@@ -49,13 +49,14 @@ class AnkiDataFrame(pd.DataFrame):
         self.db = None  # type: sqlite3.Connection
 
         #: Path to Anki database that is opened as :attr:`.db`
+        #:   (:class:`pathlib.Path`)
         self.db_path = None  # type: pathlib.Path
 
         #: Type of anki table: 'notes', 'cards' or 'revlog'. This corresponds to
         #: the meaning of the ID row.
         self._anki_table = None  # type: str
 
-        #: Prefix for fields as columns
+        #: Prefix for fields as columns. Default is ``nfld_``.
         self.fields_as_columns_prefix = "nfld_"
 
         #: Fields format: ``none``, ``list`` or ``columns`` or ``in_progress``,
@@ -103,7 +104,7 @@ class AnkiDataFrame(pd.DataFrame):
     def _get_table(self, path, user, table):
         if not path:
             path = self.db_path
-        self._load_db(convenience.db_path_input(path, user=user))
+        self._load_db(ankipandas.paths.db_path_input(path, user=user))
 
         df = core.get_table(self.db, table)
         replace_df_inplace(self, df)
@@ -123,9 +124,11 @@ class AnkiDataFrame(pd.DataFrame):
         database.
 
         Args:
-            path: (Search) path to database see :func:`.db_path_input` for more
+            path: (Search) path to database see
+                :py:func:`~ankipandas.paths.db_path_input` for more
                 information.
-            user: Anki user name. See :func:`.db_path_input` for more
+            user: Anki user name. See
+                :py:func:`~ankipandas.paths.db_path_input` for more
                 information.
 
         Example:
@@ -144,9 +147,11 @@ class AnkiDataFrame(pd.DataFrame):
         database.
 
         Args:
-            path: (Search) path to database see :func:`.db_path_input` for more
+            path: (Search) path to database see
+                :func:`~ankipandas.paths.db_path_input` for more
                 information.
-            user: Anki user name. See :func:`.db_path_input` for more
+            user: Anki user name. See
+                :func:`~ankipandas.paths.db_path_input` for more
                 information.
 
         Example:
@@ -165,9 +170,11 @@ class AnkiDataFrame(pd.DataFrame):
         database.
 
         Args:
-            path: (Search) path to database see :func:`.db_path_input` for more
+            path: (Search) path to database see
+                :func:`~ankipandas.paths.db_path_input` for more
                 information.
-            user: Anki user name. See :func:`.db_path_input` for more
+            user: Anki user name. See
+                :func:`~ankipandas.paths.db_path_input` for more
                 information.
 
         Example:

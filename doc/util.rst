@@ -13,7 +13,3 @@ Utilities
     :members:
     :undoc-members:
 
-.. automodule:: ankipandas.util.docstrings
-    :members:
-    :undoc-members:
-

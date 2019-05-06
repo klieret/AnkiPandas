@@ -6,7 +6,7 @@ import shutil
 import tempfile
 
 # ours
-from ankipandas.core_functions import *
+from ankipandas.core import *
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
 from ankipandas.columns import our_columns
 

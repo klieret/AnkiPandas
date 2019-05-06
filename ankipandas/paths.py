@@ -7,7 +7,6 @@ desired columns in just one line of code."""
 import os
 import collections
 import pathlib
-import pandas as pd
 from functools import lru_cache
 from typing import Union
 

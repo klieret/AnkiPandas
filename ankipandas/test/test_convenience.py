@@ -11,7 +11,7 @@ from typing import List, Any
 from randomfiletree import sample_random_elements, iterative_gaussian_tree
 
 # ours
-import ankipandas.convenience_functions as convenience
+import ankipandas.paths as convenience
 from ankipandas.columns import *
 
 
