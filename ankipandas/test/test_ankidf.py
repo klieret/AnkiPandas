@@ -10,6 +10,8 @@ Everything else is tested here.
 import pathlib
 import unittest
 import copy
+import shutil
+import tempfile
 
 # 3rd
 import numpy as np
@@ -592,6 +594,28 @@ class TestAnkiDF(unittest.TestCase):
                     list(val_rest_1),
                     list(val_rest_2)
                 )
+
+    # Write
+    # ==========================================================================
+
+    def test_read_write_identical(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = shutil.copy2(str(self.db_path), tmpdir)
+            (pathlib.Path(tmpdir) / "backups").mkdir()
+            for table in self.adfs:
+                with self.subTest(table=table):
+                    adf = AnkiDF._table_constructor(
+                        path=db_path, user=None, table=table
+                    )
+                    adf.write("update")
+                    adf2 = AnkiDF._table_constructor(
+                        path=db_path, user=None, table=table
+                    )
+                    adf_old = AnkiDF._table_constructor(
+                        path=self.db_path, user=None, table=table
+                    )
+                    self.assertTrue(adf2.equals(adf_old))
+
 
     # Help
     # ==========================================================================

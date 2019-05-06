@@ -137,24 +137,58 @@ class TestRawWrite(unittest.TestCase):
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
-                notes2.loc[notes2["id"] == 1555579337683, "tags"] = "mytesttag"
+                notes2.loc[notes2["id"] == 1555579337683, "tags"] = \
+                    "definitelynew!"
                 set_table(self.db_write, notes2, "notes", mode)
                 if mode == "append":
                     self._check_db_equal()
                 else:
-                    notes2 = get_table(self.db_write, "notes")
-                    chtag = notes2.loc[notes2["id"] == 1555579337683, "tags"]
+                    notes2r = get_table(self.db_write, "notes")
+                    chtag = notes2r.loc[notes2r["id"] == 1555579337683, "tags"]
                     self.assertListEqual(
                         list(chtag.values.tolist()),
-                        ["mytesttag"]
+                        ["definitelynew!"]
                     )
                     unchanged = notes.loc[notes["id"] != 1555579337683, :]
-                    unchanged2 = notes2.loc[notes2["id"] != 1555579337683, :]
+                    unchanged2 = notes2r.loc[notes2["id"] != 1555579337683, :]
 
                     self.assertListEqual(
                         list(unchanged.values.tolist()),
                         list(unchanged2.values.tolist())
                     )
+
+    def test_update_append_does_not_delete(self):
+        notes = get_table(self.db_read, "notes")
+        cards = get_table(self.db_read, "cards")
+        revs = get_table(self.db_read, "revs")
+        notes.drop(notes.index)
+        cards.drop(cards.index)
+        revs.drop(revs.index)
+        for mode in ["update", "append"]:
+            with self.subTest(mode=mode):
+                self._reset()
+                set_table(self.db_write, notes, "notes", mode)
+                set_table(self.db_write, cards, "cards", mode)
+                set_table(self.db_write, revs, "revs", mode)
+                self._check_db_equal()
+
+    def test_replace_deletes(self):
+        notes = get_table(self.db_read, "notes")
+        cards = get_table(self.db_read, "cards")
+        revs = get_table(self.db_read, "revs")
+        notes = notes.drop(notes.index)
+        cards = cards.drop(cards.index)
+        revs = revs.drop(revs.index)
+        self._reset()
+        set_table(self.db_write, notes, "notes", "replace")
+        set_table(self.db_write, cards, "cards", "replace")
+        set_table(self.db_write, revs, "revs", "replace")
+        notes = get_table(self.db_write, "notes")
+        cards = get_table(self.db_write, "cards")
+        revs = get_table(self.db_write, "revs")
+        self.assertEqual(len(notes), 0)
+        self.assertEqual(len(revs), 0)
+        self.assertEqual(len(cards), 0)
 
 
 class TestMergeDfs(unittest.TestCase):

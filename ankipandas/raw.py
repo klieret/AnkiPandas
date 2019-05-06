@@ -103,9 +103,56 @@ def get_info(db: sqlite3.Connection) -> dict:
 # Basic Setters
 # ==============================================================================
 
+def _consolidate_tables(df: pd.DataFrame, df_old: pd.DataFrame, mode: str,
+                        id_column="id"):
+
+    if not list(df.columns) == list(df_old.columns):
+        raise ValueError("Columns do not match: Old: {}, New: {}".format(
+            ", ".join(df_old.columns), ", ".join(df.columns)
+        ))
+
+    old_indices = set(df_old[id_column])
+    new_indices = set(df[id_column])
+
+    # Get indices
+    # -----------
+
+    if mode == "update":
+        indices = set(old_indices)
+    elif mode == "append":
+        indices = set(new_indices) - set(old_indices)
+        if not indices:
+            log.warning(
+                "Was told to append to table, but there do not seem to be any"
+                " new entries. "
+            )
+    elif mode == "replace":
+        indices = set(new_indices)
+    else:
+        raise ValueError("Unknown mode '{}'.".format(mode))
+
+    df = df[df[id_column].isin(indices)]
+
+    # Apply
+    # -----
+
+    if mode == "update":
+        df_new = df_old.copy()
+        df_new.update(df)
+    elif mode == "append":
+        df_new = df_old.append(df, verify_integrity=True)
+    elif mode == "replace":
+        df_new = df.copy()
+    else:
+        raise ValueError("Unknown mode '{}'.".format(mode))
+
+    print(mode, df_new)
+    return df_new
+
+
+# fixme: update mode also can delete things if we do not have all rows
 def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
-              mode: str, id_column="id", same_columns=True,
-              drop_new_columns=True
+              mode: str, id_column="id",
               ) -> None:
     """
     Write table back to database.
@@ -114,49 +161,15 @@ def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
         db: Database (:class:`sqlite3.Connection`)
         df: The :class:`pandas.DataFrame` to write
         table: Table to write to: 'notes', 'cards', 'revs'
-        mode: 'update': Update only existing entries, 'append': Only append new
+        mode: 'update': Update all existing entries, 'append': Only append new
             entries, but do not modify, 'replace': Append, modify and delete
-        same_columns: Check that the columns will stay exactly the same
-        drop_new_columns: Drop any columns that are in the new dataframe
-            but not in the old table.
-
     Returns:
         None
     """
     df_old = get_table(db, table)
-    old_indices = set(df_old[id_column])
-    new_indices = set(df[id_column])
-    if mode == "update":
-        indices = set(old_indices)
-    elif mode == "append":
-        indices = set(new_indices) - set(old_indices)
-        if not indices:
-            log.warning(
-                "Was told to append to table, but there do not seem to be any"
-                " new entries. Returning doing nothing."
-            )
-            return
-    elif mode == "replace":
-        indices = set(new_indices)
-    else:
-        raise ValueError("Unknown mode '{}'.".format(mode))
-    # Remove everything not indices
-    # fixme: Do we need to make a deepcopy?
-    df = df[df[id_column].isin(indices)]
-    old_cols = list(df_old.columns)
-    new_cols = list(df.columns)
-    if drop_new_columns:
-        df.drop(set(new_cols) - set(old_cols), axis=1, inplace=True)
-    if same_columns:
-        if not set(df.columns) == set(df_old.columns):
-            raise ValueError("Columns do not match: Old: {}, New: {}".format(
-                ", ".join(df_old.columns), ", ".join(df.columns)
-            ))
-    if mode == "append":
-        if_exists = "append"
-    else:
-        if_exists = "replace"
-    df.to_sql(tables_ours2anki[table], db, if_exists=if_exists, index=False)
+    df_new = _consolidate_tables(df=df, df_old=df_old, mode=mode,
+                                 id_column=id_column)
+    df_new.to_sql(tables_ours2anki[table], db, if_exists="replace", index=False)
 
 
 # Trivially derived getters
