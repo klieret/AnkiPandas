@@ -22,7 +22,7 @@ class AnkiDataFrame(pd.DataFrame):
     #: :class:`pandas.DataFrame` does not posess. These will be copied in the
     #: constructor.
     _attributes = ("db", "db_path", "_anki_table", "fields_as_columns_prefix",
-                   "_fields_format")
+                   "_fields_format", "_df_format")
 
     def __init__(self, *args, **kwargs):
         """ Initializes a blank :class:`AnkiDataFrame`.
@@ -189,6 +189,33 @@ class AnkiDataFrame(pd.DataFrame):
     def _invalid_table(self):
         raise ValueError("Invalid table: {}.".format(self._anki_table))
 
+    def _check_df_format(self):
+        if self._df_format == "in_progress":
+            raise ValueError(
+                "Previous call to normalize() or raw() did not terminate "
+                "succesfully. This is usually a very bad sign, but you can "
+                "try calling them again with the force option: raw(force=True) "
+                "or raw(force=True) and see if that works."
+            )
+        elif self._df_format == "anki":
+            pass
+        elif self._df_format == "ours":
+            pass
+        else:
+            raise ValueError(
+                "Unknown value of _df_format: {}".format(self._df_format)
+            )
+
+    def _check_our_format(self):
+        self._check_df_format()
+        if not self._df_format == "ours":
+            raise ValueError(
+                "This operation is not supported for AnkiDataFrames in the "
+                "'raw' format. Perhaps you called raw() before or used the "
+                "raw=True option when loading? You can try switching to the "
+                "required format using the normalize() method."
+            )
+
     # IDs
     # ==========================================================================
 
@@ -197,6 +224,7 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def nid(self):
         """ Note ID as :class:`pandas.Series` of strings. """
+        self._check_our_format()
         if self._anki_table in ["notes", "cards"]:
             if "nid" not in self.columns:
                 raise ValueError(
@@ -213,6 +241,7 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def cid(self):
         """ Card ID as :class:`pandas.Series` of strings. """
+        self._check_our_format()
         if self._anki_table in ["cards", "revs"]:
             if "cid" not in self.columns:
                 raise ValueError(
@@ -232,6 +261,7 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def mid(self):
         """ Model ID as :class:`pandas.Series` of strings. """
+        self._check_our_format()
         if self._anki_table in ["notes"]:
             if "nmodel" not in self.columns:
                 raise ValueError(
@@ -255,6 +285,7 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def did(self):
         """ Deck ID as :class:`pandas.Series` of strings. """
+        self._check_our_format()
         if self._anki_table == "cards":
             if "cdeck" not in self.columns:
                 raise ValueError(
@@ -292,6 +323,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
+        self._check_our_format()
         return core.merge_dfs(
             df=self,
             df_add=AnkiDataFrame.notes(self.db_path),
@@ -322,6 +354,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
+        self._check_our_format()
         return core.merge_dfs(
             df=self,
             df_add=AnkiDataFrame.cards(self.db_path),
@@ -349,6 +382,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
+        self._check_our_format()
         if not inplace:
             df = self.copy(True)
             df.fields_as_columns(inplace=True)
@@ -406,6 +440,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
+        self._check_our_format()
         if not inplace:
             df = self.copy()  # deep?
             df.fields_as_list(
@@ -469,6 +504,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             Boolean :class:`pd.Series`
         """
+        self._check_our_format()
         self._check_tag_col()
 
         if isinstance(tags, str):
@@ -495,6 +531,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             Boolean :class:`pd.Series`
         """
+        self._check_our_format()
         if tags is None:
             return self.has_tag(None)
         self._check_tag_col()
@@ -513,6 +550,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
+        self._check_our_format()
         if not inplace:
             df = self.copy()  # deep?
             df.add_tag(tags, inplace=True)
@@ -540,6 +578,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
+        self._check_our_format()
         if not inplace:
             df = self.copy()  # deep?
             df.remove_tag(tags, inplace=True)
@@ -562,17 +601,26 @@ class AnkiDataFrame(pd.DataFrame):
     # Raw and normalized
     # ==========================================================================
 
-    def normalize(self, inplace=False):
+    def normalize(self, inplace=False, force=False):
         if not inplace:
             df = self.copy()
-            df.normalize(inplace=True)
+            df.normalize(inplace=True, force=force)
             return df
 
-        self._df_format = "in_progress"
+        if not force:
+            self._check_df_format()
+            if self._df_format == "ours":
+                log.warning(
+                    "Dataframe already is in our format. "
+                    "Returning without doing anything."
+                )
+                return
 
         table = self._anki_table
         if table not in ["cards", "revs", "notes"]:
             self._invalid_table()
+
+        self._df_format = "in_progress"
 
         self.rename(
             columns=ankipandas.columns.columns_anki2ours[table],
@@ -610,15 +658,27 @@ class AnkiDataFrame(pd.DataFrame):
 
         self._df_format = "ours"
 
-    def raw(self, inplace=False):
+    # todo: doc
+    def raw(self, inplace=False, force=False):
         if not inplace:
             df = self.copy()  # deep?
-            df.prepare_write(inplace=True)
+            df.prepare_write(inplace=True, force=force)
             return df
+
+        if not force:
+            self._check_df_format()
+            if self._df_format == "anki":
+                log.warning(
+                    "Dataframe already is in Anki format. "
+                    "Returning without doing anything."
+                )
+                return
 
         table = self._anki_table
         if table not in ["revs", "cards", "notes"]:
             self._invalid_table()
+
+        self._df_format = "in_progress"
 
         # Fields & Hashes
         # ---------------
@@ -700,9 +760,13 @@ class AnkiDataFrame(pd.DataFrame):
         for col in new.columns:
             self[col] = new[col]
 
+        self._df_format = "anki"
+
     # Help
     # ==========================================================================
 
+    # todo: supply only column option. Also just print description if narrowed
+    #   down to only one item!
     def help_cols(self, column='auto', table='all', ankicolumn='all') \
             -> pd.DataFrame:
         """
