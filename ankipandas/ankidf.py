@@ -13,13 +13,16 @@ import ankipandas.core_functions as core
 from ankipandas.util.dataframe import replace_df_inplace
 import ankipandas.columns
 from ankipandas.util.misc import invert_dict
+from ankipandas.util.log import log
+from ankipandas.hash import field_checksum
 
 
 class AnkiDataFrame(pd.DataFrame):
     #: Additional attributes of a :class:`AnkiDataFrame` that a normal
     #: :class:`pandas.DataFrame` does not posess. These will be copied in the
     #: constructor.
-    _attributes = ("db", "db_path", "_anki_table")
+    _attributes = ("db", "db_path", "_anki_table", "fields_as_columns_prefix",
+                   "_fields_format")
 
     def __init__(self, *args, **kwargs):
         """ Initializes a blank :class:`AnkiDataFrame`.
@@ -37,8 +40,6 @@ class AnkiDataFrame(pd.DataFrame):
                 :class:`pandas.DataFrame`.
         """
         super().__init__(*args, **kwargs)
-        if len(args) == 1 and isinstance(args[0], AnkiDataFrame):
-            self._copy_attrs_from(args[0])
 
         # IMPORTANT: Make sure to add all attributes to the class variable
         # :attr:`._attributes`. Also all of them have to be initialized as None!
@@ -55,7 +56,14 @@ class AnkiDataFrame(pd.DataFrame):
         self._anki_table = None  # type: str
 
         #: Prefix for fields as columns
-        self.fields_as_columns_prefix = "fld_"
+        self.fields_as_columns_prefix = "nfld_"
+
+        #: Fields format: ``none``, ``list`` or ``columns`` or ``in_progress``
+        self._fields_format = "none"
+
+        # todo: is this serving any purpose? Coverage shows it never runs.
+        if len(args) == 1 and isinstance(args[0], AnkiDataFrame):
+            self._copy_attrs_from(args[0])
 
     @property
     def _constructor(self):
@@ -113,6 +121,8 @@ class AnkiDataFrame(pd.DataFrame):
             # Fields as list, rather than as string joined by \x1f
             df["nflds"] = df["nflds"].str.split("\x1f")
 
+            self._fields_format = "list"
+
             # Model field
             df["nmodel"] = df["mid"].map(core.get_model_names(self.db))
 
@@ -120,7 +130,7 @@ class AnkiDataFrame(pd.DataFrame):
             # Deck field
             df["cdeck"] = df["did"].map(core.get_deck_names(self.db))
 
-        # For example we sometimes interpret cryptic numeric values
+        # We sometimes interpret cryptic numeric values
         if table in ankipandas.columns.value_maps:
             for column in ankipandas.columns.value_maps[table]:
                 df[column] = df[column].map(
@@ -129,8 +139,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         drop_columns = \
             set(df.columns) - set(ankipandas.columns.our_columns[table])
-        for drop_column in drop_columns:
-            df.drop(drop_column, axis=1, inplace=True)
+        df.drop(drop_columns, axis=1, inplace=True)
 
         replace_df_inplace(self, df)
         self._anki_table = table
@@ -369,29 +378,51 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
+        if not inplace:
+            df = self.copy(True)
+            df.fields_as_columns(inplace=True)
+            return df
+
         if "nflds" not in self.columns:
             raise ValueError(
                 "Could not find fields column 'nflds'."
             )
+
+        if self._fields_format == "columns":
+            log.warning(
+                "Fields are already as columns."
+                " Returning without doing anything."
+            )
+            return
+        elif self._fields_format == "in_progress":
+            raise ValueError(
+                "It looks like the last call to fields_as_list or"
+                "fields_as_columns was not successful, so you better start "
+                "over."
+            )
+        elif self._fields_format == "list":
+            pass
+        else:
+            raise ValueError(
+                "Unknown _fields_format: {}".format(self._fields_format)
+            )
+
+        self._fields_format = "in_progress"
         # fixme: What if one field column is one that is already in use?
         prefix = self.fields_as_columns_prefix
-        if inplace:
-            mids = self.mid.unique()
-            for mid in mids:
-                df_model = self[self.mid == mid]
-                fields = pd.DataFrame(df_model["nflds"].tolist())
-                field_names = core.get_field_names(self.db)[str(mid)]
-                for field in field_names:
-                    if prefix + field not in self.columns:
-                        self[prefix + field] = ""
-                for ifield, field in enumerate(field_names):
-                    self.loc[self.mid == mid, [prefix + field]] = \
-                        fields[ifield].tolist()
-            self.drop("nflds", axis=1, inplace=True)
-        else:
-            df = self.copy(True)
-            df.fields_as_columns(inplace=True)
-            return df
+        mids = self.mid.unique()
+        for mid in mids:
+            df_model = self[self.mid == mid]
+            fields = pd.DataFrame(df_model["nflds"].tolist())
+            field_names = core.get_field_names(self.db)[str(mid)]
+            for field in field_names:
+                if prefix + field not in self.columns:
+                    self[prefix + field] = ""
+            for ifield, field in enumerate(field_names):
+                self.loc[self.mid == mid, [prefix + field]] = \
+                    fields[ifield].tolist()
+        self.drop("nflds", axis=1, inplace=True)
+        self._fields_format = "columns"
 
     def fields_as_list(self, inplace=False):
         """
@@ -404,29 +435,46 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
-        if inplace:
-            mids = self.mid.unique()
-            to_drop = []
-            for mid in mids:
-                fields = core.get_field_names(self.db)[str(mid)]
-                fields = [
-                    self.fields_as_columns_prefix + field for field in fields
-                ]
-                print(mid, fields)
-                print(self[fields])
-                print(pd.Series(self[fields].values.tolist()))
-                self.loc[self.mid == mid, "nflds"] = \
-                    pd.Series(self[fields].values.tolist())
-                # Careful: Do not delete the fields here yet, other models
-                # might still use them
-                to_drop.extend(fields)
-            self.drop(to_drop, axis=1, inplace=True)
-        else:
+        if not inplace:
             df = self.copy()  # deep?
             df.fields_as_list(
                 inplace=True,
             )
             return df
+
+        if self._fields_format == "list":
+            log.warning(
+                "Fields are already as list. Returning without doing anything."
+            )
+            return
+        elif self._fields_format == "in_progress":
+            raise ValueError(
+                "It looks like the last call to fields_as_list or"
+                "fields_as_columns was not successful, so you better start "
+                "over."
+            )
+        elif self._fields_format == "columns":
+            pass
+        else:
+            raise ValueError(
+                "Unknown _fields_format: {}".format(self._fields_format)
+            )
+
+        self._fields_format = "in_progress"
+        mids = self.mid.unique()
+        to_drop = []
+        for mid in mids:
+            fields = core.get_field_names(self.db)[str(mid)]
+            fields = [
+                self.fields_as_columns_prefix + field for field in fields
+            ]
+            self.loc[self.mid == mid, "nflds"] = \
+                pd.Series(self[fields].values.tolist())
+            # Careful: Do not delete the fields here yet, other models
+            # might still use them
+            to_drop.extend(fields)
+        self.drop(to_drop, axis=1, inplace=True)
+        self._fields_format = "fields"
 
     # Quick access
     # ==========================================================================
@@ -539,6 +587,99 @@ class AnkiDataFrame(pd.DataFrame):
 
         else:
             self["ntags"] = pd.Series([[]]*len(self))
+
+    # Writing
+    # ==========================================================================
+
+    def prepare_write(self, inplace=False):
+        if not inplace:
+            df = self.copy()  # deep?
+            df.prepare_write(inplace=True)
+            return df
+
+        table = self._anki_table
+        if table not in ["revs", "cards", "notes"]:
+            self._invalid_table()
+
+        # Fields & Hashes
+        # ---------------
+
+        if table == "notes":
+            if not self._fields_format == "list":
+                self.fields_as_columns(inplace=True)
+            # Check if success
+            if not self._fields_format == "list":
+                raise ValueError(
+                    "It looks like the last call to fields_as_list or"
+                    "fields_as_columns was not successful, so you better start "
+                    "over."
+                )
+
+            self["ncsum"] = self["nflds"].apply(
+                lambda lst: field_checksum(lst[0])
+            )
+
+            self["nflds"] = self["nflds"].str.join("\x1f")
+
+        # Tags
+        # ----
+
+        if table == "notes" and "nflds" in self.columns:
+            self["ntags"] = self["ntags"].str.join(" ")
+
+        # IDs
+        # ---
+
+        if table in ["revlog", "cards"] and "cdeck" in self.columns:
+            self["did"] = self["cdeck"].map(
+                invert_dict(core.get_deck_names(self.db))
+            )
+        if table == "notes" and "nmodel" in self.columns:
+            self["mid"] = self["nmodel"].map(
+                invert_dict(core.get_model_names(self.db))
+            )
+
+        # Maps
+        # ----
+
+        if table in ankipandas.columns.value_maps:
+            for column in ankipandas.columns.value_maps[table]:
+                if column not in self.columns:
+                    continue
+                self[column] = self[column].map(
+                    invert_dict(ankipandas.columns.value_maps[table][column])
+                )
+
+        # Renames
+        # -------
+
+        self.rename(
+            columns=invert_dict(ankipandas.columns.columns_anki2ours[table]),
+            inplace=True
+        )
+
+        # Dtypes
+        # ------
+
+        for column, type in ankipandas.columns.dtype_casts_back[table].items():
+            self[column] = self[column].astype(type)
+
+        # Unused columns
+        # --------------
+
+        if table in ["cards", "notes"]:
+            self["data"] = ""
+            self["flags"] = 0
+
+        # Drop and Rearrange
+        # ------------------
+
+        new = pd.DataFrame(
+            self[ankipandas.columns.anki_columns[table]]
+        )
+        self.drop(self.columns, axis=1, inplace=True)
+        for col in new.columns:
+            self[col] = new[col]
 
     # Help
     # ==========================================================================

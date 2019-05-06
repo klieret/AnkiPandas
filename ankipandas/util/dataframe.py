@@ -16,6 +16,7 @@ def replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
     Returns:
         None
     """
+    # Drop all ROWs (not columns)
     if df.index.any():
         df.drop(df.index, inplace=True)
     for col in df_new.columns:

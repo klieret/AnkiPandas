@@ -31,6 +31,54 @@ our_columns = {
     for table in our_tables
 }
 
+# hard code this here, because order is important
+anki_columns = {
+    "cards": [
+        'id',
+        'nid',
+        'did',
+        'ord',
+        'mod',
+        'usn',
+        'type',
+        'queue',
+        'due',
+        'ivl',
+        'factor',
+        'reps',
+        'lapses',
+        'left',
+        'odue',
+        'odid',
+        'flags',
+        'data'
+    ],
+    "notes": [
+        'id',
+        'guid',
+        'mid',
+        'mod',
+        'usn',
+        'tags',
+        'flds',
+        'sfld',
+        'csum',
+        'flags',
+        'data',
+    ],
+    "revs": [
+        'id',
+        'cid',
+        'usn',
+        'ease',
+        'ivl',
+        'lastIvl',
+        'factor',
+        'time',
+        'type'
+    ]
+}
+
 columns_ours2anki = {
     table: dict(zip(
         fields_df[fields_df["Table"] == table]["Column"],
@@ -77,4 +125,11 @@ dtype_casts = {
     "notes": {"id": str, "mid": str},
     "cards": {"id": str, "nid": str, "did": str},
     "revs": {"id": str, "cid": str}
+}
+
+# todo: more precise?
+dtype_casts_back = {
+    "notes": {"id": int, "mid": int},
+    "cards": {"id": int, "nid": int, "did": int},
+    "revs": {"id": int, "cid": int}
 }
