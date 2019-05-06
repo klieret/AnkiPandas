@@ -11,7 +11,7 @@ from typing import List, Any
 from randomfiletree import sample_random_elements, iterative_gaussian_tree
 
 # ours
-import ankipandas.paths as convenience
+import ankipandas.paths as paths
 from ankipandas._columns import *
 
 
@@ -74,26 +74,26 @@ class TestFindDatabase(unittest.TestCase):
 
     def test_db_path_input_nexist(self):
         with self.assertRaises(FileNotFoundError):
-            convenience.db_path_input("/x/y/z")
+            paths.db_path_input("/x/y/z")
 
     def test_db_path_input_multiple(self):
         with self.assertRaises(ValueError):
-            convenience.db_path_input(self.dirs["multiple"].name)
+            paths.db_path_input(self.dirs["multiple"].name)
 
     def test_db_path_input_nothing(self):
         with self.assertRaises(ValueError):
-            convenience.db_path_input(self.dirs["nothing"].name)
+            paths.db_path_input(self.dirs["nothing"].name)
 
     def test_db_path_input_perfect(self):
         self.assertEqual(
-            convenience.db_path_input(self.dirs["perfect"].name),
+            paths.db_path_input(self.dirs["perfect"].name),
             self.dbs["perfect"][0]
         )
 
     def test__find_database(self):
         for d in self.dirs:
             a = sorted(map(str, flatten_list(
-                convenience._find_db(
+                paths._find_db(
                     self.dirs[d].name, maxdepth=None, break_on_first=False
                 ).values()
             )))
@@ -103,7 +103,7 @@ class TestFindDatabase(unittest.TestCase):
     def test__find_database_filename(self):
         # If doesn't exist
         self.assertEqual(
-            convenience._find_db(
+            paths._find_db(
                 Path("abc/myfilename.txt"), filename="myfilename.txt"
             ),
             {}
@@ -114,23 +114,23 @@ class TestFindDatabase(unittest.TestCase):
         dir_path.mkdir()
         file_path.touch()
         self.assertEqual(
-            convenience._find_db(file_path, filename="myfilename.txt"),
+            paths._find_db(file_path, filename="myfilename.txt"),
             collections.defaultdict(list, {"myfolder": [file_path]})
         )
         tmpdir.cleanup()
 
     def test_find_database(self):
         with self.assertRaises(ValueError):
-            convenience.find_db(
+            paths.find_db(
                 self.dirs["nothing"].name, break_on_first=False
             )
         with self.assertRaises(ValueError):
-            convenience.find_db(
+            paths.find_db(
                 self.dirs["multiple"].name, break_on_first=False
             )
             print(self.dbs["multiple"])
         self.assertEqual(
-            str(convenience.find_db(
+            str(paths.find_db(
                 self.dirs["perfect"].name, break_on_first=False
             )),
             str(self.dbs["perfect"][0])
@@ -139,6 +139,63 @@ class TestFindDatabase(unittest.TestCase):
     def tearDown(self):
         for d in self.dirs.values():
             d.cleanup()
+
+
+class TestBackup(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.tmpdir_path = Path(self.tmpdir.name)
+        (self.tmpdir_path / "collection.anki2").touch()
+        (self.tmpdir_path / "backups").mkdir()
+
+        self.tmpdir_only_db = tempfile.TemporaryDirectory()
+        self.tmpdir_only_db_path = Path(self.tmpdir_only_db.name)
+        (self.tmpdir_only_db_path / "collection.anki2").touch()
+
+    def tearDown(self):
+        self.tmpdir.cleanup()
+        self.tmpdir_only_db.cleanup()
+
+    def test_get_anki_backup_folder(self):
+        self.assertEqual(
+            str(paths.get_anki_backup_folder(
+                self.tmpdir_path / "collection.anki2")
+            ),
+            str(self.tmpdir_path / "backups")
+        )
+
+    def test_get_anki_backup_folder_raise(self):
+        with self.assertRaises(FileNotFoundError):
+            paths.get_anki_backup_folder(self.tmpdir_path / "asdf")
+        with self.assertRaises(ValueError):
+            paths.get_anki_backup_folder(
+                self.tmpdir_only_db_path / "collection.anki2"
+            )
+        paths.get_anki_backup_folder(
+            self.tmpdir_only_db_path / "collection.anki2",
+            nexist="ignore"
+        )
+
+    def test_backup_db_auto(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "collection.anki2"
+            db_path.touch()
+            backup_folder = db_path.parent / "backups"
+            backup_folder.mkdir()
+            backup_path = paths.backup_db(db_path)
+            self.assertTrue(backup_path.is_file())
+            self.assertTrue(backup_path.parent == backup_folder)
+
+    def test_backup_db_custom(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "collection.anki2"
+            db_path.touch()
+            backup_folder = db_path.parent / "myfolder"
+            backup_path = paths.backup_db(
+                db_path, backup_folder=backup_folder
+            )
+            self.assertTrue(backup_path.is_file())
+            self.assertTrue(backup_path.parent == backup_folder)
 
 
 if __name__ == "__main__":

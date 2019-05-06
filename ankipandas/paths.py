@@ -7,8 +7,10 @@ without the user having to specify full paths.
 # std
 import os
 import collections
+import datetime
 import pathlib
 from functools import lru_cache
+import shutil
 from typing import Union
 
 # ours
@@ -202,3 +204,68 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
         return result
     else:
         raise ValueError("Database could not be found.")
+
+
+def db_backup_file_name() -> str:
+    """ Time based file name of the backup file. """
+    return "backup-ankipandas-{}.anki2".format(
+        datetime.datetime.now().strftime("%Y-%m-%d-%H.%M.%S.%f")
+    )
+
+
+def get_anki_backup_folder(
+        path: Union[str, pathlib.PurePath],
+        nexist="raise") -> pathlib.Path:
+    """ Return path to Anki backup folder.
+
+    Args:
+        path: Path to Aki database as :class:`pathlib.Path`
+        nexist: What to do if backup folder doesn't seem to exist: ``raise`` or
+            ``ignore``.
+
+    Returns:
+        Path to Anki backup folder as :class:`pathlib.Path`.
+    """
+    path = pathlib.Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(
+            "Database path {} seems to be invalid.".format(path)
+        )
+    backup_folder = path.parent / "backups"
+    if nexist == "raise" and not backup_folder.is_dir():
+        raise ValueError(
+            "Anki backup folder corresponding to database at {} doesn't seem"
+            "to exist.".format(path)
+        )
+    return backup_folder
+
+
+def backup_db(db_path: Union[str, pathlib.PurePath],
+              backup_folder: Union[str, pathlib.PurePath] = None) \
+        -> pathlib.Path:
+    """
+    Back up database file.
+
+    Args:
+        db_path: Path to database
+        backup_folder: Path to backup folder. If None is given, the backup is
+            created in the Anki backup directory.
+
+    Returns:
+        Path to newly created backup file as :class:`pathlib.Path`.
+    """
+    db_path = pathlib.Path(db_path)
+    if backup_folder:
+        backup_folder = pathlib.Path(backup_folder)
+        if not backup_folder.is_dir():
+            log.debug("Creating backup directory {}".format(str(backup_folder)))
+            backup_folder.mkdir(parents=True)
+    else:
+        backup_folder = get_anki_backup_folder(db_path, nexist="raise")
+    if not db_path.is_file():
+        raise FileNotFoundError(
+            "Database does not seem to exist."
+        )
+    backup_path = backup_folder / db_backup_file_name()
+    shutil.copy2(str(db_path), str(backup_path))
+    return backup_path

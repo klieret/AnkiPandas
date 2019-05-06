@@ -103,10 +103,6 @@ def get_info(db: sqlite3.Connection) -> dict:
 # Basic Setters
 # ==============================================================================
 
-# fixme: Table names changed
-# fixme: Need to change data types again
-# fixme: need to pop first letters
-# fixme: id_column is now dependent
 def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
               mode: str, id_column="id", same_columns=True,
               drop_new_columns=True
@@ -130,8 +126,6 @@ def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
     df_old = get_table(db, table)
     old_indices = set(df_old[id_column])
     new_indices = set(df[id_column])
-    print("old indices", old_indices)
-    print("new indices", new_indices)
     if mode == "update":
         indices = set(old_indices)
     elif mode == "append":
