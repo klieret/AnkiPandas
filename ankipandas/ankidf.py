@@ -609,6 +609,41 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self["ntags"] = pd.Series([[]]*len(self))
 
+    # Compare
+    # ==========================================================================
+
+    def was_modified(self, _force=False):
+        """ Compare with original table, show which rows have changed.
+
+        Args:
+            _force: internal use
+
+        Returns:
+            Boolean value for each row, showing if it was modified. New rows
+            are considered to be modified as well.
+        """
+        if not _force:
+            self._check_our_format()
+
+        comparison = self._table_constructor(
+            self.db_path, None, self._anki_table
+        )
+
+        # Need to align both frames.
+
+    def is_new(self, _force=False):
+        """ Compare with original table, show which rows have changed.
+
+        Args:
+            _force: internal use
+
+        Returns:
+            Boolean value for each row, showing if it was modified. New rows
+            are considered to be modified as well.
+        """
+        if not _force:
+            self._check_our_format()
+
     # Raw and normalized
     # ==========================================================================
 
