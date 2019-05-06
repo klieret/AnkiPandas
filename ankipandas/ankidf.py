@@ -58,8 +58,9 @@ class AnkiDataFrame(pd.DataFrame):
         #: Prefix for fields as columns
         self.fields_as_columns_prefix = "nfld_"
 
-        #: Fields format: ``none``, ``list`` or ``columns`` or ``in_progress``
-        self._fields_format = "none"
+        #: Fields format: ``none``, ``list`` or ``columns`` or ``in_progress``,
+        #:   or ``anki`` (default)
+        self._fields_format = "anki"
 
         #: Overal structure of the dataframe ``anki``, ``ours``, ``in_progress``
         self._df_format = None  # type: str
@@ -105,11 +106,6 @@ class AnkiDataFrame(pd.DataFrame):
         self._load_db(convenience.db_path_input(path, user=user))
 
         df = core.get_table(self.db, table)
-
-        # Note: Conversion of dtypes happens first ==> use original
-        # column names!
-        dtypes = ankipandas.columns.dtype_casts[table]
-        df = df.astype(dtypes)  # type: pd.DataFrame
         replace_df_inplace(self, df)
         self._anki_table = table
         self._df_format = "anki"
@@ -183,6 +179,13 @@ class AnkiDataFrame(pd.DataFrame):
 
         """
         return cls._table_constructor(path, user, "revs")
+
+    # Fixes
+    # ==========================================================================
+
+    # todo: skip in doc
+    def equals(self, other):
+        return pd.DataFrame(self).equals(other)
 
     # ==========================================================================
 
@@ -622,10 +625,40 @@ class AnkiDataFrame(pd.DataFrame):
 
         self._df_format = "in_progress"
 
+        # Dtypes
+        # ------
+
+        for column, type in ankipandas.columns.dtype_casts[table].items():
+            self[column] = self[column].astype(type)
+
+        # Renames
+        # -------
+
         self.rename(
             columns=ankipandas.columns.columns_anki2ours[table],
             inplace=True
         )
+
+        # Value maps
+        # ----------
+        # We sometimes interpret cryptic numeric values
+
+        if table in ankipandas.columns.value_maps:
+            for column in ankipandas.columns.value_maps[table]:
+                self[column] = self[column].map(
+                    ankipandas.columns.value_maps[table][column]
+                )
+
+        # IDs
+        # ---
+
+        if table == "cards":
+            self["cdeck"] = self["did"].map(core.get_deck_names(self.db))
+        elif table == "notes":
+            self["nmodel"] = self["mid"].map(core.get_model_names(self.db))
+
+        # Tags
+        # ----
 
         if table == "notes":
             # Tags as list, rather than string joined by space
@@ -633,24 +666,17 @@ class AnkiDataFrame(pd.DataFrame):
                 self["ntags"].apply(
                     lambda joined: [item for item in joined.split(" ") if item]
                 )
+
+        # Fields
+        # ------
+
+        if table == "notes":
             # Fields as list, rather than as string joined by \x1f
             self["nflds"] = self["nflds"].str.split("\x1f")
-
             self._fields_format = "list"
 
-            # Model field
-            self["nmodel"] = self["mid"].map(core.get_model_names(self.db))
-
-        if table == "cards":
-            # Deck field
-            self["cdeck"] = self["did"].map(core.get_deck_names(self.db))
-
-        # We sometimes interpret cryptic numeric values
-        if table in ankipandas.columns.value_maps:
-            for column in ankipandas.columns.value_maps[table]:
-                self[column] = self[column].map(
-                    ankipandas.columns.value_maps[table][column]
-                )
+        # Drop columns
+        # ------------
 
         drop_columns = \
             set(self.columns) - set(ankipandas.columns.our_columns[table])
@@ -662,7 +688,7 @@ class AnkiDataFrame(pd.DataFrame):
     def raw(self, inplace=False, force=False):
         if not inplace:
             df = self.copy()  # deep?
-            df.prepare_write(inplace=True, force=force)
+            df.raw(inplace=True, force=force)
             return df
 
         if not force:
@@ -679,6 +705,9 @@ class AnkiDataFrame(pd.DataFrame):
             self._invalid_table()
 
         self._df_format = "in_progress"
+
+        # Note: Here we pretty much go through self.normalize() and revert
+        # every single step. Opposite order of course!
 
         # Fields & Hashes
         # ---------------
@@ -709,7 +738,7 @@ class AnkiDataFrame(pd.DataFrame):
         # IDs
         # ---
 
-        if table in ["revlog", "cards"] and "cdeck" in self.columns:
+        if table == "cards" and "cdeck" in self.columns:
             self["did"] = self["cdeck"].map(
                 invert_dict(core.get_deck_names(self.db))
             )
@@ -718,8 +747,8 @@ class AnkiDataFrame(pd.DataFrame):
                 invert_dict(core.get_model_names(self.db))
             )
 
-        # Maps
-        # ----
+        # Value Maps
+        # ----------
 
         if table in ankipandas.columns.value_maps:
             for column in ankipandas.columns.value_maps[table]:

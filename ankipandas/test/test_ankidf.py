@@ -11,6 +11,9 @@ import pathlib
 import unittest
 import copy
 
+# 3rd
+import pandas as pd
+
 # ours
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
 from ankipandas.columns import our_columns
@@ -315,6 +318,37 @@ class TestAnkiDF(unittest.TestCase):
             [True]
         )
 
+    # Formats
+    # ==========================================================================
+
+    def test_reformat_trivial(self):
+        for table in ["notes", "revs", "cards"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(
+                    path=self.db_path, user=None, table=table
+                )
+                adf2 = adf.normalize()
+                self.assertTrue(adf.equals(adf2))
+
+    def test_compare_convert_raw_load_raw(self):
+        for table in ["notes", "revs", "cards"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(
+                    path=self.db_path, user=None, table=table
+                ).raw()
+                df = core.get_table(self.db, table)
+                if table == "notes":
+                    df["tags"] = df["tags"].str.strip()
+                self.assertTrue(adf.equals(df))
+
+    def test_raw_normalize(self):
+        for table in ["notes", "revs", "cards"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(
+                    path=self.db_path, user=None, table=table
+                )
+                adf2 = adf.raw().normalize()
+                self.assertTrue(adf.equals(adf2))
 
     # Help
     # ==========================================================================
