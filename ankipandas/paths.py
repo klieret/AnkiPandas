@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-""" Convenience functions that allow to load pandas dataframe with all the
-desired columns in just one line of code."""
+""" Convenience functions to find the database and other system locations
+without the user having to specify full paths.
+"""
 
 # std
 import os
@@ -87,7 +88,7 @@ def find_db(
             multiple databases matching your criteria.
 
     Raises:
-        :class:`ValueError` if none ore more than one result is found.
+        If none ore more than one result is found: :class:`ValueError`
 
     Returns:
         pathlib.Path to the anki2 database
@@ -166,7 +167,7 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
 
     1. If no path is given, we search through some default locations
     2. If path points to a file: Take that file
-    3. If path poitns to a directory: Search in that directory
+    3. If path points to a directory: Search in that directory
 
     Args:
         path: Path to database or search path or None
@@ -176,8 +177,8 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
         Path to anki database as :class:`pathlib.Path` object
 
     Raises:
-        :class:`FileNotFoundError` if path does not exist
-        :class:`ValueError` in various other cases
+        If path does not exist: :class:`FileNotFoundError`
+        In various other cases: :class:`ValueError`
     """
     if path is None:
         result = find_db(user=user)

@@ -4,8 +4,8 @@ import re
 from hashlib import sha1
 from html.entities import name2codepoint
 
-""" Directly copied from Anki: anki/anki/utils.py
-Only a bit of PEP8ing and making things private."""
+# Implementation directly copied from Anki (anki/anki/utils.py).
+# Only a bit of PEP8ing and making things private.
 
 _reComment = re.compile("(?s)<!--.*?-->")
 _reStyle = re.compile("(?si)<style.*?>.*?</style>")

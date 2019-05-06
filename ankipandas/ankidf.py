@@ -613,6 +613,19 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     def normalize(self, inplace=False, force=False):
+        """ Bring a :class:`AnkiDataFrame` from the ``raw`` format (i.e. the
+        exact format that Anki uses in its internal representation) to our
+        convenient format.
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+            force: If a previous conversion fails, :meth:`normalize` will
+                refuse to attempt another one by default. Use this option
+                to force it to attempt in anyway.
+
+        Returns:
+            New :class:`AnkiDataFrame` if inplace==True, else None
+        """
         if not inplace:
             df = self.copy()
             df.normalize(inplace=True, force=force)
@@ -692,8 +705,19 @@ class AnkiDataFrame(pd.DataFrame):
 
         self._df_format = "ours"
 
-    # todo: doc
     def raw(self, inplace=False, force=False):
+        """ Bring a :class:`AnkiDataFrame` into the ``raw`` format (i.e. the
+        exact format that Anki uses in its internal representation) .
+
+        Args:
+            inplace: If False, return new dataframe, else update old one
+            force: If a previous conversion fails, :meth:`raw` will
+                refuse to attempt another one by default. Use this option
+                to force it to attempt in anyway.
+
+        Returns:
+            New :class:`AnkiDataFrame` if inplace==True, else None
+        """
         if not inplace:
             df = self.copy()  # deep?
             df.raw(inplace=True, force=force)

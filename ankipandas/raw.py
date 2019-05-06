@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-""" Most of the actual implementation is done with these functions that allow
-a finer control over what is happenin than the convenience functions.
+""" These function implement the more direct interactions with the Anki
+database and provide basic functionality that is then used to implement
+:class:`ankipandas.ankidf.AnkiDataFrame`.
 """
 
 # std

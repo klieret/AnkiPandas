@@ -16,4 +16,6 @@ line of code!
     :caption: Module documentation
 
     ankidf
+    paths
+    raw
     util
