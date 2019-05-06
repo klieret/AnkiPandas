@@ -198,6 +198,7 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
         else:
             result = find_db(
                 search_paths=(path,),
+                user=user,
                 break_on_first=False
             )
     if result:
