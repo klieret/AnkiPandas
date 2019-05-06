@@ -2,6 +2,7 @@
 
 # std
 import sqlite3
+import time
 
 # 3rd
 import pandas as pd
@@ -765,11 +766,19 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     def _set_usn(self):
-        if self._anki_table in ["revs", "notes"]:
+        """ Update usn (update sequence number) for all changed rows. """
+        self.loc[
+            self.was_modified(na=True, _force=True),
+            _columns.columns_anki2ours[self._anki_table]["usn"]
+        ] = -1
+
+    def _set_mod(self):
+        """ Update modification timestamps for all changed rows. """
+        if self._anki_table in ["cards", "notes"]:
             self.loc[
-                self.was_modified(na=True),
-                _columns.columns_anki2ours[self._anki_table]["usn"]
-            ] = -1
+                self.was_modified(na=True, _force=True),
+                _columns.columns_anki2ours[self._anki_table]["mod"]
+            ] = int(time.time())
 
     # Raw and normalized
     # ==========================================================================
@@ -904,6 +913,12 @@ class AnkiDataFrame(pd.DataFrame):
 
         # Note: Here we pretty much go through self.normalize() and revert
         # every single step.
+
+        # Update automatic fields
+        # -----------------------
+
+        self._set_mod()
+        self._set_usn()
 
         # IDs
         # ---

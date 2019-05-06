@@ -18,6 +18,7 @@ import numpy as np
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
 from ankipandas._columns import our_columns
 import ankipandas.raw as raw
+import ankipandas._columns as _columns
 
 
 # todo: add more notes to test deck
@@ -543,6 +544,54 @@ class TestAnkiDF(unittest.TestCase):
                 )
                 adf2 = adf.raw().normalize()
                 self.assertTrue(adf.equals(adf2))
+
+    # Update modification stamps
+    # ==========================================================================
+
+    def test_set_usn(self):
+        for table in ["notes", "revs", "cards"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(
+                    path=self.db_path, user=None, table=table
+                )
+                adf_old = adf.copy()
+                adf.loc[adf.index[0], adf_old.columns[0]] = "definitely changed"
+                adf._set_usn()
+                # fixme: this is probably already true before
+                self.assertEqual(
+                    adf.loc[
+                        adf.index[0],
+                        _columns.columns_anki2ours[table]["usn"]
+                    ],
+                    -1
+                )
+
+    def test_set_mod(self):
+        for table in ["notes", "cards"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(
+                    path=self.db_path, user=None, table=table
+                )
+                adf_old = adf.copy()
+                adf.loc[adf.index[0], adf.columns[0]] = "definitely changed"
+                adf._set_mod()
+                val1 = adf.loc[
+                   adf.index[0], _columns.columns_anki2ours[table]["mod"]
+                ]
+                val_rest_1 = adf.loc[
+                   adf.index[1:], _columns.columns_anki2ours[table]["mod"]
+                ]
+                val2 = adf_old.loc[
+                   adf.index[0], _columns.columns_anki2ours[table]["mod"]
+                ]
+                val_rest_2 = adf.loc[
+                   adf.index[1:], _columns.columns_anki2ours[table]["mod"]
+                ]
+                self.assertFalse(val1 == val2)
+                self.assertListEqual(
+                    list(val_rest_1),
+                    list(val_rest_2)
+                )
 
     # Help
     # ==========================================================================
