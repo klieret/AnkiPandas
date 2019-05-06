@@ -231,12 +231,15 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     # todo: call nidS etc. to avoid clashes with attributes?
+    # todo: rid?
 
     @property
     def nid(self):
         """ Note ID as :class:`pandas.Series` of strings. """
         self._check_our_format()
-        if self._anki_table in ["notes", "cards"]:
+        if self._anki_table == "notes":
+            return self.index
+        elif self._anki_table == "cards":
             if "nid" not in self.columns:
                 raise ValueError(
                     "You seem to have removed the 'nid' column. That was not "
@@ -253,7 +256,9 @@ class AnkiDataFrame(pd.DataFrame):
     def cid(self):
         """ Card ID as :class:`pandas.Series` of strings. """
         self._check_our_format()
-        if self._anki_table in ["cards", "revs"]:
+        if self._anki_table == "cards":
+            return self.index
+        if self._anki_table == "revs":
             if "cid" not in self.columns:
                 raise ValueError(
                     "You seem to have removed the 'cid' column. That was not "
@@ -268,6 +273,16 @@ class AnkiDataFrame(pd.DataFrame):
             )
         else:
             self._invalid_table()
+
+    @property
+    def rid(self):
+        """ Review ID as :class:`pandas.Series` of strings. """
+        if self._anki_table == "revs":
+            return self.index
+        else:
+            raise ValueError(
+                "Review index is only available for the 'revs' table."
+            )
 
     @property
     def mid(self):
@@ -486,7 +501,10 @@ class AnkiDataFrame(pd.DataFrame):
                 self.fields_as_columns_prefix + field for field in fields
             ]
             self.loc[self.mid == mid, "nflds"] = \
-                pd.Series(self[fields].values.tolist())
+                pd.Series(
+                    self.loc[self.mid == mid, fields].values.tolist(),
+                    index=self.loc[self.mid==mid].index
+                )
             # Careful: Do not delete the fields here yet, other models
             # might still use them
             to_drop.extend(fields)
@@ -607,7 +625,7 @@ class AnkiDataFrame(pd.DataFrame):
             self["ntags"] = self["ntags"].apply(_remove_tags)
 
         else:
-            self["ntags"] = pd.Series([[]]*len(self))
+            self["ntags"] = self["ntags"].apply(lambda _: [])
 
     # Compare
     # ==========================================================================
@@ -708,6 +726,8 @@ class AnkiDataFrame(pd.DataFrame):
         # IDs
         # ---
 
+        self.set_index(ankipandas._columns.table2index[table], inplace=True)
+
         if table == "cards":
             self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
         elif table == "notes":
@@ -778,6 +798,9 @@ class AnkiDataFrame(pd.DataFrame):
 
         # IDs
         # ---
+
+        # Index as column:
+        self.reset_index(inplace=True, drop=False)
 
         if table == "cards" and "cdeck" in self.columns:
             self["did"] = self["cdeck"].map(

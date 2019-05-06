@@ -40,11 +40,11 @@ class TestAnkiDF(unittest.TestCase):
     def test_tags(self):
         notes = AnkiDF.notes(self.db_path)
         self.assertListEqual(
-            list(notes.query("nid=='1555579337683'")["ntags"].values)[0],
+            list(notes.query("index=='1555579337683'")["ntags"].values)[0],
             ['other_test_tag']
         )
         self.assertListEqual(
-            list(notes.query("nid=='1555579352896'")["ntags"].values)[0],
+            list(notes.query("index=='1555579352896'")["ntags"].values)[0],
             ['some_test_tag']
         )
 
@@ -65,13 +65,12 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_nids_notes(self):
         notes = AnkiDF.notes(self.db_path)
-        self.assertIn("nid", list(notes.columns))
         self.assertListEqual(
-            list(notes["nid"]),
+            list(notes.index),
             list(notes.nid)
         )
         self.assertListEqual(
-            list(notes["nid"].unique()),
+            list(notes.index),
             list(map(str, raw.get_table(self.db, "notes")["id"].unique()))
         )
         self.assertEqual(
@@ -81,13 +80,12 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_cids_cards(self):
         cards = AnkiDF.cards(self.db_path)
-        self.assertIn("cid", list(cards.columns))
         self.assertListEqual(
-            list(cards["cid"]),
+            list(cards.index),
             list(cards.cid)
         )
         self.assertListEqual(
-            list(cards["cid"].unique()),
+            list(cards.index),
             list(map(str, raw.get_table(self.db, "cards")["id"].unique()))
         )
         self.assertEqual(
@@ -97,13 +95,12 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_rids_revs(self):
         revs = AnkiDF.revs(self.db_path)
-        self.assertIn("rid", list(revs.columns))
         self.assertListEqual(
-            list(revs["rid"]),
+            list(revs.index),
             list(revs.rid)
         )
         self.assertListEqual(
-            list(revs["rid"].unique()),
+            list(revs.index),
             list(map(str, raw.get_table(self.db, "revs")["id"].unique()))
         )
         self.assertEqual(

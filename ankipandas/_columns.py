@@ -20,6 +20,12 @@ tables_anki2ours = invert_dict(tables_ours2anki)
 fields_file = Path(__file__).parent / "data" / "anki_fields.csv"
 fields_df = pd.read_csv(fields_file)
 
+table2index = {
+    "cards": "cid",
+    "notes": "nid",
+    "revs": "rid"
+}
+
 our_tables = sorted(list(tables_ours2anki.keys()))
 our_columns = {
     table: sorted(list(
@@ -30,6 +36,9 @@ our_columns = {
     ))
     for table in our_tables
 }
+# Remove indices
+for table, columns in our_columns.items():
+    columns.remove(table2index[table])
 
 # hard code this here, because order is important
 anki_columns = {
