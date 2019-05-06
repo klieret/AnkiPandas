@@ -5,9 +5,9 @@ import sqlite3
 import time
 
 # 3rd
+import numpy as np
 import pandas as pd
 import pathlib
-import numpy as np
 
 # ours
 import ankipandas.paths
@@ -18,6 +18,7 @@ import ankipandas._columns as _columns
 from ankipandas.util.misc import invert_dict
 from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
+from ankipandas.util.guid import guid
 
 
 class AnkiDataFrame(pd.DataFrame):
@@ -786,7 +787,7 @@ class AnkiDataFrame(pd.DataFrame):
         deleted_indices = other_nids - set(self.index)
         return sorted(list(deleted_indices))
 
-    # Update modification stamps
+    # Update modification stamps and similar
     # ==========================================================================
 
     def _set_usn(self):
@@ -803,6 +804,12 @@ class AnkiDataFrame(pd.DataFrame):
                 self.was_modified(na=True, _force=True),
                 _columns.columns_anki2ours[self._anki_table]["mod"]
             ] = int(time.time())
+
+    # todo: test
+    def _set_guid(self):
+        """ Update globally unique id """
+        if self._anki_table == "notes":
+            self.loc[~self["nguid"].apply(bool)].apply(guid)
 
     # Raw and normalized
     # ==========================================================================
@@ -944,6 +951,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         self._set_mod()
         self._set_usn()
+        self._set_guid()
 
         # IDs
         # ---
