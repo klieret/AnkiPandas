@@ -6,6 +6,7 @@ import sqlite3
 # 3rd
 import pandas as pd
 import pathlib
+import numpy as np
 
 # ours
 import ankipandas.paths
@@ -191,9 +192,14 @@ class AnkiDataFrame(pd.DataFrame):
     # Fixes
     # ==========================================================================
 
-    # todo: skip in doc
     def equals(self, other):
         return pd.DataFrame(self).equals(other)
+
+    # todo: skip doc
+    def append(self, *args, **kwargs):
+        ret = super(AnkiDataFrame, self).append(*args, **kwargs)
+        self._copy_attrs_to(ret)
+        return ret
 
     # ==========================================================================
 
@@ -630,29 +636,83 @@ class AnkiDataFrame(pd.DataFrame):
     # Compare
     # ==========================================================================
 
-    def was_modified(self, _force=False):
+    # todo: other comparison source
+    def was_modified(self, other: pd.DataFrame = None, default=True,
+                     _force=False):
         """ Compare with original table, show which rows have changed.
 
         Args:
+            other: Compare with this :class:`pandas.DataFrame`.
+                If None (default), use original unmodified dataframe as reloaded
+                from the database.
+            default: Value for new or deleted columns
+            _force: internal use
+
+        Returns:
+            Boolean value for each row, showing if it was modified.
+        """
+        if not _force:
+            self._check_our_format()
+
+        if other is None:
+            other = self._table_constructor(
+                self.db_path, None, self._anki_table
+            )
+
+        other_nids = set(other.index)
+        inters = set(self.index).intersection(other_nids)
+        result = pd.Series(default, index=self.index)
+        new_bools = np.any(
+            other[other.index.isin(inters)].values !=
+            self[self.index.isin(inters)].values,
+            axis=1
+        )
+        result.loc[self.index.isin(inters)] = pd.Series(
+            new_bools,
+            index=result[self.index.isin(inters)].index
+        )
+        return result
+
+    def modified_columns(self, other: pd.DataFrame = None, _force=False,
+                         only=True):
+        """ Compare with original table, show which rows were added.
+
+        Args:
+            other: Compare with this :class:`pandas.DataFrame`.
+                If None (default), use original unmodified dataframe as reloaded
+                from the database.
+            only: Only show rows where at least one column is changed.
             _force: internal use
 
         Returns:
             Boolean value for each row, showing if it was modified. New rows
             are considered to be modified as well.
         """
-        if not _force:
-            self._check_our_format()
-
-        comparison = self._table_constructor(
-            self.db_path, None, self._anki_table
+        if other is None:
+            other = self._table_constructor(
+                self.db_path, None, self._anki_table
+            )
+        columns = [c for c in self.columns if c in other.columns]
+        other_nids = set(other.index)
+        inters = set(self.index).intersection(other_nids)
+        if only:
+            inters = inters.intersection(
+                self[self.was_modified(other=other, _force=_force)].index
+            )
+        inters = sorted(list(inters))
+        return pd.DataFrame(
+            self.loc[inters, columns].values != other.loc[inters, columns].values,
+            index=self.loc[inters].index,
+            columns=columns
         )
 
-        # Need to align both frames.
-
-    def is_new(self, _force=False):
-        """ Compare with original table, show which rows have changed.
+    def was_added(self, other: pd.DataFrame = None, _force=False):
+        """ Compare with original table, show which rows were added.
 
         Args:
+            other: Compare with this :class:`pandas.DataFrame`.
+                If None (default), use original unmodified dataframe as reloaded
+                from the database.
             _force: internal use
 
         Returns:
@@ -661,6 +721,37 @@ class AnkiDataFrame(pd.DataFrame):
         """
         if not _force:
             self._check_our_format()
+
+        if other is not None:
+            other_nids = set(other.index)
+        else:
+            other_nids = set(map(str, raw.get_ids(self.db, self._anki_table)))
+
+        new_indices = set(self.index) - other_nids
+        return self.index.isin(new_indices)
+
+    def was_deleted(self, other: pd.DataFrame = None, _force=False):
+        """ Compare with original table, return deleted indizes.
+
+        Args:
+            other: Compare with this :class:`pandas.DataFrame`.
+                If None (default), use original unmodified dataframe as reloaded
+                from the database.
+            _force: internal use
+
+        Returns:
+            Sorted list of indizes.
+        """
+        if not _force:
+            self._check_our_format()
+
+        if other is not None:
+            other_nids = set(other.index)
+        else:
+            other_nids = set(map(str, raw.get_ids(self.db, self._anki_table)))
+
+        deleted_indices = other_nids - set(self.index)
+        return sorted(list(deleted_indices))
 
     # Raw and normalized
     # ==========================================================================

@@ -165,6 +165,23 @@ def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
 # todo: Using decorators here causes the function signatures to be messed up
 #  with sphinx but oh well.
 
+# todo: docs
+
+
+@lru_cache(CACHE_SIZE)
+def get_ids(db: sqlite3.Connection, table: str) -> List[str]:
+    """ Get list of IDs, e.g. note IDs etc.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        table: 'revs', 'cards', 'notes'
+
+    Returns:
+        Nested dictionary
+    """
+    return get_table(db, table)["id"].tolist()
+
+
 @lru_cache(CACHE_SIZE)
 def get_deck_info(db: sqlite3.Connection) -> dict:
     """ Get information about decks.

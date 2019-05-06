@@ -11,6 +11,9 @@ import pathlib
 import unittest
 import copy
 
+# 3rd
+import numpy as np
+
 # ours
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
 from ankipandas._columns import our_columns
@@ -311,6 +314,203 @@ class TestAnkiDF(unittest.TestCase):
             list(notes.has_tag(["asdf"]).unique()),
             [True]
         )
+
+    # Changes
+    # ==========================================================================
+
+    def test_show_modification_unchanged(self):
+        for table in ["cards", "revs", "notes"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(self.db_path, None, table)
+                self.assertEqual(
+                    np.sum(adf.was_modified() == False),
+                    len(adf)
+                )
+                self.assertEqual(
+                    np.sum(adf.was_added() == False),
+                    len(adf)
+                )
+                self.assertEqual(
+                    len(adf.was_deleted()),
+                    0
+                )
+                self.assertEqual(
+                    np.sum(adf.was_modified(adf) == False),
+                    len(adf)
+                )
+                self.assertEqual(
+                    np.sum(adf.was_added(adf) == False),
+                    len(adf)
+                )
+                self.assertEqual(
+                    len(adf.was_deleted(adf)),
+                    0
+                )
+
+    def test_show_modification_empty(self):
+        for table in ["cards", "revs", "notes"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(self.db_path, None, table)
+                adf_old = adf.copy()
+                n = len(adf)
+                adf = adf.drop(adf.index)
+                self.assertEqual(
+                    np.sum(adf.was_modified() == False),
+                    0
+                )
+                self.assertEqual(
+                    np.sum(adf.was_added() == False),
+                    0
+                )
+                self.assertEqual(
+                    len(adf.was_deleted()),
+                    n
+                )
+                self.assertEqual(
+                    np.sum(adf.was_modified(adf_old) == False),
+                    0
+                )
+                self.assertEqual(
+                    np.sum(adf.was_added(adf_old) == False),
+                    0
+                )
+                self.assertEqual(
+                    len(adf.was_deleted(adf_old)),
+                    n
+                )
+
+    def test_show_modification_all_modified(self):
+        for table in ["cards", "revs", "notes"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(self.db_path, None, table)
+                adf_old = adf.copy()
+                adf[adf.columns[2]] = "changed!"
+                self.assertEqual(
+                    np.sum(adf.was_modified() == False),
+                    0
+                )
+                self.assertEqual(
+                    np.sum(adf.was_added() == True),
+                    0
+                )
+                self.assertEqual(
+                    len(adf.was_deleted()),
+                    0
+                )
+                # ----
+                self.assertEqual(
+                    len(adf.modified_columns(only=True)),
+                    len(adf)
+                )
+                self.assertEqual(
+                    len(adf.modified_columns(only=False)),
+                    len(adf)
+                )
+                self.assertEqual(
+                    list(adf.modified_columns().loc[adf.index[0]]).index(True),
+                    2
+                )
+                # ----
+                self.assertEqual(
+                    np.sum(adf.was_modified(adf_old) == False),
+                    0
+                )
+                self.assertEqual(
+                    np.sum(adf.was_added(adf_old) == True),
+                    0
+                )
+                self.assertEqual(
+                    len(adf.was_deleted(adf_old)),
+                    0
+                )
+                # ----
+                self.assertEqual(
+                    len(adf.modified_columns(only=True, other=adf_old)),
+                    len(adf)
+                )
+                self.assertEqual(
+                    len(adf.modified_columns(only=False, other=adf_old)),
+                    len(adf)
+                )
+                self.assertEqual(
+                    list(
+                        adf.modified_columns(other=adf_old).loc[adf.index[0]]
+                    ).index(True),
+                    2
+                )
+
+    def test_show_modification_some_modified(self):
+        for table in ["cards", "revs", "notes"]:
+            with self.subTest(table=table):
+                adf = AnkiDF._table_constructor(self.db_path, None, table)
+                adf_old = adf.copy()
+                adf.loc[adf.index[0], [adf.columns[2]]] = "changed!"
+                self.assertEqual(
+                    np.sum(adf.was_modified() == True),
+                    1
+                )
+                self.assertEqual(
+                    adf.was_modified()[0],
+                    True
+                )
+                self.assertEqual(
+                    np.sum(adf.was_added() == True),
+                    0
+                )
+                self.assertEqual(
+                    len(adf.was_deleted()),
+                    0
+                )
+                # ----
+                self.assertEqual(
+                    len(adf.modified_columns(only=True)),
+                    1
+                )
+                self.assertEqual(
+                    len(adf.modified_columns(only=False)),
+                    len(adf)
+                )
+                self.assertEqual(
+                    list(adf.modified_columns().loc[adf.index[0]]).index(True),
+                    2
+                )
+                # ----
+                self.assertEqual(
+                    np.sum(adf.was_modified(adf_old) == True),
+                    1
+                )
+                self.assertEqual(
+                    adf.was_modified(adf_old)[0],
+                    True
+                )
+                self.assertEqual(
+                    np.sum(adf.was_added(adf_old) == True),
+                    0
+                )
+                self.assertEqual(
+                    len(adf.was_deleted(adf_old)),
+                    0
+                )
+                # ----
+                self.assertEqual(
+                    len(adf.modified_columns(only=True, other=adf_old)),
+                    1
+                )
+                self.assertEqual(
+                    len(adf.modified_columns(only=False, other=adf_old)),
+                    len(adf)
+                )
+                self.assertEqual(
+                    list(
+                        adf.modified_columns(other=adf_old).loc[adf.index[0]]
+                    ).index(True),
+                    2
+                )
+
+    def test_modification_tests_1(self):
+        notes = AnkiDF.notes(self.db_path)
+        notes2 = notes.copy()
+        notes2.add_tag("test")
 
     # Formats
     # ==========================================================================
