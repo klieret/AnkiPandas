@@ -782,13 +782,11 @@ class AnkiDataFrame(pd.DataFrame):
 
             self["nflds"] = self["nflds"].str.join("\x1f")
 
-
         # Tags
         # ----
 
         if table == "notes" and "nflds" in self.columns:
             self["ntags"] = self["ntags"].str.join(" ")
-
 
         # Value Maps
         # ----------
@@ -812,8 +810,8 @@ class AnkiDataFrame(pd.DataFrame):
         # Dtypes
         # ------
 
-        for column, type in ankipandas._columns.dtype_casts_back[table].items():
-            self[column] = self[column].astype(type)
+        for column, typ in ankipandas._columns.dtype_casts_back[table].items():
+            self[column] = self[column].astype(typ)
 
         # Unused columns
         # --------------
