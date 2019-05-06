@@ -327,7 +327,7 @@ class TestAnkiDF(unittest.TestCase):
                 adf2 = adf.normalize()
                 self.assertTrue(adf.equals(adf2))
 
-    def test_compare_convert_raw_load_raw(self):
+    def test_convert_raw_load_raw(self):
         for table in ["notes", "revs", "cards"]:
             with self.subTest(table=table):
                 adf = AnkiDF._table_constructor(

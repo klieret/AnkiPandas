@@ -226,6 +226,16 @@ def get_mid2model(db: sqlite3.Connection) -> Dict[str, str]:
 
 
 @lru_cache(CACHE_SIZE)
+def get_mid2sortfield(db: sqlite3.Connection) -> Dict[str, int]:
+    """ Mapping of model ID to index of sort field. """
+    minfo = get_model_info(db)
+    return {
+        mid: minfo[mid]["sortf"]
+        for mid in minfo
+    }
+
+
+@lru_cache(CACHE_SIZE)
 def get_mid2fields(db: sqlite3.Connection) -> Dict[str, List[str]]:
     """ Get mapping of model ID to field names.
 
@@ -284,3 +294,5 @@ def get_nid2mid(db: sqlite3.Connection) -> Dict[str, str]:
     """
     notes = get_table(db, "notes")
     return dict(zip(notes["id"].astype(str), notes["mid"].astype(str)))
+
+

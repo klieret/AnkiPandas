@@ -739,7 +739,19 @@ class AnkiDataFrame(pd.DataFrame):
         self._df_format = "in_progress"
 
         # Note: Here we pretty much go through self.normalize() and revert
-        # every single step. Opposite order of course!
+        # every single step.
+
+        # IDs
+        # ---
+
+        if table == "cards" and "cdeck" in self.columns:
+            self["did"] = self["cdeck"].map(
+                invert_dict(raw.get_did2deck(self.db))
+            )
+        if table == "notes" and "nmodel" in self.columns:
+            self["mid"] = self["nmodel"].map(
+                invert_dict(raw.get_mid2model(self.db))
+            )
 
         # Fields & Hashes
         # ---------------
@@ -755,11 +767,21 @@ class AnkiDataFrame(pd.DataFrame):
                     "over."
                 )
 
+            # Restore the sort field.
+            mids = list(self["mid"].unique())
+            mid2sfld = raw.get_mid2sortfield(self.db)
+            for mid in mids:
+                sfield = mid2sfld[mid]
+                df_model = self[self["mid"] == mid]
+                fields = pd.DataFrame(df_model["nflds"].tolist())
+                self.loc[self["mid"] == mid, "nsfld"] = fields[sfield].tolist()
+
             self["ncsum"] = self["nflds"].apply(
                 lambda lst: field_checksum(lst[0])
             )
 
             self["nflds"] = self["nflds"].str.join("\x1f")
+
 
         # Tags
         # ----
@@ -767,17 +789,6 @@ class AnkiDataFrame(pd.DataFrame):
         if table == "notes" and "nflds" in self.columns:
             self["ntags"] = self["ntags"].str.join(" ")
 
-        # IDs
-        # ---
-
-        if table == "cards" and "cdeck" in self.columns:
-            self["did"] = self["cdeck"].map(
-                invert_dict(raw.get_did2deck(self.db))
-            )
-        if table == "notes" and "nmodel" in self.columns:
-            self["mid"] = self["nmodel"].map(
-                invert_dict(raw.get_mid2model(self.db))
-            )
 
         # Value Maps
         # ----------
