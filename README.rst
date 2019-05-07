@@ -14,7 +14,7 @@ Analyze and manipulate your Anki collection using pandas!
    :alt: Documentation Status
 
 .. |Pypi package| image:: https://badge.fury.io/py/ankipandas.svg
-    :target: https://badge.fury.io/py/ankipandas
+    :target: https://pypi.org/project/ankipandas/
     :alt: Pypi status
 
 .. |Chat| image:: https://img.shields.io/gitter/room/ankipandas/community.svg
