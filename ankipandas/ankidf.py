@@ -8,7 +8,7 @@ import time
 import numpy as np
 import pandas as pd
 import pathlib
-from typing import Union
+from typing import Union, List
 
 # ours
 import ankipandas.paths
@@ -561,6 +561,28 @@ class AnkiDataFrame(pd.DataFrame):
                 "Tag column 'ntags' doesn't exist. Perhaps you forgot to merge "
                 "the notes into your table?"
             )
+
+    def list_tags(self) -> List[str]:
+        """ Return sorted list of all tags. """
+        if "ntags" not in self.columns:
+            raise ValueError(
+                "Tags column 'ntags' not present. Either use the notes table"
+                " or merge it into your table."
+            )
+        else:
+            return sorted(list(set(
+                [item for lst in self["ntags"].tolist() for item in lst]
+            )))
+
+    def list_decks(self):
+        """ Return sorted list of deck names. """
+        decks = sorted(list(raw.get_did2deck(self.db).values()))
+        decks.remove("")
+        return decks
+
+    def list_models(self):
+        """ Return sorted list of model names. """
+        return sorted(list(raw.get_mid2model(self.db).values()))
 
     def has_tag(self, tags=None):
         """ Checks whether row has a certain tag ('ntags' column).

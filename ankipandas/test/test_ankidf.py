@@ -220,8 +220,35 @@ class TestAnkiDF(unittest.TestCase):
             sorted(our_columns["notes"])
         )
 
+    # Convenience
+    # ==========================================================================
+
+    def test_list_decks(self):
+        decks = self.notes.list_decks()
+        self.assertTrue(
+            set(decks).issuperset({"Testing", "EnglishGerman"})
+        )
+
+    def test_list_models(self):
+        models = self.notes.list_models()
+        self.assertTrue(
+            set(models).issuperset({
+                "Basic",
+                'Basic (and reversed card)',
+                'Basic (optional reversed card)',
+                'Basic (type in the answer)',
+                'Cloze'
+            })
+        )
+
     # Tags
     # ==========================================================================
+
+    def test_list_tags(self):
+        tags = self.notes.list_tags()
+        self.assertTrue(
+            set(tags).issuperset(["adjective", "noun"])
+        )
 
     def test_remove_tags(self):
         notes = AnkiDF.notes(self.db_path)
