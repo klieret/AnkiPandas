@@ -1,7 +1,7 @@
-AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
-===========================================================================
+AnkiPandas: Analyze and manipulate your Anki collection using pandas!
+=====================================================================
 
-|Chat| |License|
+|Build Status| |Coveralls| |Doc Status| |Pypi package| |Chat| |License|
 
 .. |Build Status| image:: https://travis-ci.org/klieret/AnkiPandas.svg?branch=master
    :target: https://travis-ci.org/klieret/AnkiPandas
@@ -46,7 +46,7 @@ Anki flashcards.
 That means you can
 
 * **Select**: Easily select arbitrary subsets of your cards, notes or reviews
-  (`one of many introductions <https://medium.com/dunder-data/6fcd0170be9c>`_ ,
+  (`one of many introductions <https://medium.com/dunder-data/6fcd0170be9c>`_,
   `official documentation <https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html>`_)
 * **Visualize**: Use powerful `built in tools`_ or switch to the even more versatile
   `seaborn`_ (statistical analysis) or `matplotlib`_
@@ -59,11 +59,10 @@ That means you can
 
 **Pros**
 
-* Easy installation via python package manager (independent of your Anki installation): |Pypi package|
+* Easy installation via python package manager (independent of your Anki installation)
 * Just one line of code to get started
 * Bring together information about cards_, notes_, models_, decks_ and more in just one table!
-* Fully documented: |Doc Status|
-* Well tested: |Build Status| |Coveralls|
+* `Fully documented <https://ankipandas.readthedocs.io/>`_
 
 .. _cards: https://apps.ankiweb.net/docs/manual.html#cards
 .. _notes: https://apps.ankiweb.net/docs/manual.html#notes-&-fields
@@ -78,16 +77,14 @@ look at the genanki_ project.
 Installation
 ------------
 
-``AnkiPandas`` is available as |Pypi package| and can be installed with the `python package manager`_:
+``AnkiPandas`` is available as `pypi package <https://pypi.org/project/ankipandas/>`_
+and can be installed or upgrade with the `python package manager`_:
 
 .. _python package manager: https://pip.pypa.io/en/stable/
 
 .. code:: sh
 
-    pip3 install ankipandas
-
-For a local installation, you might want to use the ``--user`` switch of ``pip``.
-You can also update your current installation with ``pip3 install --upgrade ankipandas``.
+    pip3 install --user --upgrade ankipandas
 
 For the latest development version you can also work from a cloned version
 of this repository:
@@ -96,47 +93,94 @@ of this repository:
 
     git clone https://github.com/klieret/ankipandas/
     cd ankipandas
-    pip3 install --user .
+    pip3 install --user --upgrade .
 
 Usage
 -----
 
-The simplest interface is that of an ``AnkiDataFrame`` (a subclass of pandas ``DataFrame``):
-
-It's as easy as this:
+Starting up is as easy as this:
 
 .. code:: python
 
     from ankipandas import AnkiDataFrame
 
-    cards = AnkiDataFrame.cards()
+    notes = AnkiDataFrame.notes()
 
-And you have a dataframe containing all cards, with additional methods that make
+And you have a dataframe containing all notes, with additional methods that make
 many things easy.
-If called without any argument ``AnkiDataFrame.cards()`` tries to find the location
-of your Anki database by itself. However this might take some time.
+Similarly, you can load notes or reviews using ``cards()`` or ``revs()``.
+If called without any argument ``notes()`` (and friends) tries to find
+your Anki database by itself. However this might take some time.
 To make it easier, simply supply (part of) the path to the database and (if you have
 more than one user) your Anki user name, e.g.
 ``AnkiDataFrame.cards(".local/share/Anki2/", user="User 1")`` on many Linux
 installations.
 
-For example:
-
-.. code:: python
-
-    # For each card, merge all information from the corresponding note into
-    # the dataframe
-    cards.merge_notes(inplace=True)
-
-    # Add all fields from the notes as new columns to the dataframe (instead of
-    # being merged in one field ``flds`` as by default):
-    cards.fields_as_columns(inplace=True)
+To get information about the interpretation of each column, use ``notes.help_cols()``.
 
 Take a look at the documentation_ to find out more about more about the
 available methods!
 
 .. _documentation: https://ankipandas.readthedocs.io/
 
+Some basic examples:
+
+Analysis
+~~~~~~~~
+
+Show a histogram of the number of reviews (repetitions) of each card for all decks:
+
+.. code:: python
+
+    cards = AnkiDataFrame.cards()
+    cards.hist(column="creps", by="cdeck")
+
+Show the number of leeches per deck as pie chart:
+
+.. code:: python
+
+    cards = AnkiDataFrame.cards()
+    selection = cards[cards.has_tag("leech")]
+    selection["cdeck"].value_counts().plot.pie()
+
+Find all notes of model ``MnemoticModel`` with empty ``Mnemotic`` field:
+
+.. code:: pyhon
+
+    notes = AnkiDataFrame.notes().fields_as_columns()
+    notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
+
+Manipulations
+~~~~~~~~~~~~~
+
+Add the ``difficult-japanese`` and ``marked`` tag to all notes that contain the tags
+``Japanese`` and ``leech``:
+
+.. code:: python
+
+    notes = AnkiDataFrame.notes()
+    selection = notes.has_tags(["Japanese", "leech"])
+    selection = selection.add_tag(["difficult-japanese", "marked"])
+    notes.update(selection)
+    notes.write()  # Overwrites your database after creating a backup!
+
+Set the ``language`` field to ``English`` for all notes of model ``LanguageModel`` that are tagged with ``English``:
+
+.. code:: python
+
+    notes = AnkiDataFrame.notes()
+    selection = notes.has_tag(["English"]).query("model=='LanguageModel'").fields_as_columns()
+    selection["language"] = "English"
+    notes.update(selection).write()
+
+Move all cards tagged ``leech`` to the deck ``Leeches Only``:
+
+.. code:: python
+
+    cards = AnkiDataFrame.cards().merge_notes()
+    selection = cards.has_tag("leech")
+    selection["cdeck"] = "Leeches Only"
+    cards.update(selection).write()
 
 Columns
 -------
