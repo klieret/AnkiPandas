@@ -145,7 +145,7 @@ Show the number of leeches per deck as pie chart:
 
 Find all notes of model ``MnemoticModel`` with empty ``Mnemotic`` field:
 
-.. code:: pyhon
+.. code:: python
 
     notes = AnkiDataFrame.notes().fields_as_columns()
     notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
