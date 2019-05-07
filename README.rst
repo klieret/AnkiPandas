@@ -202,11 +202,20 @@ If you want to code something yourself, you are very welcome to submit a `pull r
 .. _pull request: https://github.com/klieret/AnkiPandas/pulls
 
 
-License
--------
+License & Disclaimer
+--------------------
 
-This software is licenced under the `MIT license`_.
+This software is licenced under the `MIT license`_ and (despite best testing efforts)
+comes **without any warranty**.
+The logo is inspired by the `Anki logo`_ (`license <https://github.com/dae/anki/blob/master/LICENSE.logo>`_)
+and the `logo of the pandas package`_
+(`license2 <https://github.com/pandas-dev/pandas/blob/master/LICENSE>`_).
+This library and its author(s) are not affiliated/associated with the main
+Anki or pandas project in any way.
 
 .. _MIT license: https://github.com/klieret/ankipandas/blob/master/LICENSE.txt
+
+.. _logo of the pandas package: https://github.com/pandas-dev/pandas/blob/master/doc/logo/pandas_logo.svg
+.. _Anki logo: https://github.com/dae/anki/blob/master/web/imgs/anki-logo-thin.png
 
 .. end-body
