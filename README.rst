@@ -1,7 +1,7 @@
 AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 ===========================================================================
 
-|Build Status| |Coveralls| |Doc Status| |Pypi status| |Chat| |License|
+|Chat| |License|
 
 .. |Build Status| image:: https://travis-ci.org/klieret/AnkiPandas.svg?branch=master
    :target: https://travis-ci.org/klieret/AnkiPandas
@@ -13,7 +13,7 @@ AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
    :target: https://ankipandas.readthedocs.io/
    :alt: Documentation Status
 
-.. |Pypi Status| image:: https://badge.fury.io/py/ankipandas.svg
+.. |Pypi package| image:: https://badge.fury.io/py/ankipandas.svg
     :target: https://badge.fury.io/py/ankipandas
     :alt: Pypi status
 
@@ -53,15 +53,17 @@ That means you can
 * **Manipulate**: Apply fast bulk operations to the table (e.g. add tags, change decks, set field contents, suspend cards, ...)
   or iterate over the table and perform these manipulations step by step
 
-.. _built in visualization tools: https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html
+.. _built in tools: https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html
 .. _matplotlib: https://matplotlib.org/
 .. _seaborn: https://seaborn.pydata.org/
 
 **Pros**
 
-* Easy installation via python package manager (independent of your Anki installation)
+* Easy installation via python package manager (independent of your Anki installation): |Pypi package|
 * Just one line of code to get started
 * Bring together information about cards_, notes_, models_, decks_ and more in just one table!
+* Fully documented: |Doc Status|
+* Well tested: |Build Status| |Coveralls|
 
 .. _cards: https://apps.ankiweb.net/docs/manual.html#cards
 .. _notes: https://apps.ankiweb.net/docs/manual.html#notes-&-fields
@@ -76,7 +78,7 @@ look at the genanki_ project.
 Installation
 ------------
 
-``AnkiPandas`` can be installed with the `python package manager`_:
+``AnkiPandas`` is available as |Pypi package| and can be installed with the `python package manager`_:
 
 .. _python package manager: https://pip.pypa.io/en/stable/
 
