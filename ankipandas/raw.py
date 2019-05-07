@@ -146,7 +146,6 @@ def _consolidate_tables(df: pd.DataFrame, df_old: pd.DataFrame, mode: str,
     else:
         raise ValueError("Unknown mode '{}'.".format(mode))
 
-    print(mode, df_new)
     return df_new
 
 
