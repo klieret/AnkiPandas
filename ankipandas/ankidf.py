@@ -252,7 +252,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def nid(self):
-        """ Note ID as :class:`pandas.Series` of strings. """
+        """ Note ID as :class:`pandas.Series` of integers. """
         self._check_our_format()
         if self._anki_table == "notes":
             return self.index
@@ -285,7 +285,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def cid(self):
-        """ Card ID as :class:`pandas.Series` of strings. """
+        """ Card ID as :class:`pandas.Series` of integers. """
         self._check_our_format()
         if self._anki_table == "cards":
             return self.index
@@ -323,7 +323,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def rid(self):
-        """ Review ID as :class:`pandas.Series` of strings. """
+        """ Review ID as :class:`pandas.Series` of integers. """
         if self._anki_table == "revs":
             return self.index
         else:
@@ -351,7 +351,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def mid(self):
-        """ Model ID as :class:`pandas.Series` of strings. """
+        """ Model ID as :class:`pandas.Series` of integers. """
         self._check_our_format()
         if self._anki_table in ["notes"]:
             if "nmodel" not in self.columns:
@@ -360,14 +360,10 @@ class AnkiDataFrame(pd.DataFrame):
                     " a good idea. Cannot get model ID anymore."
                 )
             else:
-                return self["nmodel"].map(
-                    invert_dict(raw.get_mid2model(self.db))
-                )
+                return self["nmodel"].map(raw.get_model2mid(self.db))
         if self._anki_table in ["revs", "cards"]:
             if "nmodel" in self.columns:
-                return self["nmodel"].map(
-                    invert_dict(raw.get_mid2model(self.db))
-                )
+                return self["nmodel"].map(raw.get_model2mid(self.db))
             else:
                 return self.nid.map(raw.get_nid2mid(self.db))
         else:
@@ -384,7 +380,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def did(self):
-        """ Deck ID as :class:`pandas.Series` of strings. """
+        """ Deck ID as :class:`pandas.Series` of integers. """
         self._check_our_format()
         if self._anki_table == "cards":
             if "cdeck" not in self.columns:
@@ -392,7 +388,7 @@ class AnkiDataFrame(pd.DataFrame):
                     "You seem to have removed the 'cdeck' column. That was not "
                     "a good idea. Cannot get deck ID anymore."
                 )
-            return self["cdeck"].map(invert_dict(raw.get_did2deck(self.db)))
+            return self["cdeck"].map(raw.get_deck2did(self.db))
         elif self._anki_table == "notes":
             raise ValueError(
                 "Notes can belong to multiple decks. Therefore it is impossible"
@@ -415,7 +411,7 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def odid(self):
         """ Original deck ID for cards in filtered deck as
-        :class:`pandas.Series` of strings.
+        :class:`pandas.Series` of integers.
         """
         self._check_our_format()
         if self._anki_table == "cards":
@@ -424,10 +420,10 @@ class AnkiDataFrame(pd.DataFrame):
                     "You seem to have removed the 'odeck' column. That was not "
                     "a good idea. Cannot get original deck ID anymore."
                 )
-            return self["odeck"].map(invert_dict(raw.get_did2deck(self.db)))
+            return self["odeck"].map(raw.get_deck2did(self.db))
         elif self._anki_table == "revs":
             if "odeck" in self.columns:
-                return self["odeck"].map(invert_dict(raw.get_did2deck(self.db)))
+                return self["odeck"].map(raw.get_deck2did(self.db))
         elif self._anki_table == "notes":
             raise ValueError(
                 "The original deck ID (odid) is not availabale for the notes "
@@ -560,9 +556,11 @@ class AnkiDataFrame(pd.DataFrame):
         prefix = self.fields_as_columns_prefix
         mids = self.mid.unique()
         for mid in mids:
+            if mid == 0:
+                continue
             df_model = self[self.mid == mid]
             fields = pd.DataFrame(df_model["nflds"].tolist())
-            field_names = raw.get_mid2fields(self.db)[str(mid)]
+            field_names = raw.get_mid2fields(self.db)[mid]
             for field in field_names:
                 if prefix + field not in self.columns:
                     self[prefix + field] = ""
@@ -613,14 +611,14 @@ class AnkiDataFrame(pd.DataFrame):
         mids = self.mid.unique()
         to_drop = []
         for mid in mids:
-            fields = raw.get_mid2fields(self.db)[str(mid)]
+            fields = raw.get_mid2fields(self.db)[mid]
             fields = [
                 self.fields_as_columns_prefix + field for field in fields
             ]
             self.loc[self.mid == mid, "nflds"] = \
                 pd.Series(
                     self.loc[self.mid == mid, fields].values.tolist(),
-                    index=self.loc[self.mid==mid].index
+                    index=self.loc[self.mid == mid].index
                 )
             # Careful: Do not delete the fields here yet, other models
             # might still use them
@@ -653,7 +651,8 @@ class AnkiDataFrame(pd.DataFrame):
     def list_decks(self):
         """ Return sorted list of deck names. """
         decks = sorted(list(raw.get_did2deck(self.db).values()))
-        decks.remove("")
+        if "" in decks:
+            decks.remove("")
         return decks
 
     def list_models(self):
@@ -880,7 +879,7 @@ class AnkiDataFrame(pd.DataFrame):
         if other is not None:
             other_nids = set(other.index)
         else:
-            other_nids = set(map(str, raw.get_ids(self.db, self._anki_table)))
+            other_nids = set(raw.get_ids(self.db, self._anki_table))
 
         new_indices = set(self.index) - other_nids
         return self.index.isin(new_indices)
@@ -903,7 +902,7 @@ class AnkiDataFrame(pd.DataFrame):
         if other is not None:
             other_nids = set(other.index)
         else:
-            other_nids = set(map(str, raw.get_ids(self.db, self._anki_table)))
+            other_nids = set(raw.get_ids(self.db, self._anki_table))
 
         deleted_indices = other_nids - set(self.index)
         return sorted(list(deleted_indices))
@@ -1082,14 +1081,14 @@ class AnkiDataFrame(pd.DataFrame):
 
         if table == "cards":
             self["did"] = self["cdeck"].map(
-                invert_dict(raw.get_did2deck(self.db))
+                raw.get_deck2did(self.db)
             )
             self["odid"] = self["codeck"].map(
-                invert_dict(raw.get_did2deck(self.db))
+                raw.get_deck2did(self.db)
             )
         if table == "notes":
             self["mid"] = self["nmodel"].map(
-                invert_dict(raw.get_mid2model(self.db))
+                raw.get_model2mid(self.db)
             )
 
         # Fields & Hashes

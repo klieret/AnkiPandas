@@ -105,7 +105,7 @@ class TestAnkiDF(unittest.TestCase):
         )
         self.assertListEqual(
             list(self.notes.index),
-            list(map(str, raw.get_table(self.db, "notes")["id"].unique()))
+            list(raw.get_table(self.db, "notes")["id"].unique())
         )
         self.assertEqual(
             len(self.notes.nid.unique()),
@@ -119,7 +119,7 @@ class TestAnkiDF(unittest.TestCase):
         )
         self.assertListEqual(
             list(self.cards.index),
-            list(map(str, raw.get_table(self.db, "cards")["id"].unique()))
+            list(raw.get_table(self.db, "cards")["id"].unique())
         )
         self.assertEqual(
             len(self.cards.cid.unique()),
@@ -133,7 +133,7 @@ class TestAnkiDF(unittest.TestCase):
         )
         self.assertListEqual(
             list(self.revs.index),
-            list(map(str, raw.get_table(self.db, "revs")["id"].unique()))
+            list(raw.get_table(self.db, "revs")["id"].unique())
         )
         self.assertEqual(
             len(self.revs.rid.unique()),
@@ -188,7 +188,9 @@ class TestAnkiDF(unittest.TestCase):
             "cards": set(self.cards.did),
             "revs": set(self.revs.did)
         }
+        print(did2s)
         dids = set(raw.get_did2deck(self.db).keys())
+        print(dids)
         for table, dids2 in did2s.items():
             with self.subTest(table=table):
                 self.assertTrue(dids2.issubset(dids))
@@ -526,7 +528,7 @@ class TestAnkiDF(unittest.TestCase):
                     1
                 )
                 self.assertEqual(
-                    adf.was_modified()[0],
+                    adf.was_modified().tolist()[0],
                     True
                 )
                 self.assertEqual(
@@ -556,7 +558,7 @@ class TestAnkiDF(unittest.TestCase):
                     1
                 )
                 self.assertEqual(
-                    adf.was_modified(adf_old)[0],
+                    adf.was_modified(adf_old).tolist()[0],
                     True
                 )
                 self.assertEqual(

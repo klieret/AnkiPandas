@@ -131,16 +131,16 @@ value_maps = {
 }
 
 dtype_casts = {
-    "notes": {"id": str, "mid": str},
-    "cards": {"id": str, "nid": str, "did": str, "odid": str},
-    "revs": {"id": str, "cid": str}
+    "notes": {},
+    "cards": {},
+    "revs": {}
 }
 
 # todo: more precise?
 dtype_casts_back = {
-    "notes": {"id": int, "mid": int},
-    "cards": {"id": int, "nid": int, "did": int, "odid": int},
-    "revs": {"id": int, "cid": int}
+    "notes": {},
+    "cards": {},
+    "revs": {}
 }
 
 # Avoiding problem with ints to floats such as here:
