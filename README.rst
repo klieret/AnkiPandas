@@ -27,34 +27,49 @@ AnkiPandas: Open your Anki database as a pandas DataFrame in just one line!
 
 .. start-body
 
-**NOTE: THIS PROJECT IS STILL AT AN EARLY DEVELOPMENT VERSION. TRY OUT WITH CARE AND EXPECT INTERFACE CHANGES.**
-
-**CURRENT STATUS**: Most read access is working and tested. Write access will be
-added soon.
+**NOTE: THIS PROJECT IS STILL AT AN EARLY DEVELOPMENT VERSION. TRY OUT WITH CARE.**
 
 Description
 -----------
 
-Analyze and manipulate your Anki_ flashcards as a pandas_ DataFrame_!
+Anki_ is one of the most popular flashcard system for spaced repetition learning,
+pandas_ is the most popular python package for data analysis and manipulation.
+So what could be better than to bring both together?
 
 .. _anki: https://apps.ankiweb.net/
 .. _pandas: https://pandas.pydata.org/
 .. _DataFrame: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html
 
-**Pros**:
+With ``AnkiPandas`` you can use ``pandas`` to easily analyze or manipulate your
+Anki flashcards.
 
-* Use pandas to easily analyze or manipulate your Anki collection
+That means you can
+
+* **Select**: Easily select arbitrary subsets of your cards, notes or reviews
+  (`one of many introductions <https://medium.com/dunder-data/6fcd0170be9c>`_ ,
+  `official documentation <https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html>`_)
+* **Visualize**: Use powerful `built in tools`_ or switch to the even more versatile
+  `seaborn`_ (statistical analysis) or `matplotlib`_
+* **Manipulate**: Apply fast bulk operations to the table (e.g. add tags, change decks, set field contents, suspend cards, ...)
+  or iterate over the table and perform these manipulations step by step
+
+.. _built in visualization tools: https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html
+.. _matplotlib: https://matplotlib.org/
+.. _seaborn: https://seaborn.pydata.org/
+
+**Pros**
+
+* Easy installation via python package manager (independent of your Anki installation)
 * Just one line of code to get started
-* Bring together information about cards_, notes_, models_, decks_ in just one table!
-* Easy installation (independent from your anki installation)
+* Bring together information about cards_, notes_, models_, decks_ and more in just one table!
 
 .. _cards: https://apps.ankiweb.net/docs/manual.html#cards
 .. _notes: https://apps.ankiweb.net/docs/manual.html#notes-&-fields
 .. _models: https://apps.ankiweb.net/docs/manual.html#note-types
 .. _decks: https://apps.ankiweb.net/docs/manual.html#decks
 
-If your main goal is to add new cards, models and more, you can also take a
-look at the genanki_ project alternatively.
+Alternatives: If your main goal is to add new cards, models and more, you can also take a
+look at the genanki_ project.
 
 .. _genanki: https://github.com/kerrickstaley/genanki
 
