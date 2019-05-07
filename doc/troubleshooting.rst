@@ -31,7 +31,6 @@ Debugging
 
 For better debugging, you can increase the log level of ``ankipandas``:
 
-.. code-block::
+.. code-block:: python
 
     ankipandas.set_log_level("debug")
-

@@ -153,13 +153,18 @@ print("html_theme='{}'".format(html_theme))
 # documentation.
 # html_theme_options = {}
 
-# if html_theme == "sphinx_rtd_theme":
-#     html_theme_options = {
-#         'logo_only': True
-#     }
-# else:
-#     html_theme_options = {}
-# print("html_theme_options={}".format(html_theme_options))
+if html_theme == "sphinx_rtd_theme":
+    html_theme_options = {
+        'logo_only': True
+    }
+else:
+    html_theme_options = {}
+print("html_theme_options={}".format(html_theme_options))
+
+if html_theme == "sphinx_rtd_theme":
+    html_logo = "../misc/logo/logo_rtd.svg"
+else:
+    html_logo = "../misc/logo/logo.svg"
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
