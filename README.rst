@@ -1,5 +1,5 @@
-AnkiPandas: Analyze and manipulate your Anki collection using pandas!
-=====================================================================
+Analyze and manipulate your Anki collection using pandas!
+=========================================================
 
 |Build Status| |Coveralls| |Doc Status| |Pypi package| |Chat| |License|
 
@@ -31,6 +31,8 @@ AnkiPandas: Analyze and manipulate your Anki collection using pandas!
 
 Description
 -----------
+
+.. image:: https://raw.githubusercontent.com/klieret/AnkiPandas/master/misc/logo/logo_github.png
 
 Anki_ is one of the most popular flashcard system for spaced repetition learning,
 pandas_ is the most popular python package for data analysis and manipulation.
