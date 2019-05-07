@@ -260,6 +260,36 @@ class TestAnkiDF(unittest.TestCase):
             })
         )
 
+    # Properties
+    # ==========================================================================
+
+    def test_prop_nid(self):
+        notes, cards, revs = self.nadfs()
+        with self.assertRaises(ValueError):
+            notes.nid = ""
+        cards.nid = "a"
+        revs.nid = "a"
+        self.assertEqual(cards.nid.unique().tolist(), ["a"])
+        self.assertEqual(revs.nid.unique().tolist(), ["a"])
+
+    def test_prop_cid(self):
+        notes, cards, revs = self.nadfs()
+        with self.assertRaises(ValueError):
+            cards.cid = ""
+        with self.assertRaises(ValueError):
+            notes.cid = ""
+        revs.cid = "a"
+        self.assertEqual(revs["cid"].unique().tolist(), ["a"])
+
+    def test_prop_rid(self):
+        notes, cards, revs = self.nadfs()
+        with self.assertRaises(ValueError):
+            revs.rid = ""
+        with self.assertRaises(ValueError):
+            cards.rid = ""
+        with self.assertRaises(ValueError):
+            notes.rid = ""
+
     # Tags
     # ==========================================================================
 

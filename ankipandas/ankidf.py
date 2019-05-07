@@ -265,9 +265,23 @@ class AnkiDataFrame(pd.DataFrame):
             else:
                 return self["nid"]
         elif self._anki_table == "revs":
-            return self.cid.map(raw.get_cid2nid(self.db))
+            if "nid" in self.columns:
+                return self["nid"]
+            else:
+                return self.cid.map(raw.get_cid2nid(self.db))
         else:
             self._invalid_table()
+
+    @nid.setter
+    def nid(self, value):
+        if self._anki_table == "notes":
+            raise ValueError(
+                "Note ID column should already be index and notes.nid() will "
+                "always return this index. Therefore you should not set nid "
+                "to a column."
+            )
+        else:
+            self["nid"] = value
 
     @property
     def cid(self):
@@ -291,15 +305,49 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self._invalid_table()
 
+    @cid.setter
+    def cid(self, value):
+        if self._anki_table == "cards":
+            raise ValueError(
+                "Card ID column should already be index and notes.cid() will "
+                "always return this index. Therefore you should not set cid "
+                "to a column."
+            )
+        elif self._anki_table == "revs":
+            self["cid"] = value
+        else:
+            raise ValueError(
+                "Notes can belong to multiple cards. Therefore please "
+                " do not associate a card ID with them."
+            )
+
     @property
     def rid(self):
         """ Review ID as :class:`pandas.Series` of strings. """
         if self._anki_table == "revs":
             return self.index
         else:
+            if "rid" in self.columns:
+                return self["rid"]
+            else:
+                raise ValueError(
+                    "Review index is only available for the 'revs' table by"
+                    " default."
+                )
+
+    @rid.setter
+    def rid(self, value):
+        print("arg")
+        if self._anki_table == "revs":
             raise ValueError(
-                "Review index is only available for the 'revs' table."
+                "Review ID column should already be index and notes.rid() will "
+                "always return this index. Therefore you should not set rid "
+                "to a column."
             )
+        else:
+            raise ValueError(
+                "Setting a review index 'rid' makes no sense in "
+                "tables other than 'rev'.")
 
     @property
     def mid(self):
@@ -325,6 +373,15 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             self._invalid_table()
 
+    @mid.setter
+    def mid(self, value):
+        if self._anki_table == "notes":
+            log.warning(
+                "You can set an additional 'mid' column, but this will always"
+                " be overwritten with the information from the 'nmodel' "
+                "column.")
+        self["mid"] = value
+
     @property
     def did(self):
         """ Deck ID as :class:`pandas.Series` of strings. """
@@ -345,6 +402,15 @@ class AnkiDataFrame(pd.DataFrame):
             return self.cid.map(raw.get_cid2did(self.db))
         else:
             self._invalid_table()
+
+    @did.setter
+    def did(self, value):
+        if self._anki_table == "cards":
+            log.warning(
+                "You can set an additional deck ID 'did' column, but this "
+                "will always be overwritten with the information from the "
+                "'cdeck' column.")
+        self["did"] = value
 
     @property
     def odid(self):
@@ -369,6 +435,16 @@ class AnkiDataFrame(pd.DataFrame):
             )
         else:
             self._invalid_table()
+
+    @odid.setter
+    def odid(self, value):
+        if self._anki_table == "cards":
+            log.warning(
+                "You can set an additional 'odid' column, but this will always"
+                " be overwritten with the information from the 'odeck' "
+                "column."
+            )
+        self["odid"] = value
 
     # Merge tables
     # ==========================================================================
