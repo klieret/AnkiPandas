@@ -128,9 +128,8 @@ class TestAnkiDF(unittest.TestCase):
     def test_nids_revs(self):
         revs = AnkiDF.revs(self.db_path)
         notes = AnkiDF.notes(self.db_path)
-        self.assertListEqual(
-            sorted(list(revs.nid.unique())),
-            sorted(list(notes.nid.unique()))
+        self.assertTrue(
+            set(notes.nid.unique()).issuperset(set(revs.nid.unique()))
         )
 
     def test_nids_nexist(self):
@@ -142,9 +141,8 @@ class TestAnkiDF(unittest.TestCase):
     def test_cids_revs(self):
         revs = AnkiDF.revs(self.db_path)
         cards = AnkiDF.cards(self.db_path)
-        self.assertListEqual(
-            sorted(list(revs.cid.unique())),
-            sorted(list(cards.cid.unique()))
+        self.assertTrue(
+            set(revs.cid.unique()).issubset(set(cards.cid.unique()))
         )
 
     def test_cids_notes(self):

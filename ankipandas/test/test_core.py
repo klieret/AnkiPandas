@@ -24,7 +24,7 @@ class TestRawRead(unittest.TestCase):
 
     def test_cards(self):
         cards = AnkiDF.cards(self.db_path)
-        self.assertEqual(len(cards), 3)
+        self.assertGreater(len(cards), 11)
         self.assertEqual(
             list(sorted(cards.columns)),
             sorted(our_columns["cards"])
@@ -32,7 +32,7 @@ class TestRawRead(unittest.TestCase):
 
     def test_notes(self):
         notes = AnkiDF.notes(self.db_path)
-        self.assertEqual(len(notes), 2)
+        self.assertGreater(len(notes), 6)
         self.assertEqual(
             list(sorted(notes.columns)),
             sorted(our_columns["notes"])
@@ -52,12 +52,8 @@ class TestRawRead(unittest.TestCase):
 
     def test_get_deck_names(self):
         names = get_did2deck(self.db)
-        self.assertDictEqual(
-            names,
-            {
-                "1": "Default",
-                "0": ""
-            }
+        self.assertTrue(
+            set(names.values()).issuperset({"Testing", "EnglishGerman"})
         )
 
     def test_get_model_info(self):
