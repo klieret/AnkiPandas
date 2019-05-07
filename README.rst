@@ -182,19 +182,6 @@ Move all cards tagged ``leech`` to the deck ``Leeches Only``:
     selection["cdeck"] = "Leeches Only"
     cards.update(selection).write()
 
-Columns
--------
-
-Get information about the columns in the table:
-
-.. code:: python
-
-    cards.help()
-
-Most of this information is from the `ankidroid documentation`_.
-
-.. _ankidroid documentation: https://github.com/ankidroid/Anki-Android/wiki/Database-Structure
-
 Troubleshooting
 ---------------
 
