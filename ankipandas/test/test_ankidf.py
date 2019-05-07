@@ -34,28 +34,57 @@ class TestAnkiDF(unittest.TestCase):
         self.notes = AnkiDF.notes(self.db_path)
         self.cards = AnkiDF.cards(self.db_path)
         self.revs = AnkiDF.revs(self.db_path)
-        self.adfs = {
+        self.table2adf = {
             "notes": self.notes,
             "cards": self.cards,
             "revs": self.revs
         }
+        self.adfs = [self.notes, self.cards, self.revs]
+
+    def nnotes(self):
+        return self.notes.copy()
+
+    def ncards(self):
+        return self.cards.copy()
+
+    def nrevs(self):
+        return self.revs.copy()
+
+    def ntable(self, table):
+        if table == "notes":
+            return self.nnotes()
+        elif table == "cards":
+            return self.ncards()
+        elif table == "revs":
+            return self.nrevs()
+        else:
+            raise ValueError("Unknown table")
+
+    def ntable2adf(self):
+        return {
+            "notes": self.nnotes(),
+            "cards": self.ncards(),
+            "revs": self.nrevs()
+        }
+
+    def nadfs(self):
+        return [self.nnotes(), self.ncards(), self.nrevs()]
 
     # Test constructors
     # ==========================================================================
 
     def test_tags(self):
-        notes = AnkiDF.notes(self.db_path)
         self.assertListEqual(
-            list(notes.query("index=='1555579337683'")["ntags"].values)[0],
+            list(self.notes.query("index=='1555579337683'")["ntags"].values)[0],
             ['other_test_tag']
         )
         self.assertListEqual(
-            list(notes.query("index=='1555579352896'")["ntags"].values)[0],
+            list(self.notes.query("index=='1555579352896'")["ntags"].values)[0],
             ['some_test_tag']
         )
 
     def test_merge_note_info(self):
-        merged = AnkiDF.cards(self.db_path).merge_notes()
+        merged = self.ncards().merge_notes()
         self.assertListEqual(
             sorted(list(merged.columns)),
             sorted(list(
@@ -70,66 +99,59 @@ class TestAnkiDF(unittest.TestCase):
     # --------------------------------------------------------------------------
 
     def test_nids_notes(self):
-        notes = AnkiDF.notes(self.db_path)
         self.assertListEqual(
-            list(notes.index),
-            list(notes.nid)
+            list(self.notes.index),
+            list(self.notes.nid)
         )
         self.assertListEqual(
-            list(notes.index),
+            list(self.notes.index),
             list(map(str, raw.get_table(self.db, "notes")["id"].unique()))
         )
         self.assertEqual(
-            len(notes.nid.unique()),
-            len(notes.nid)
+            len(self.notes.nid.unique()),
+            len(self.notes.nid)
         )
 
     def test_cids_cards(self):
-        cards = AnkiDF.cards(self.db_path)
         self.assertListEqual(
-            list(cards.index),
-            list(cards.cid)
+            list(self.cards.index),
+            list(self.cards.cid)
         )
         self.assertListEqual(
-            list(cards.index),
+            list(self.cards.index),
             list(map(str, raw.get_table(self.db, "cards")["id"].unique()))
         )
         self.assertEqual(
-            len(cards.cid.unique()),
-            len(cards.cid)
+            len(self.cards.cid.unique()),
+            len(self.cards.cid)
         )
 
     def test_rids_revs(self):
-        revs = AnkiDF.revs(self.db_path)
         self.assertListEqual(
-            list(revs.index),
-            list(revs.rid)
+            list(self.revs.index),
+            list(self.revs.rid)
         )
         self.assertListEqual(
-            list(revs.index),
+            list(self.revs.index),
             list(map(str, raw.get_table(self.db, "revs")["id"].unique()))
         )
         self.assertEqual(
-            len(revs.rid.unique()),
-            len(revs.rid)
+            len(self.revs.rid.unique()),
+            len(self.revs.rid)
         )
 
     # Slightly more elaborate cases
     # --------------------------------------------------------------------------
 
     def test_nids_cards(self):
-        cards = AnkiDF.cards(self.db_path)
-        notes = AnkiDF.notes(self.db_path)
         self.assertListEqual(
-            sorted(list(cards.nid.unique())),
-            sorted(list(notes.nid.unique()))
+            sorted(list(self.cards.nid.unique())),
+            sorted(list(self.notes.nid.unique()))
         )
 
     def test_nids_revs(self):
-        revs = AnkiDF.revs(self.db_path)
-        notes = AnkiDF.notes(self.db_path)
         self.assertTrue(
-            set(notes.nid.unique()).issuperset(set(revs.nid.unique()))
+            set(self.notes.nid.unique()).issuperset(set(self.revs.nid.unique()))
         )
 
     def test_nids_nexist(self):
@@ -139,25 +161,22 @@ class TestAnkiDF(unittest.TestCase):
             nexist.nid
 
     def test_cids_revs(self):
-        revs = AnkiDF.revs(self.db_path)
-        cards = AnkiDF.cards(self.db_path)
         self.assertTrue(
-            set(revs.cid.unique()).issubset(set(cards.cid.unique()))
+            set(self.revs.cid.unique()).issubset(set(self.cards.cid.unique()))
         )
 
     def test_cids_notes(self):
-        notes = AnkiDF.notes(self.db_path)
         with self.assertRaises(ValueError):
             # noinspection PyStatementEffect
-            notes.cid
+            self.notes.cid
 
     # --------------------------------------------------------------------------
 
     def test_mids(self):
         mids2s = {
-            "notes": set(AnkiDF.notes(self.db_path).mid),
-            "cards": set(AnkiDF.cards(self.db_path).mid),
-            "revs": set(AnkiDF.revs(self.db_path).mid)
+            "notes": set(self.notes.mid),
+            "cards": set(self.cards.mid),
+            "revs": set(self.revs.mid)
         }
         mids = set(raw.get_mid2model(self.db).keys())
         for table, mids2 in mids2s.items():
@@ -166,8 +185,8 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_dids(self):
         did2s = {
-            "cards": set(AnkiDF.cards(self.db_path).did),
-            "revs": set(AnkiDF.revs(self.db_path).did)
+            "cards": set(self.cards.did),
+            "revs": set(self.revs.did)
         }
         dids = set(raw.get_did2deck(self.db).keys())
         for table, dids2 in did2s.items():
@@ -177,7 +196,7 @@ class TestAnkiDF(unittest.TestCase):
     # ==========================================================================
 
     def test_merge_card_info(self):
-        merged = AnkiDF.revs(self.db_path).merge_cards()
+        merged = self.nrevs().merge_cards()
         self.assertListEqual(
             sorted(list(merged.columns)),
             sorted(list(
@@ -186,7 +205,7 @@ class TestAnkiDF(unittest.TestCase):
         )
 
     def test_fields_as_columns(self):
-        notes = AnkiDF.notes(self.db_path).fields_as_columns()
+        notes = self.nnotes().fields_as_columns()
         cols = our_columns["notes"].copy()
         cols.remove("nflds")
         prefix = notes.fields_as_columns_prefix
@@ -208,7 +227,7 @@ class TestAnkiDF(unittest.TestCase):
         # Add fields as column, remove original 'flds' column, then
         # add it back from the field columns and see if things still check
         # out
-        notes = AnkiDF.notes(self.db_path)
+        notes = self.nnotes()
         flds = copy.copy(notes["nflds"].values)
         notes = notes.fields_as_columns().fields_as_list()
         self.assertEqual(
@@ -251,7 +270,7 @@ class TestAnkiDF(unittest.TestCase):
         )
 
     def test_remove_tags(self):
-        notes = AnkiDF.notes(self.db_path)
+        notes = self.nnotes()
         notes = notes.remove_tag(None)
         self.assertEqual(
             list(set(map(tuple, notes["ntags"]))),
@@ -259,7 +278,7 @@ class TestAnkiDF(unittest.TestCase):
         )
 
     def test_add_tags(self):
-        notes = AnkiDF.notes(self.db_path).remove_tag(None).add_tag("1145")
+        notes = self.nnotes().remove_tag(None).add_tag("1145")
         self.assertListEqual(
             list(set(map(tuple, notes["ntags"]))),
             [('1145', )]
@@ -281,7 +300,7 @@ class TestAnkiDF(unittest.TestCase):
         )
 
     def test_has_tag(self):
-        notes = AnkiDF.notes(self.db_path).remove_tag(None).add_tag("1145")
+        notes = self.nnotes().remove_tag(None).add_tag("1145")
         self.assertListEqual(
             list(notes.has_tag("1145").unique()),
             [True]
@@ -300,14 +319,14 @@ class TestAnkiDF(unittest.TestCase):
         )
 
     def test_has_tag_natural(self):
-        notes = AnkiDF.notes(self.db_path)
+        notes = self.notes
         self.assertListEqual(
             sorted(list(notes.has_tag(["some_test_tag"]).unique())),
             [False, True]
         )
 
     def test_has_tags(self):
-        notes = AnkiDF.notes(self.db_path).remove_tag(None).add_tag("1145")
+        notes = self.nnotes().remove_tag(None).add_tag("1145")
         self.assertListEqual(
             list(notes.has_tags("1145").unique()),
             [True]
@@ -331,7 +350,7 @@ class TestAnkiDF(unittest.TestCase):
         )
 
     def test_remove_tag(self):
-        notes = AnkiDF.notes(self.db_path).add_tag(["1145", "asdf"])
+        notes = self.nnotes().add_tag(["1145", "asdf"])
         notes.remove_tag("1145", inplace=True)
         self.assertListEqual(
             list(notes.has_tag(["1145"]).unique()),
@@ -348,7 +367,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_show_modification_unchanged(self):
         for table in ["cards", "revs", "notes"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(self.db_path, None, table)
+                adf = self.table2adf[table]
                 self.assertEqual(
                     np.sum(adf.was_modified() == False),
                     len(adf)
@@ -377,7 +396,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_show_modification_empty(self):
         for table in ["cards", "revs", "notes"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(self.db_path, None, table)
+                adf = self.ntable(table)
                 adf_old = adf.copy()
                 n = len(adf)
                 adf = adf.drop(adf.index)
@@ -409,7 +428,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_show_modification_all_modified(self):
         for table in ["cards", "revs", "notes"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(self.db_path, None, table)
+                adf = self.ntable(table)
                 adf_old = adf.copy()
                 adf[adf.columns[2]] = "changed!"
                 self.assertEqual(
@@ -469,7 +488,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_show_modification_some_modified(self):
         for table in ["cards", "revs", "notes"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(self.db_path, None, table)
+                adf = self.ntable(table)
                 adf_old = adf.copy()
                 adf.loc[adf.index[0], [adf.columns[2]]] = "changed!"
                 self.assertEqual(
@@ -534,29 +553,20 @@ class TestAnkiDF(unittest.TestCase):
                     2
                 )
 
-    def test_modification_tests_1(self):
-        notes = AnkiDF.notes(self.db_path)
-        notes2 = notes.copy()
-        notes2.add_tag("test")
-
     # Formats
     # ==========================================================================
 
     def test_reformat_trivial(self):
         for table in ["notes", "revs", "cards"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(
-                    path=self.db_path, user=None, table=table
-                )
+                adf = self.ntable(table)
                 adf2 = adf.normalize()
                 self.assertTrue(adf.equals(adf2))
 
     def test_convert_raw_load_raw(self):
         for table in ["notes", "revs", "cards"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(
-                    path=self.db_path, user=None, table=table
-                ).raw()
+                adf = self.ntable(table).raw()
                 df = raw.get_table(self.db, table)
                 if table == "notes":
                     df["tags"] = df["tags"].str.strip()
@@ -565,9 +575,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_raw_normalize(self):
         for table in ["notes", "revs", "cards"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(
-                    path=self.db_path, user=None, table=table
-                )
+                adf = self.ntable(table)
                 adf2 = adf.raw().normalize()
                 self.assertTrue(adf.equals(adf2))
 
@@ -577,9 +585,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_set_usn(self):
         for table in ["notes", "revs", "cards"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(
-                    path=self.db_path, user=None, table=table
-                )
+                adf = self.ntable(table)
                 adf_old = adf.copy()
                 adf.loc[adf.index[0], adf_old.columns[0]] = "definitely changed"
                 adf._set_usn()
@@ -595,9 +601,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_set_mod(self):
         for table in ["notes", "cards"]:
             with self.subTest(table=table):
-                adf = AnkiDF._table_constructor(
-                    path=self.db_path, user=None, table=table
-                )
+                adf = self.ntable(table)
                 adf_old = adf.copy()
                 adf.loc[adf.index[0], adf.columns[0]] = "definitely changed"
                 adf._set_mod()
@@ -626,7 +630,7 @@ class TestAnkiDF(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = shutil.copy2(str(self.db_path), tmpdir)
             (pathlib.Path(tmpdir) / "backups").mkdir()
-            for table in self.adfs:
+            for table in self.table2adf:
                 with self.subTest(table=table):
                     adf = AnkiDF._table_constructor(
                         path=db_path, user=None, table=table
@@ -639,7 +643,6 @@ class TestAnkiDF(unittest.TestCase):
                         path=self.db_path, user=None, table=table
                     )
                     self.assertTrue(adf2.equals(adf_old))
-
 
     # Help
     # ==========================================================================
@@ -654,19 +657,20 @@ class TestAnkiDF(unittest.TestCase):
     # fixme
     @unittest.skip
     def test_help_cols_auto(self):
-        for table in self.adfs:
+        for table in self.table2adf:
             with self.subTest(table=table):
-                df = self.adfs[table].help_cols(column="auto")
+                df = self.table2adf[table].help_cols(column="auto")
                 self.assertListEqual(
                     sorted(list(set(df["Column"]))),
-                    sorted(list(set(self.adfs[table].columns)))
+                    sorted(list(set(self.table2adf[table].columns)))
                 )
     # todo: expand tests!
 
     def test_help(self):
-        notes = AnkiDF.notes(self.db_path)
+        notes = self.notes
         hlp = notes.help()
         self.assertTrue(isinstance(hlp, str))
+
 
 if __name__ == "__main__":
     unittest.main()
