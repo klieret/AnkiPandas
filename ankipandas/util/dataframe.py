@@ -27,8 +27,6 @@ def replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
 
 
 # fixme: This removes items whenever it can't merge!
-# todo: move to util
-# todo: id_add needs shouldn't have default
 def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
               inplace=False, id_add="id", prepend="", replace=False,
               prepend_clash_only=True, columns=None,
@@ -82,13 +80,16 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
     if replace:
         # Simply remove all potential clashes
         replaced_columns = set(df_add.columns).intersection(set(df.columns))
+        print(replaced_columns)
         df = df.drop(replaced_columns, axis=1)
 
     df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
+
     # Now remove id_add if it was to be removed
     # Careful: 'in' doesn't work with None
     if (columns and id_add not in columns) or \
             (drop_columns and id_add in drop_columns):
+        print("drop index")
         df_merge.drop(id_add, axis=1, inplace=True)
 
     # todo: make optional

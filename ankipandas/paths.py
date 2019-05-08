@@ -16,6 +16,7 @@ from typing import Union
 # ours
 from ankipandas.util.log import log
 
+
 @lru_cache(32)
 def _find_db(search_path, maxdepth=6,
              filename="collection.anki2",

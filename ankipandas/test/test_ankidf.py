@@ -97,7 +97,10 @@ class TestAnkiDF(unittest.TestCase):
             ['some_test_tag']
         )
 
-    def test_merge_note_info(self):
+    # Test merging
+    # ==========================================================================
+
+    def test_merge_notes_cards(self):
         merged = self.ncards().merge_notes()
         self.assertListEqual(
             sorted(list(merged.columns)),
@@ -105,6 +108,34 @@ class TestAnkiDF(unittest.TestCase):
                 set(our_columns["cards"]) | set(our_columns["notes"])
             ))
         )
+
+    def test_merge_notes_revs(self):
+        merged = self.nrevs().merge_notes()
+        self.assertListEqual(
+            sorted(list(merged.columns)),
+            sorted(list(
+                # Note: 'nid' is not a notes column.
+                set(our_columns["revs"]) | set(our_columns["notes"])| {"nid"}
+            ))
+        )
+
+    def test_merge_notes_raises(self):
+        with self.assertRaises(ValueError):
+            self.nnotes().merge_notes()
+
+    def test_merge_cards(self):
+        merged = self.nrevs().merge_cards()
+        self.assertListEqual(
+            sorted(list(merged.columns)),
+            sorted(list(
+                set(our_columns["revs"]) | set(our_columns["cards"])
+            ))
+        )
+    def test_merge_cards_raises(self):
+        with self.assertRaises(ValueError):
+            self.ncards().merge_cards()
+        with self.assertRaises(ValueError):
+            self.nnotes().merge_cards()
 
     # Test properties
     # ==========================================================================
@@ -210,15 +241,6 @@ class TestAnkiDF(unittest.TestCase):
                 self.assertTrue(dids2.issubset(dids))
 
     # ==========================================================================
-
-    def test_merge_card_info(self):
-        merged = self.nrevs().merge_cards()
-        self.assertListEqual(
-            sorted(list(merged.columns)),
-            sorted(list(
-                set(our_columns["revs"]) | set(our_columns["cards"])
-            ))
-        )
 
     def test_fields_as_columns(self):
         notes = self.nnotes().fields_as_columns()

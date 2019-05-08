@@ -266,9 +266,6 @@ class AnkiDataFrame(pd.DataFrame):
     # IDs
     # ==========================================================================
 
-    # todo: call nidS etc. to avoid clashes with attributes?
-    # todo: rid?
-
     @property
     def nid(self):
         """ Note ID as :class:`pandas.Series` of integers. """
@@ -464,7 +461,6 @@ class AnkiDataFrame(pd.DataFrame):
     # Merge tables
     # ==========================================================================
 
-    # todo: use .nids rather than .nid_columns
     def merge_notes(self, inplace=False, columns=None,
                     drop_columns=None, prepend="n",
                     prepend_clash_only=True):
@@ -482,6 +478,13 @@ class AnkiDataFrame(pd.DataFrame):
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
         self._check_our_format()
+        if self._anki_table == "notes":
+            raise ValueError(
+                "AnkiDataFrame was already initialized as a table of type"
+                " notes, therefore merge_notes() doesn't make any sense."
+            )
+        elif self._anki_table == "revs":
+            self["nid"] = self.nid
         return ankipandas.util.dataframe.merge_dfs(
             df=self,
             df_add=AnkiDataFrame.notes(self.db_path),
@@ -494,8 +497,6 @@ class AnkiDataFrame(pd.DataFrame):
             drop_columns=drop_columns
         )
 
-    # todo: support merging into notes frame
-    # todo: use .cids rather than .cid_columns
     def merge_cards(self, inplace=False, columns=None, drop_columns=None,
                     prepend="c", prepend_clash_only=True):
         """
@@ -512,6 +513,17 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
+        if self._anki_table == "cards":
+            raise ValueError(
+                "AnkiDataFrame was already initialized as a table of type"
+                " cards, therefore merge_cards() doesn't make any sense."
+            )
+        elif self._anki_table == "notes":
+            raise ValueError(
+                "One note can correspond to more than one card, therefore it "
+                "it is not supported to merge the cards table into the "
+                "notes table."
+            )
         self._check_our_format()
         return ankipandas.util.dataframe.merge_dfs(
             df=self,
