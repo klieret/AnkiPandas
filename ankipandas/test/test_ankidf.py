@@ -73,6 +73,20 @@ class TestAnkiDF(unittest.TestCase):
     # Test constructors
     # ==========================================================================
 
+    def test_empty(self):
+        eadfs = {
+            "notes": AnkiDF.notes(empty=True),
+            "cards": AnkiDF.cards(empty=True),
+            "revs": AnkiDF.revs(empty=True)
+        }
+        for table, eadf in eadfs.items():
+            self.assertEqual(len(eadf), 0)
+            adf = self.table2adf[table]
+            self.assertListEqual(
+                sorted(list(adf.columns)),
+                sorted(list(eadf.columns))
+            )
+
     def test_tags(self):
         self.assertListEqual(
             list(self.notes.query("index=='1555579337683'")["ntags"].values)[0],

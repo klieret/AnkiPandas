@@ -18,7 +18,7 @@ import pandas as pd
 
 # ours
 from ankipandas.util.log import log
-from ankipandas._columns import tables_ours2anki
+from ankipandas._columns import tables_ours2anki, anki_columns
 
 CACHE_SIZE = 32
 
@@ -75,6 +75,18 @@ def get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
         db
     )
     return df
+
+
+def get_empty_table(table: str) -> pd.DataFrame:
+    """ Get empty table
+
+    Args:
+        table: ``cards``, ``notes`` or ``revs``
+
+    Returns:
+        :class: `pandas.DataFrame`
+    """
+    return pd.DataFrame(columns=anki_columns[table])
 
 
 @lru_cache(CACHE_SIZE)
