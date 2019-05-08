@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 # std
+import collections
 import sqlite3
 import time
 
 # 3rd
-from functools import lru_cache
 import numpy as np
 import pandas as pd
 import pathlib
-from typing import Union, List
+from typing import Union, List, Dict, Iterable
 
 # ours
 import ankipandas.paths
@@ -223,7 +223,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     # todo: skip doc
     def append(self, *args, **kwargs):
-        ret = super(AnkiDataFrame, self).append(*args, **kwargs)
+        ret = pd.DataFrame.append(self, *args, **kwargs)
         self._copy_attrs_to(ret)
         ret.astype(_columns.dtype_casts2[self._anki_table])
         return ret
@@ -1230,6 +1230,143 @@ class AnkiDataFrame(pd.DataFrame):
         )
         log.info("Backup created at {}.".format(backup_path.resolve()))
         raw.set_table(self.db, self.raw(), table=self._anki_table, mode=mode)
+
+    # Append
+    # ==========================================================================
+
+    def _get_id(self):
+        idx = int(time.time())
+        while idx in self.index:
+            idx += 1
+        return idx
+
+    def add_note(self, nmodel: str, nflds: Union[List[str], Dict[str, str]],
+                 ntags=None, nid=None, nguid=None, nmod=None, nusn=-1,
+                 others: Dict[str, str] = None):
+        """ Add new note.
+
+        Args:
+            nmodel: Name of the model (must exist already, check
+                :meth:`list_models` for a list of available models)
+            nflds: Fields of the note either as list or as dictionary
+                ``{field name: field value}``. In the latter case, if fields
+                are not present, they are filled with empty string.
+            ntags: Tags of the note as string or Iterable thereof. Defaults to
+                no tags.
+            nid: Note ID. Will be set automatically by default and it is
+                discouraged to set your own. If you do so and it already
+                exists, the existing note will be overwritten.
+            nguid: Note Globally Unique ID. Will be set automatically by
+                default, and it is discouraged to set your own.
+            nmod: Modification timestamp. Will be set automatically by default
+                and it is discouraged to set your own.
+            nusn: Update sequence number. Will be set automatically by default
+                and it is very discouraged to set your own.
+            others: Dictionary of column contents for any other columns we might
+                encounter (if collides with one of the above column contents
+                derived by the above arguments, it will be ignored)
+
+        Returns:
+            None
+        """
+        self._check_our_format()
+        if not self._anki_table == "notes":
+            raise ValueError(
+                "Adding of notes only supported in notes table."
+            )
+
+        if not nid:
+            nid = self._get_id()
+        if not nmod:
+            nmod = int(time.time())
+        if not nguid:
+            nguid = guid()
+        if isinstance(ntags, str):
+            ntags = [ntags]
+        if not ntags:
+            ntags = []
+        model2mid = raw.get_model2mid(self.db)
+        if nmodel not in model2mid.keys():
+            raise ValueError(
+                "No model of with name '{}' exists.".format(nmodel)
+            )
+        field_keys = raw.get_mid2fields(self.db)[model2mid[nmodel]]
+        if isinstance(nflds, Iterable) and not isinstance(nflds, dict):
+            nflds = list(nflds)
+            if not len(nflds) == len(field_keys):
+                raise ValueError(
+                    "Model '{}' has {} fields but you supplied {}.".format(
+                        nmodel, len(field_keys), len(nflds)
+                    )
+                )
+            else:
+                field_key2field = dict(zip(field_keys, nflds))
+        elif isinstance(nflds, dict):
+            field_key2field = collections.defaultdict(str, nflds)
+        else:
+            raise ValueError(
+                "Unsupported type for fields"
+                "argument: {}.".format(type(nflds))
+            )
+
+        # Now we need to decide on contents for EVERY column in the DF
+        known_columns = {
+            "nmodel": nmodel,
+            "ntags": ntags,
+            "nguid": nguid,
+            "nmod": nmod,
+            "nusn": nusn
+        }
+
+        # More difficult: Field columns:
+        if self._fields_format == "list":
+            # Be careful with order!
+            known_columns["nflds"] = \
+                [field_key2field[field_key] for field_key in field_keys]
+        elif self._fields_format == "columns":
+            # Let's first set all fields as columns to '', because we also
+            # need to set those which aren't from our model:
+            for col in self.columns:
+                if col.startswith(self.fields_as_columns_prefix):
+                    self.known_columns[col] = ""
+            # Now let's fill those of our model
+            known_columns.update(field_key2field)
+        else:
+            raise ValueError(
+                "Fields have to be in 'list' or 'columns' format, but yours "
+                "are in '{}' format.".format(self._fields_format)
+            )
+
+        # Last step: others
+        # Make sure that we don't accidentally overwrite one of our fields
+        if not others:
+            others = {}
+        others = {
+            key: others[key] for key in others if key not in known_columns
+        }
+        known_columns.update(others)
+
+        missing = sorted(list(set(known_columns.keys()) - set(self.columns)))
+        if missing:
+            raise ValueError(
+                "Do not know how to fill the following column(s): {}. Remove"
+                "them or make sure you specify values using the 'others'"
+                "argument."
+            )
+
+        # Now we're ready
+        # add_data = collections.OrderedDict()
+        # for col in self.columns:
+        #     add_data[col] = known_columns[col]
+        add = pd.DataFrame(columns=self.columns, index=[nid])
+        for key, item in known_columns.items():
+            print(key, item)
+            add.at[nid, key] = item
+        add = add.astype({
+            key: value for key, value in _columns.dtype_casts_all.items()
+            if key in self.columns
+        })
+        self.loc[nid] = add.loc[nid]
 
     # Help
     # ==========================================================================

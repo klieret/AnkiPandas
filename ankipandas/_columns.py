@@ -173,3 +173,6 @@ dtype_casts2 = {
         "rtime": int,
     }
 }
+dtype_casts_all = dtype_casts2["cards"]
+dtype_casts_all.update(dtype_casts2["notes"])
+dtype_casts_all.update(dtype_casts2["revs"])
