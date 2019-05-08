@@ -5,7 +5,8 @@ from pathlib import Path
 
 # 3rd
 import pandas as pd
-import numpy as np
+
+# todo: Docstrings, cleanup
 
 # ours
 from ankipandas.util.misc import invert_dict
@@ -29,10 +30,9 @@ table2index = {
 our_tables = sorted(list(tables_ours2anki.keys()))
 our_columns = {
     table: sorted(list(
-        fields_df[np.logical_and(
-            fields_df["Table"] == table,
-            fields_df["Default"] == True
-        )]["Column"].unique()
+        fields_df[
+            (fields_df["Table"] == table) & fields_df["Default"]
+        ]["Column"].unique()
     ))
     for table in our_tables
 }
@@ -90,8 +90,12 @@ anki_columns = {
 
 columns_ours2anki = {
     table: dict(zip(
-        fields_df[np.logical_and(fields_df["Table"] == table, fields_df["Native"] == True)]["Column"],
-        fields_df[np.logical_and(fields_df["Table"] == table, fields_df["Native"] == True)]["AnkiColumn"]
+        fields_df[
+            (fields_df["Table"] == table) & fields_df["Native"]
+        ]["Column"],
+        fields_df[
+            (fields_df["Table"] == table) & fields_df["Native"]
+        ]["AnkiColumn"]
     ))
     for table in our_tables
 }

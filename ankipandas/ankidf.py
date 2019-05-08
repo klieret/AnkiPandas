@@ -5,7 +5,6 @@ import sqlite3
 import time
 
 # 3rd
-from functools import lru_cache
 import numpy as np
 import pandas as pd
 import pathlib
@@ -351,6 +350,7 @@ class AnkiDataFrame(pd.DataFrame):
                     " default."
                 )
 
+    # noinspection PyUnusedLocal
     @rid.setter
     def rid(self, value):
         print("arg")
@@ -877,7 +877,7 @@ class AnkiDataFrame(pd.DataFrame):
             other = self._table_constructor(
                 self.db_path, None, self._anki_table
             )
-        columns = [c for c in self.columns if c in other.columns]
+        cols = [c for c in self.columns if c in other.columns]
         other_nids = set(other.index)
         inters = set(self.index).intersection(other_nids)
         if only:
@@ -886,9 +886,9 @@ class AnkiDataFrame(pd.DataFrame):
             )
         inters = sorted(list(inters))
         return pd.DataFrame(
-            self.loc[inters, columns].values != other.loc[inters, columns].values,
+            self.loc[inters, cols].values != other.loc[inters, cols].values,
             index=self.loc[inters].index,
-            columns=columns
+            columns=cols
         )
 
     def was_added(self, other: pd.DataFrame = None, _force=False):
@@ -1002,8 +1002,8 @@ class AnkiDataFrame(pd.DataFrame):
         # Dtypes
         # ------
 
-        for column, type in _columns.dtype_casts[table].items():
-            self[column] = self[column].astype(type)
+        for column, typ in _columns.dtype_casts[table].items():
+            self[column] = self[column].astype(typ)
 
         # Renames
         # -------

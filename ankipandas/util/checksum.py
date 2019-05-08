@@ -25,7 +25,7 @@ def _strip_html(s):
 
 
 def _strip_html_media(s):
-    "Strip HTML but keep media filenames"
+    """ Strip HTML but keep media filenames """
     s = _reMedia.sub(" \\1 ", s)
     return _strip_html(s)
 
@@ -52,7 +52,7 @@ def _ents_to_txt(html):
                 text = chr(name2codepoint[text[1:-1]])
             except KeyError:
                 pass
-        return text # leave as is
+        return text  # leave as is
     return _reEnts.sub(fixup, html)
 
 

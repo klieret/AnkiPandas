@@ -105,14 +105,17 @@ class TestRawWrite(unittest.TestCase):
         notes2 = get_table(self.db_write, "notes")
         cards2 = get_table(self.db_write, "cards")
         revlog2 = get_table(self.db_write, "revs")
+        # noinspection PyUnresolvedReferences
         self.assertListEqual(
-            list(notes.values.tolist()), list(notes2.values.tolist())
+            notes.values.tolist(), notes2.values.tolist()
         )
+        # noinspection PyUnresolvedReferences
         self.assertListEqual(
-            list(cards.values.tolist()), list(cards2.values.tolist())
+            cards.values.tolist(), cards2.values.tolist()
         )
+        # noinspection PyUnresolvedReferences
         self.assertListEqual(
-            list(revlog.values.tolist()), list(revlog2.values.tolist())
+            revlog.values.tolist(), revlog2.values.tolist()
         )
 
     def test_rw_identical(self):
