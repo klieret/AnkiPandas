@@ -1239,7 +1239,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     def add_note(self, nmodel: str, nflds: Union[List[str], Dict[str, str]],
                  ntags=None, nid=None, nguid=None, nmod=None, nusn=-1,
-                 others: Dict[str, str] = None):
+                 others: Dict[str, str] = None) -> int:
         """ Add new note.
 
         Args:
@@ -1264,7 +1264,7 @@ class AnkiDataFrame(pd.DataFrame):
                 derived by the above arguments, it will be ignored)
 
         Returns:
-            None
+            Note ID (nid)
         """
         self._check_our_format()
         if not self._anki_table == "notes":
@@ -1357,13 +1357,14 @@ class AnkiDataFrame(pd.DataFrame):
         #     add_data[col] = known_columns[col]
         add = pd.DataFrame(columns=self.columns, index=[nid])
         for key, item in known_columns.items():
-            print(key, item)
             add.at[nid, key] = item
         add = add.astype({
             key: value for key, value in _columns.dtype_casts_all.items()
             if key in self.columns
         })
         self.loc[nid] = add.loc[nid]
+
+        return nid
 
     # Help
     # ==========================================================================

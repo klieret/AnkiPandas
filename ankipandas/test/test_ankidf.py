@@ -693,6 +693,73 @@ class TestAnkiDF(unittest.TestCase):
                     list(val_rest_2)
                 )
 
+    # New
+    # ==========================================================================
+
+    # New notes
+    # --------------------------------------------------------------------------
+
+    def test_new_notes_empty_fully_specified(self):
+        empty = AnkiDF.notes(self.db_path, empty=True)
+
+        init_dict = dict(
+            nmodel="Basic",
+            nflds=["field1", "field2"],
+            ntags=["tag1", "tag2"],
+            nguid="cryptic",
+            nmod=124,
+            nusn=42,
+        )
+        nid = empty.add_note(nid=123, **init_dict)
+        self.assertEqual(nid, 123)
+        note = empty.loc[nid]
+        self.assertDictEqual(init_dict, note.to_dict())
+        self.assertEqual(len(empty), 1)
+
+        init_dict2 = dict(
+            nmodel="Basic",
+            nflds=["field21", "field22"],
+            ntags=["tag21", "tag22"],
+            nguid="cryptic2",
+            nmod=1235,
+            nusn=17,
+        )
+        nid = empty.add_note(nid=125, **init_dict2)
+        self.assertEqual(nid, 125)
+        note = empty.loc[125]
+        self.assertDictEqual(init_dict2, note.to_dict())
+        self.assertEqual(len(empty), 2)
+
+    def test_new_notes_overwrite(self):
+        empty = AnkiDF.notes(self.db_path, empty=True)
+        empty.add_note("Basic", ["f1", "f2"], nid=10)
+        self.assertEqual(len(empty), 1)
+        empty.add_note("Basic", ["f3", "f4"], nid=10)
+        self.assertEqual(len(empty), 1)
+        self.assertEqual(empty.loc[10].to_dict()["nflds"], ["f3", "f4"])
+
+    def test_new_notes_default_values(self):
+        empty = AnkiDF.notes(self.db_path)
+
+        init_dict = dict(
+            nmodel="Basic",
+            nflds=["field1", "field2"],
+        )
+        nid = empty.add_note(nid=123, **init_dict)
+        self.assertEqual(nid, 123)
+        note = empty.loc[nid].to_dict()
+        self.assertEqual(note["nmodel"], init_dict["nmodel"])
+        self.assertEqual(note["nflds"], init_dict["nflds"])
+
+    def test_new_note_raises(self):
+        empty = AnkiDF.notes(self.db_path, empty=True)
+        with self.assertRaises(ValueError):
+            empty.add_note("doesntexist", [])
+        with self.assertRaises(ValueError):
+            empty.add_note("Basic", [])
+        with self.assertRaises(ValueError):
+            empty.add_note("Basic", ["1", "2", "3"])
+
     # Write
     # ==========================================================================
 
