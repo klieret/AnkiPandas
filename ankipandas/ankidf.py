@@ -111,12 +111,13 @@ class AnkiDataFrame(pd.DataFrame):
         self._anki_table = table
         self._df_format = "anki"
 
+        if not path:
+            path = self.db_path
+        self._load_db(ankipandas.paths.db_path_input(path, user=user))
+
         if empty:
             df = raw.get_empty_table(table)
         else:
-            if not path:
-                path = self.db_path
-            self._load_db(ankipandas.paths.db_path_input(path, user=user))
             df = raw.get_table(self.db, table)
 
         replace_df_inplace(self, df)
@@ -131,7 +132,7 @@ class AnkiDataFrame(pd.DataFrame):
     @classmethod
     def notes(cls, path=None, user=None, empty=False):
         """ Initialize :class:`AnkiDataFrame` with notes table loaded from Anki
-        database (unless ``empty`` option is specified).
+        database.
 
         Args:
             path: (Search) path to database see
@@ -150,11 +151,6 @@ class AnkiDataFrame(pd.DataFrame):
             notes = ankipandas.AnkiDataFrame.notes()
 
         """
-        if empty and (path is not None or user is not None):
-            log.warning(
-                "When initialized with empty==True, no database is "
-                "initialized, so the path and user argument are ignored."
-            )
         return cls._table_constructor(path, user, "notes", empty=empty)
 
     @classmethod
@@ -991,14 +987,11 @@ class AnkiDataFrame(pd.DataFrame):
 
         self._df_format = "in_progress"
 
-        empty = len(self) == 0 and self.db is None
-
         # Dtypes
         # ------
 
-        if not empty:
-            for column, type in _columns.dtype_casts[table].items():
-                self[column] = self[column].astype(type)
+        for column, type in _columns.dtype_casts[table].items():
+            self[column] = self[column].astype(type)
 
         # Renames
         # -------
@@ -1012,12 +1005,11 @@ class AnkiDataFrame(pd.DataFrame):
         # ----------
         # We sometimes interpret cryptic numeric values
 
-        if not empty:
-            if table in _columns.value_maps:
-                for column in _columns.value_maps[table]:
-                    self[column] = self[column].map(
-                        _columns.value_maps[table][column]
-                    )
+        if table in _columns.value_maps:
+            for column in _columns.value_maps[table]:
+                self[column] = self[column].map(
+                    _columns.value_maps[table][column]
+                )
 
         # IDs
         # ---
@@ -1025,22 +1017,15 @@ class AnkiDataFrame(pd.DataFrame):
         self.set_index(_columns.table2index[table], inplace=True)
 
         if table == "cards":
-            if empty:
-                self["cdeck"] = None
-                self["codeck"] = None
-            else:
-                self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
-                self["codeck"] = self["codid"].map(raw.get_did2deck(self.db))
+            self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
+            self["codeck"] = self["codid"].map(raw.get_did2deck(self.db))
         elif table == "notes":
-            if not empty:
-                self["nmodel"] = self["mid"].map(raw.get_mid2model(self.db))
-            else:
-                self["nmodel"] = None
+            self["nmodel"] = self["mid"].map(raw.get_mid2model(self.db))
 
         # Tags
         # ----
 
-        if not empty and table == "notes":
+        if table == "notes":
             # Tags as list, rather than string joined by space
             self["ntags"] = \
                 self["ntags"].apply(
@@ -1052,8 +1037,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         if table == "notes":
             # Fields as list, rather than as string joined by \x1f
-            if not empty:
-                self["nflds"] = self["nflds"].str.split("\x1f")
+            self["nflds"] = self["nflds"].str.split("\x1f")
             self._fields_format = "list"
 
         # Drop columns
