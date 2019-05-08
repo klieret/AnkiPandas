@@ -75,9 +75,9 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_empty(self):
         eadfs = {
-            "notes": AnkiDF.notes(empty=True),
-            "cards": AnkiDF.cards(empty=True),
-            "revs": AnkiDF.revs(empty=True)
+            "notes": AnkiDF.notes(self.db_path, empty=True),
+            "cards": AnkiDF.cards(self.db_path, empty=True),
+            "revs": AnkiDF.revs(self.db_path, empty=True)
         }
         for table, eadf in eadfs.items():
             self.assertEqual(len(eadf), 0)
