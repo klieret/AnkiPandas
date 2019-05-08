@@ -679,28 +679,29 @@ class TestAnkiDF(unittest.TestCase):
     # Help
     # ==========================================================================
 
-    def test_help_cols(self):
-        df = self.notes.help_cols()
-        self.assertListEqual(
-            list(df.columns),
-            ["Column", "AnkiColumn", "Table", "Description", "Native", "Default"]
-        )
-
-    # fixme
-    @unittest.skip
-    def test_help_cols_auto(self):
-        for table in self.table2adf:
+    def test_help_col(self):
+        for table, adf in self.table2adf.items():
             with self.subTest(table=table):
-                df = self.table2adf[table].help_cols(column="auto")
+                cols = list(adf.columns) + [adf.index.name]
+                for col in cols:
+                    self.assertIsInstance(adf.help_col(col, ret=True), str)
+
+    def test_help_cols_auto(self):
+        for table, adf in self.table2adf.items():
+            with self.subTest(table=table):
+                df = adf.help_cols()
                 self.assertListEqual(
-                    sorted(list(set(df["Column"]))),
-                    sorted(list(set(self.table2adf[table].columns)))
+                    list(df.columns),
+                    ["AnkiColumn", "Table", "Description", "Native", "Default"]
                 )
-    # todo: expand tests!
+                self.assertListEqual(
+                    sorted(adf.columns),
+                    sorted(list(set(df.index)))  # nid, cid appear twice
+                )
 
     def test_help(self):
         notes = self.notes
-        hlp = notes.help()
+        hlp = notes.help(ret=True)
         self.assertTrue(isinstance(hlp, str))
 
 

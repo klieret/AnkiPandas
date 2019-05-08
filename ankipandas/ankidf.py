@@ -5,6 +5,7 @@ import sqlite3
 import time
 
 # 3rd
+from functools import lru_cache
 import numpy as np
 import pandas as pd
 import pathlib
@@ -1196,13 +1197,43 @@ class AnkiDataFrame(pd.DataFrame):
     # Help
     # ==========================================================================
 
-    # todo: supply only column option. Also just print description if narrowed
-    #   down to only one item!
+    def help_col(self, column, ret=False) -> Union[str, None]:
+        """
+        Show description/help about a column. To get information about all
+        columns, use the :meth:`.help_cols` method instead.
+
+        Args:
+              column: Name of the column
+              ret: If True, return as string, rather than printing
+        """
+        df = self.help_cols(column)
+        if len(df) == 0:
+            raise ValueError(
+                "Could not find help for your search request.".format(column)
+            )
+        if len(df) == 2:
+            # fix for nid and cid column:
+            df = self.help_cols(column, table=self._anki_table)
+        if len(df) != 1:
+            raise ValueError("Could not find help due to bug.")
+        data = df.loc[column].to_dict()
+        h = "Help for column '{}'\n".format(column)
+        h += "-" * (len(h) - 1) + "\n"
+        if data["Native"]:
+            h += "Name in raw Anki database: " + data["AnkiColumn"] + "\n"
+        h += "Information from table: " + data["Table"] + "\n"
+        h += "Present by default: " + str(data["Default"]) + "\n\n"
+        h += "Description: " + data["Description"]
+        if ret:
+            return h
+        else:
+            print(h)
+
     def help_cols(self, column='auto', table='all', ankicolumn='all') \
             -> pd.DataFrame:
         """
-        Return a pandas dataframe containing descriptions of every field in the
-        anki database. The arguments below help to filter it.
+        Show information about the columns and their interpretations. To
+        get information about a single column, please use :meth:`.help_col`.
 
         Args:
             column: Name of a field or column (as used by us) or list thereof.
@@ -1217,6 +1248,11 @@ class AnkiDataFrame(pd.DataFrame):
 
         Returns:
             Pandas DataFrame with all matches.
+
+        .. warning::
+
+            As there are problems with text wrapping in pandas DataFrame, this
+            method might change or disappear in the future.
         """
         help_path = pathlib.Path(__file__).parent / "data" / "anki_fields.csv"
         df = pd.read_csv(help_path)
@@ -1234,18 +1270,30 @@ class AnkiDataFrame(pd.DataFrame):
             if isinstance(ankicolumn, str):
                 ankicolumn = [ankicolumn]
             df = df[df["AnkiColumn"].isin(ankicolumn)]
-
+        df.set_index("Column", inplace=True)
         return df
 
-    # fixme: fill in link
     @staticmethod
-    def help() -> str:
-        """ Display short help text. """
+    def help(ret=False) -> Union[str, None]:
+        """ Display short help text.
+
+        Args:
+            ret: Return as string instead of printing it.
+
+        Returns:
+            string if ret==True, else None
+        """
         h = "This is the help for the class AnkiDataFrame, a subclass of " \
-            "pandas.DataFrame. The full documentation of all class methods " \
+            "pandas.DataFrame. \n" \
+            "The full documentation of all class methods " \
             "unique to AnkiDataFrame can be found on " \
-            "ankipandas.readthedocs.io. The inherited methods from " \
-            "pandas.DataFrame are documented at ." \
-            "To get information abou the fields currently in this table, " \
+            "https://ankipandas.readthedocs.io. \n" \
+            "The inherited methods from " \
+            "pandas.DataFrame are documented at https://pandas.pydata.org/" \
+            "pandas-docs/stable/reference/api/pandas.DataFrame.html.\n" \
+            "To get information about the fields currently in this table, " \
             "please use the help_cols() method."
-        return h
+        if ret:
+            return h
+        else:
+            print(h)
