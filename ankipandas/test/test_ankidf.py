@@ -23,7 +23,6 @@ import ankipandas.raw as raw
 import ankipandas._columns as _columns
 
 
-# todo: add more notes to test deck
 class TestAnkiDF(unittest.TestCase):
     def setUp(self):
         self.db_path = pathlib.Path(__file__).parent / "data" / \
@@ -75,9 +74,9 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_empty(self):
         eadfs = {
-            "notes": AnkiDF.notes(empty=True),
-            "cards": AnkiDF.cards(empty=True),
-            "revs": AnkiDF.revs(empty=True)
+            "notes": AnkiDF.notes(self.db_path, empty=True),
+            "cards": AnkiDF.cards(self.db_path, empty=True),
+            "revs": AnkiDF.revs(self.db_path, empty=True)
         }
         for table, eadf in eadfs.items():
             self.assertEqual(len(eadf), 0)
@@ -97,7 +96,10 @@ class TestAnkiDF(unittest.TestCase):
             ['some_test_tag']
         )
 
-    def test_merge_note_info(self):
+    # Test merging
+    # ==========================================================================
+
+    def test_merge_notes_cards(self):
         merged = self.ncards().merge_notes()
         self.assertListEqual(
             sorted(list(merged.columns)),
@@ -105,6 +107,35 @@ class TestAnkiDF(unittest.TestCase):
                 set(our_columns["cards"]) | set(our_columns["notes"])
             ))
         )
+
+    def test_merge_notes_revs(self):
+        merged = self.nrevs().merge_notes()
+        self.assertListEqual(
+            sorted(list(merged.columns)),
+            sorted(list(
+                # Note: 'nid' is not a notes column.
+                set(our_columns["revs"]) | set(our_columns["notes"]) | {"nid"}
+            ))
+        )
+
+    def test_merge_notes_raises(self):
+        with self.assertRaises(ValueError):
+            self.nnotes().merge_notes()
+
+    def test_merge_cards(self):
+        merged = self.nrevs().merge_cards()
+        self.assertListEqual(
+            sorted(list(merged.columns)),
+            sorted(list(
+                set(our_columns["revs"]) | set(our_columns["cards"])
+            ))
+        )
+
+    def test_merge_cards_raises(self):
+        with self.assertRaises(ValueError):
+            self.ncards().merge_cards()
+        with self.assertRaises(ValueError):
+            self.nnotes().merge_cards()
 
     # Test properties
     # ==========================================================================
@@ -211,15 +242,6 @@ class TestAnkiDF(unittest.TestCase):
 
     # ==========================================================================
 
-    def test_merge_card_info(self):
-        merged = self.nrevs().merge_cards()
-        self.assertListEqual(
-            sorted(list(merged.columns)),
-            sorted(list(
-                set(our_columns["revs"]) | set(our_columns["cards"])
-            ))
-        )
-
     def test_fields_as_columns(self):
         notes = self.nnotes().fields_as_columns()
         cols = our_columns["notes"].copy()
@@ -285,7 +307,9 @@ class TestAnkiDF(unittest.TestCase):
             notes.nid = ""
         cards.nid = "a"
         revs.nid = "a"
+        # noinspection PyUnresolvedReferences
         self.assertEqual(cards.nid.unique().tolist(), ["a"])
+        # noinspection PyUnresolvedReferences
         self.assertEqual(revs.nid.unique().tolist(), ["a"])
 
     def test_prop_cid(self):
@@ -415,11 +439,11 @@ class TestAnkiDF(unittest.TestCase):
             with self.subTest(table=table):
                 adf = self.table2adf[table]
                 self.assertEqual(
-                    np.sum(adf.was_modified() == False),
+                    np.sum(~adf.was_modified()),
                     len(adf)
                 )
                 self.assertEqual(
-                    np.sum(adf.was_added() == False),
+                    np.sum(~adf.was_added()),
                     len(adf)
                 )
                 self.assertEqual(
@@ -427,11 +451,11 @@ class TestAnkiDF(unittest.TestCase):
                     0
                 )
                 self.assertEqual(
-                    np.sum(adf.was_modified(adf) == False),
+                    np.sum(~adf.was_modified(adf)),
                     len(adf)
                 )
                 self.assertEqual(
-                    np.sum(adf.was_added(adf) == False),
+                    np.sum(~adf.was_added(adf)),
                     len(adf)
                 )
                 self.assertEqual(
@@ -447,11 +471,11 @@ class TestAnkiDF(unittest.TestCase):
                 n = len(adf)
                 adf = adf.drop(adf.index)
                 self.assertEqual(
-                    np.sum(adf.was_modified() == False),
+                    np.sum(~adf.was_modified()),
                     0
                 )
                 self.assertEqual(
-                    np.sum(adf.was_added() == False),
+                    np.sum(~adf.was_added()),
                     0
                 )
                 self.assertEqual(
@@ -459,11 +483,11 @@ class TestAnkiDF(unittest.TestCase):
                     n
                 )
                 self.assertEqual(
-                    np.sum(adf.was_modified(adf_old) == False),
+                    np.sum(~adf.was_modified(adf_old)),
                     0
                 )
                 self.assertEqual(
-                    np.sum(adf.was_added(adf_old) == False),
+                    np.sum(~adf.was_added(adf_old)),
                     0
                 )
                 self.assertEqual(
@@ -478,11 +502,11 @@ class TestAnkiDF(unittest.TestCase):
                 adf_old = adf.copy()
                 adf[adf.columns[2]] = "changed!"
                 self.assertEqual(
-                    np.sum(adf.was_modified() == False),
+                    np.sum(~adf.was_modified()),
                     0
                 )
                 self.assertEqual(
-                    np.sum(adf.was_added() == True),
+                    np.sum(adf.was_added()),
                     0
                 )
                 self.assertEqual(
@@ -504,11 +528,11 @@ class TestAnkiDF(unittest.TestCase):
                 )
                 # ----
                 self.assertEqual(
-                    np.sum(adf.was_modified(adf_old) == False),
+                    np.sum(~adf.was_modified(adf_old)),
                     0
                 )
                 self.assertEqual(
-                    np.sum(adf.was_added(adf_old) == True),
+                    np.sum(adf.was_added(adf_old)),
                     0
                 )
                 self.assertEqual(
@@ -538,7 +562,7 @@ class TestAnkiDF(unittest.TestCase):
                 adf_old = adf.copy()
                 adf.loc[adf.index[0], [adf.columns[2]]] = "changed!"
                 self.assertEqual(
-                    np.sum(adf.was_modified() == True),
+                    np.sum(adf.was_modified()),
                     1
                 )
                 self.assertEqual(
@@ -546,7 +570,7 @@ class TestAnkiDF(unittest.TestCase):
                     True
                 )
                 self.assertEqual(
-                    np.sum(adf.was_added() == True),
+                    np.sum(adf.was_added()),
                     0
                 )
                 self.assertEqual(
@@ -568,7 +592,7 @@ class TestAnkiDF(unittest.TestCase):
                 )
                 # ----
                 self.assertEqual(
-                    np.sum(adf.was_modified(adf_old) == True),
+                    np.sum(adf.was_modified(adf_old)),
                     1
                 )
                 self.assertEqual(
@@ -576,7 +600,7 @@ class TestAnkiDF(unittest.TestCase):
                     True
                 )
                 self.assertEqual(
-                    np.sum(adf.was_added(adf_old) == True),
+                    np.sum(adf.was_added(adf_old)),
                     0
                 )
                 self.assertEqual(

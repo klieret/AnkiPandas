@@ -111,12 +111,13 @@ class AnkiDataFrame(pd.DataFrame):
         self._anki_table = table
         self._df_format = "anki"
 
+        if not path:
+            path = self.db_path
+        self._load_db(ankipandas.paths.db_path_input(path, user=user))
+
         if empty:
             df = raw.get_empty_table(table)
         else:
-            if not path:
-                path = self.db_path
-            self._load_db(ankipandas.paths.db_path_input(path, user=user))
             df = raw.get_table(self.db, table)
 
         replace_df_inplace(self, df)
@@ -131,7 +132,7 @@ class AnkiDataFrame(pd.DataFrame):
     @classmethod
     def notes(cls, path=None, user=None, empty=False):
         """ Initialize :class:`AnkiDataFrame` with notes table loaded from Anki
-        database (unless ``empty`` option is specified).
+        database.
 
         Args:
             path: (Search) path to database see
@@ -150,11 +151,6 @@ class AnkiDataFrame(pd.DataFrame):
             notes = ankipandas.AnkiDataFrame.notes()
 
         """
-        if empty and (path is not None or user is not None):
-            log.warning(
-                "When initialized with empty==True, no database is "
-                "initialized, so the path and user argument are ignored."
-            )
         return cls._table_constructor(path, user, "notes", empty=empty)
 
     @classmethod
@@ -270,9 +266,6 @@ class AnkiDataFrame(pd.DataFrame):
     # IDs
     # ==========================================================================
 
-    # todo: call nidS etc. to avoid clashes with attributes?
-    # todo: rid?
-
     @property
     def nid(self):
         """ Note ID as :class:`pandas.Series` of integers. """
@@ -358,6 +351,7 @@ class AnkiDataFrame(pd.DataFrame):
                     " default."
                 )
 
+    # noinspection PyUnusedLocal
     @rid.setter
     def rid(self, value):
         print("arg")
@@ -468,7 +462,6 @@ class AnkiDataFrame(pd.DataFrame):
     # Merge tables
     # ==========================================================================
 
-    # todo: use .nids rather than .nid_columns
     def merge_notes(self, inplace=False, columns=None,
                     drop_columns=None, prepend="n",
                     prepend_clash_only=True):
@@ -486,6 +479,13 @@ class AnkiDataFrame(pd.DataFrame):
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
         self._check_our_format()
+        if self._anki_table == "notes":
+            raise ValueError(
+                "AnkiDataFrame was already initialized as a table of type"
+                " notes, therefore merge_notes() doesn't make any sense."
+            )
+        elif self._anki_table == "revs":
+            self["nid"] = self.nid
         return ankipandas.util.dataframe.merge_dfs(
             df=self,
             df_add=AnkiDataFrame.notes(self.db_path),
@@ -498,8 +498,6 @@ class AnkiDataFrame(pd.DataFrame):
             drop_columns=drop_columns
         )
 
-    # todo: support merging into notes frame
-    # todo: use .cids rather than .cid_columns
     def merge_cards(self, inplace=False, columns=None, drop_columns=None,
                     prepend="c", prepend_clash_only=True):
         """
@@ -516,6 +514,17 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
+        if self._anki_table == "cards":
+            raise ValueError(
+                "AnkiDataFrame was already initialized as a table of type"
+                " cards, therefore merge_cards() doesn't make any sense."
+            )
+        elif self._anki_table == "notes":
+            raise ValueError(
+                "One note can correspond to more than one card, therefore it "
+                "it is not supported to merge the cards table into the "
+                "notes table."
+            )
         self._check_our_format()
         return ankipandas.util.dataframe.merge_dfs(
             df=self,
@@ -869,7 +878,7 @@ class AnkiDataFrame(pd.DataFrame):
             other = self._table_constructor(
                 self.db_path, None, self._anki_table
             )
-        columns = [c for c in self.columns if c in other.columns]
+        cols = [c for c in self.columns if c in other.columns]
         other_nids = set(other.index)
         inters = set(self.index).intersection(other_nids)
         if only:
@@ -878,9 +887,9 @@ class AnkiDataFrame(pd.DataFrame):
             )
         inters = sorted(list(inters))
         return pd.DataFrame(
-            self.loc[inters, columns].values != other.loc[inters, columns].values,
+            self.loc[inters, cols].values != other.loc[inters, cols].values,
             index=self.loc[inters].index,
-            columns=columns
+            columns=cols
         )
 
     def was_added(self, other: pd.DataFrame = None, _force=False):
@@ -991,14 +1000,11 @@ class AnkiDataFrame(pd.DataFrame):
 
         self._df_format = "in_progress"
 
-        empty = len(self) == 0 and self.db is None
-
         # Dtypes
         # ------
 
-        if not empty:
-            for column, type in _columns.dtype_casts[table].items():
-                self[column] = self[column].astype(type)
+        for column, typ in _columns.dtype_casts[table].items():
+            self[column] = self[column].astype(typ)
 
         # Renames
         # -------
@@ -1012,12 +1018,11 @@ class AnkiDataFrame(pd.DataFrame):
         # ----------
         # We sometimes interpret cryptic numeric values
 
-        if not empty:
-            if table in _columns.value_maps:
-                for column in _columns.value_maps[table]:
-                    self[column] = self[column].map(
-                        _columns.value_maps[table][column]
-                    )
+        if table in _columns.value_maps:
+            for column in _columns.value_maps[table]:
+                self[column] = self[column].map(
+                    _columns.value_maps[table][column]
+                )
 
         # IDs
         # ---
@@ -1025,22 +1030,15 @@ class AnkiDataFrame(pd.DataFrame):
         self.set_index(_columns.table2index[table], inplace=True)
 
         if table == "cards":
-            if empty:
-                self["cdeck"] = None
-                self["codeck"] = None
-            else:
-                self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
-                self["codeck"] = self["codid"].map(raw.get_did2deck(self.db))
+            self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
+            self["codeck"] = self["codid"].map(raw.get_did2deck(self.db))
         elif table == "notes":
-            if not empty:
-                self["nmodel"] = self["mid"].map(raw.get_mid2model(self.db))
-            else:
-                self["nmodel"] = None
+            self["nmodel"] = self["mid"].map(raw.get_mid2model(self.db))
 
         # Tags
         # ----
 
-        if not empty and table == "notes":
+        if table == "notes":
             # Tags as list, rather than string joined by space
             self["ntags"] = \
                 self["ntags"].apply(
@@ -1052,8 +1050,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         if table == "notes":
             # Fields as list, rather than as string joined by \x1f
-            if not empty:
-                self["nflds"] = self["nflds"].str.split("\x1f")
+            self["nflds"] = self["nflds"].str.split("\x1f")
             self._fields_format = "list"
 
         # Drop columns

@@ -175,6 +175,7 @@ def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
         table: Table to write to: 'notes', 'cards', 'revs'
         mode: 'update': Update all existing entries, 'append': Only append new
             entries, but do not modify, 'replace': Append, modify and delete
+        id_column: Column with ID
     Returns:
         None
     """
@@ -378,5 +379,3 @@ def get_nid2mid(db: sqlite3.Connection) -> Dict[int, int]:
     notes = get_table(db, "notes")
     _nid2mid = dict(zip(notes["id"], notes["mid"]))
     return defaultdict(int, _nid2mid)
-
-

@@ -17,7 +17,6 @@ from typing import Union
 from ankipandas.util.log import log
 
 
-# todo: decorator messes up sphinx signature
 @lru_cache(32)
 def _find_db(search_path, maxdepth=6,
              filename="collection.anki2",
@@ -66,7 +65,6 @@ def _find_db(search_path, maxdepth=6,
     return found
 
 
-# todo: decorator messes up sphinx signature
 @lru_cache(32)
 def find_db(
         search_paths=None,
@@ -108,6 +106,12 @@ def find_db(
             "~/Anki2/",
             pathlib.Path.home()
         ]
+    if break_on_first:
+        log.warning(
+            "The search will stop at the first hit, so please verify that "
+            "the result is correct (for example in case there might be more"
+            "than one Anki installations)"
+        )
     if isinstance(search_paths, (str, pathlib.PurePath)):
         search_paths = [search_paths]
     found = {}
@@ -163,6 +167,7 @@ def find_db(
     return found
 
 
+@lru_cache(32)
 def db_path_input(path: Union[str, pathlib.PurePath] = None,
                   user: str = None) -> pathlib.Path:
     """ Helper function to interpret user input of path to database.
@@ -200,6 +205,9 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
                 search_paths=(path,),
                 user=user,
                 break_on_first=False
+            )
+            log.info(
+                "Database found at '{}'.".format(result)
             )
     if result:
         return result

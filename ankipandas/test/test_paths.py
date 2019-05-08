@@ -3,7 +3,6 @@
 # std
 import collections
 import unittest
-from pathlib import Path
 import tempfile
 from typing import List, Any
 
@@ -159,8 +158,8 @@ class TestBackup(unittest.TestCase):
     def test_get_anki_backup_folder(self):
         self.assertEqual(
             str(paths.get_anki_backup_folder(
-                self.tmpdir_path / "collection.anki2")
-            ),
+                self.tmpdir_path / "collection.anki2"
+            )),
             str(self.tmpdir_path / "backups")
         )
 

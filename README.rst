@@ -110,7 +110,7 @@ Starting up is as easy as this:
 
 And you have a dataframe containing all notes, with additional methods that make
 many things easy.
-Similarly, you can load notes or reviews using ``cards()`` or ``revs()``.
+Similarly, you can load cards or reviews using ``cards()`` or ``revs()``.
 If called without any argument ``notes()`` (and friends) tries to find
 your Anki database by itself. However this might take some time.
 To make it easier, simply supply (part of) the path to the database and (if you have
