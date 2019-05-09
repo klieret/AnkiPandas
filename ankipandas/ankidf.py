@@ -1258,12 +1258,47 @@ class AnkiDataFrame(pd.DataFrame):
                   nmod=None,
                   nusn=None,
                   others: Union[Dict[str, List[str]]] = None,
-                  ignore_others=False,
+                  ignore_others=True,
                   inplace=False
-    ) -> Union[pd.DataFrame, List[int]]:
-        """ Add multiple new notes.
+    ):
+        """ Add multiple new notes corresponding to one model.
 
+        Args:
+            nmodel: Name of the model (must exist already, check
+                :meth:`list_models` for a list of available models)
+            nflds: Fields of the note either as list of lists, e.g.
+                ``[[field1_note1, ... field1_noteM], ...,
+                [fieldN_note1, ... fieldN_noteM]]`` or dictionary
+                ``{field name: [field_value1, ..., field_valueM]}``.
+                In the latter case, if fields are not present, they are filled
+                with empty strings.
+            ntags: Tags of the note as list of list of strings:
+                ``[[tag1_note1, tag2_note1, ... ], ... [tag_1_noteM, ...]]``.
+                If ``None``, no tags will be added.
+            nid: List of note IDs. Will be set automatically if ``None``
+                (default) and it is discouraged to set your own.
+            nguid: List of Globally Unique IDs. Will be set automatically if
+                ``None`` (default), and it is discouraged to set your own.
+            nmod: List of modification timestamps.
+                Will be set automatically if ``None`` (default) and it is
+                discouraged to set your own.
+            nusn: List of Update Sequence Number.
+                Will be set automatically if ``None`` (default) and it is
+                very discouraged to set your own.
+            others: Dictionary of column contents for any other columns we might
+                encounter (if collides with one of the above column contents
+                derived by the above arguments, it will be ignored).
+                E.g. ``{"some_column": [val_note_1, ..., val_note_N]}``.
+            ignore_others: Ignore any additional columns, that are not filled
+                automatically and are also not specified with the ``others``
+                argument and fill them with ``NaN``s.
+            inplace: If ``False`` (default), return a new
+                :class:`~ankipandas.AnkiDataFrame`, if True, modify in place and
+                return new note ID
 
+        Returns:
+            :class:`~ankipandas.AnkiDataFrame` if ``inplace==True``, else
+            new note ID (int)
         """
         self._check_our_format()
         model2mid = raw.get_model2mid(self.db)
@@ -1429,7 +1464,8 @@ class AnkiDataFrame(pd.DataFrame):
     # todo: document inplace
     def add_note(self, nmodel: str, nflds: Union[List[str], Dict[str, str]],
                  ntags=None, nid=None, nguid=None, nmod=None, nusn=-1,
-                 others: Dict[str, str] = None, ignore_others=False, inplace=False):
+                 others: Dict[str, str] = None, ignore_others=True,
+                 inplace=False):
         """ Add new note.
 
         Args:
@@ -1452,9 +1488,16 @@ class AnkiDataFrame(pd.DataFrame):
             others: Dictionary of column contents for any other columns we might
                 encounter (if collides with one of the above column contents
                 derived by the above arguments, it will be ignored)
-            inplace:
+            ignore_others: Ignore any additional columns, that are not filled
+                automatically and are also not specified with the ``others``
+                argument and fill them with NaNs
+            inplace: If False (default), return a new
+                :class:`ankipandas.AnkiDataFrame`, if True, modify in place and
+                return new note ID
 
         Returns:
+            :class:`ankipandas.AnkiDataFrame` if ``inplace==True``, else
+            new note ID (``int``)
 
         .. note::
 
