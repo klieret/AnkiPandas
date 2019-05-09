@@ -699,6 +699,7 @@ class TestAnkiDF(unittest.TestCase):
     # New notes
     # --------------------------------------------------------------------------
 
+    # todo: also test with fields_as_columns!!
     def test_new_notes_empty_fully_specified(self):
         empty = AnkiDF.notes(self.db_path, empty=True)
 
@@ -710,9 +711,11 @@ class TestAnkiDF(unittest.TestCase):
             nmod=124,
             nusn=42,
         )
-        nid = empty.add_note(nid=123, **init_dict)
+        nid = empty.add_note(nid=123, **init_dict, inplace=True)
         self.assertEqual(nid, 123)
         note = empty.loc[nid]
+        print(init_dict)
+        print(note.to_dict())
         self.assertDictEqual(init_dict, note.to_dict())
         self.assertEqual(len(empty), 1)
 
@@ -724,19 +727,18 @@ class TestAnkiDF(unittest.TestCase):
             nmod=1235,
             nusn=17,
         )
-        nid = empty.add_note(nid=125, **init_dict2)
+        nid = empty.add_note(nid=125, **init_dict2, inplace=True)
         self.assertEqual(nid, 125)
         note = empty.loc[125]
         self.assertDictEqual(init_dict2, note.to_dict())
         self.assertEqual(len(empty), 2)
 
-    def test_new_notes_overwrite(self):
+    def test_new_notes_raises_suplicate(self):
         empty = AnkiDF.notes(self.db_path, empty=True)
-        empty.add_note("Basic", ["f1", "f2"], nid=10)
+        empty.add_note("Basic", ["f1", "f2"], nid=10, inplace=True)
         self.assertEqual(len(empty), 1)
-        empty.add_note("Basic", ["f3", "f4"], nid=10)
-        self.assertEqual(len(empty), 1)
-        self.assertEqual(empty.loc[10].to_dict()["nflds"], ["f3", "f4"])
+        with self.assertRaises(ValueError):
+            empty.add_note("Basic", ["f3", "f4"], nid=10, inplace=True)
 
     def test_new_notes_default_values(self):
         empty = AnkiDF.notes(self.db_path)
@@ -745,7 +747,7 @@ class TestAnkiDF(unittest.TestCase):
             nmodel="Basic",
             nflds=["field1", "field2"],
         )
-        nid = empty.add_note(nid=123, **init_dict)
+        nid = empty.add_note(nid=123, **init_dict, inplace=True)
         self.assertEqual(nid, 123)
         note = empty.loc[nid].to_dict()
         self.assertEqual(note["nmodel"], init_dict["nmodel"])

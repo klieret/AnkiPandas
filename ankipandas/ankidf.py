@@ -1176,6 +1176,7 @@ class AnkiDataFrame(pd.DataFrame):
             columns=invert_dict(_columns.columns_anki2ours[table]),
             inplace=True
         )
+        self.rename(columns={"index": "id"}, inplace=True)
 
         # Dtypes
         # ------
@@ -1192,10 +1193,12 @@ class AnkiDataFrame(pd.DataFrame):
 
         # Drop and Rearrange
         # ------------------
+        # Todo: warn about dropped columns?
 
         if len(self) == 0:
             new = pd.DataFrame(columns=_columns.anki_columns[table])
         else:
+            print(_columns.anki_columns[table])
             new = pd.DataFrame(
                 self[_columns.anki_columns[table]]
             )
@@ -1231,15 +1234,184 @@ class AnkiDataFrame(pd.DataFrame):
     # Append
     # ==========================================================================
 
-    def _get_id(self):
+    # fixme: Needs microseconds?
+    def _get_id(self) -> int:
+        """ Generate ID from timestamp and increment if it is already in use.
+        """
         idx = int(time.time())
         while idx in self.index:
             idx += 1
         return idx
 
+    # todo: test ignore_others
+    def add_notes(self,
+                  nmodel: str,
+                  nflds: Union[List[List[str]], Dict[str, List[str]]],
+                  ntags: List[List[str]] = None,
+                  nid=None,
+                  nguid=None,
+                  nmod=None,
+                  nusn=None,
+                  others: Union[Dict[str, List[str]]] = None,
+                  ignore_others=False,
+                  inplace=False
+    ) -> Union[pd.DataFrame, List[int]]:
+        """ Add multiple new notes.
+
+
+        """
+        self._check_our_format()
+        model2mid = raw.get_model2mid(self.db)
+        if nmodel not in model2mid.keys():
+            raise ValueError(
+                "No model of with name '{}' exists.".format(nmodel)
+            )
+        field_keys = raw.get_mid2fields(self.db)[model2mid[nmodel]]
+        if isinstance(nflds, Iterable) and not isinstance(nflds, dict):
+            lengths = sorted(list(set(map(len, nflds))))
+            if len(nflds) != len(field_keys):
+                raise ValueError(
+                    "Model '{}' has {} fields but you supplied {}.".format(
+                        nmodel, len(field_keys), len(nflds)
+                ))
+            field_key2field = dict(zip(field_keys, nflds))
+        elif isinstance(nflds, dict):
+            unknown_fields = sorted(list(set(nflds.keys()) - set(field_keys)))
+            if unknown_fields:
+                raise ValueError(
+                    "Unknown fields: {}".format(", ".join(unknown_fields))
+                )
+            lengths = sorted(list(set(map(len, nflds.values()))))
+            field_key2field = collections.defaultdict(str, nflds)
+        else:
+            raise ValueError("Unsupported fields specification")
+
+        if len(lengths) == 1:
+            n_notes = lengths[0]
+        elif len(lengths) >= 2:
+            raise ValueError(
+                "Inconsistent number of "
+                "notes: {}".format(", ".join(map(str, lengths)))
+            )
+        else:
+            raise ValueError("Unsupported fields specification")
+
+        if ntags is not None:
+            if len(ntags) != n_notes:
+                raise ValueError(
+                    "Number of tags doesn't match number of notes to"
+                    " be added: {} instead of {}.".format(len(ntags), n_notes)
+                )
+        else:
+            ntags = [[]] * n_notes
+
+        if nid is not None:
+            if len(nid) != n_notes:
+                raise ValueError(
+                    "Number of note IDs doesn't match number of notes to"
+                    " be added: {} instead of {}.".format(len(nid), n_notes))
+        else:
+            nid = [self._get_id() for _ in range(n_notes)]
+
+        already_present = sorted(list(set(nid).intersection(set(self.index))))
+        if already_present:
+            raise ValueError(
+                "The following note IDs (nid) are "
+                "already present: {}".format(", ".join(map(str, nid)))
+            )
+
+        if nmod is not None:
+            if len(nmod) != n_notes:
+                raise ValueError(
+                    "Number of modification dates doesn't match number of "
+                    "notes to  be added: {} "
+                    "instead of {}.".format(len(nmod), n_notes))
+        else:
+            nmod = [int(time.time()) for _ in range(n_notes)]
+
+        if nguid is not None:
+            if len(nguid) != n_notes:
+                raise ValueError(
+                    "Number of globally unique IDs doesn't match number of "
+                    "notes to  be added: {} "
+                    "instead of {}.".format(len(nguid), n_notes))
+        else:
+            nguid = [guid() for _ in range(n_notes)]
+
+        if nusn is None:
+            nusn = -1
+
+        # Now we need to decide on contents for EVERY column in the DF
+        known_columns = {
+            "nmodel": nmodel,
+            "ntags": ntags,
+            "nguid": nguid,
+            "nmod": nmod,
+            "nusn": nusn
+        }
+
+        # More difficult: Field columns:
+        if self._fields_format == "list":
+            # Be careful with order!
+            # Also need to flip dimensions
+            known_columns["nflds"] = np.swapaxes(
+                [field_key2field[field_key] for field_key in field_keys],
+                0,
+                1
+            ).tolist()
+        elif self._fields_format == "columns":
+            # Let's first set all fields as columns to '', because we also
+            # need to set those which aren't from our model:
+            for col in self.columns:
+                if col.startswith(self.fields_as_columns_prefix):
+                    known_columns[col] = [""] * n_notes
+            # Now let's fill those of our model
+            for col, values in field_key2field.items():
+                known_columns[self.fields_as_columns_prefix + col] = values
+        else:
+            raise ValueError(
+                "Fields have to be in 'list' or 'columns' format, but yours "
+                "are in '{}' format.".format(self._fields_format)
+            )
+
+        # Last step: others
+        # Make sure that we don't accidentally overwrite one of our fields
+        if not others:
+            others = {}
+        # todo: we should warn about this
+        others = {
+            key: others[key] for key in others if key not in known_columns
+        }
+        known_columns.update(others)
+
+        missing = sorted(list(set(self.columns) - set(known_columns.keys())))
+        if missing and not ignore_others:
+            raise ValueError(
+                "Do not know how to fill the following column(s): {}. Remove"
+                " them or make sure you specify values using the 'others'"
+                " argument. Or ignore this check by setting ignore_others=True "
+                "(which will probably fill the remaining "
+                "columns with NaNs)".format(", ".join(missing))
+            )
+
+        add = pd.DataFrame(columns=self.columns, index=nid)
+        for key, item in known_columns.items():
+            add.loc[:, key] = pd.Series(item, index=nid)
+        add = add.astype({
+            key: value for key, value in _columns.dtype_casts_all.items()
+            if key in self.columns
+        })
+        if not inplace:
+            return self.append(add)
+        else:
+            replace_df_inplace(self, self.append(add))
+            return nid
+
+    # todo: ignore_others keyword
+    # todo: document inplace
     def add_note(self, nmodel: str, nflds: Union[List[str], Dict[str, str]],
                  ntags=None, nid=None, nguid=None, nmod=None, nusn=-1,
-                 others: Dict[str, str] = None) -> int:
+                 others: Dict[str, str] = None, ignore_others=False, inplace=False):
         """ Add new note.
 
         Args:
@@ -1262,113 +1434,59 @@ class AnkiDataFrame(pd.DataFrame):
             others: Dictionary of column contents for any other columns we might
                 encounter (if collides with one of the above column contents
                 derived by the above arguments, it will be ignored)
+            inplace:
 
         Returns:
-            Note ID (nid)
+
+        .. note::
+
+            For better performance, it is advisable to use :meth:`add_notes`,
+            when adding many notes.
         """
-        self._check_our_format()
-        if not self._anki_table == "notes":
-            raise ValueError(
-                "Adding of notes only supported in notes table."
-            )
-
-        if not nid:
-            nid = self._get_id()
-        if not nmod:
-            nmod = int(time.time())
-        if not nguid:
-            nguid = guid()
-        if isinstance(ntags, str):
-            ntags = [ntags]
-        if not ntags:
-            ntags = []
-        model2mid = raw.get_model2mid(self.db)
-        if nmodel not in model2mid.keys():
-            raise ValueError(
-                "No model of with name '{}' exists.".format(nmodel)
-            )
-        field_keys = raw.get_mid2fields(self.db)[model2mid[nmodel]]
         if isinstance(nflds, Iterable) and not isinstance(nflds, dict):
-            nflds = list(nflds)
-            if not len(nflds) == len(field_keys):
-                raise ValueError(
-                    "Model '{}' has {} fields but you supplied {}.".format(
-                        nmodel, len(field_keys), len(nflds)
-                    )
-                )
-            else:
-                field_key2field = dict(zip(field_keys, nflds))
+            nflds = [[content] for content in nflds]
         elif isinstance(nflds, dict):
-            field_key2field = collections.defaultdict(str, nflds)
+            nflds = {key: [value] for key, value in nflds.items()}
         else:
             raise ValueError(
-                "Unsupported type for fields"
-                "argument: {}.".format(type(nflds))
+                "Unknown type for fields specification: {}".format(type(nflds))
             )
+        if ntags is not None:
+            ntags = [ntags]
+        if nid is not None:
+            nid = [nid]
+        if nguid is not None:
+            nguid = [nguid]
+        if nmod is not None:
+            nmod = [nmod]
+        if nusn is not None:
+            nusn = [nusn]
+        if others is not None:
+            others = {key: [value] for key, value in others.items()}
 
-        # Now we need to decide on contents for EVERY column in the DF
-        known_columns = {
-            "nmodel": nmodel,
-            "ntags": ntags,
-            "nguid": nguid,
-            "nmod": nmod,
-            "nusn": nusn
-        }
-
-        # More difficult: Field columns:
-        if self._fields_format == "list":
-            # Be careful with order!
-            known_columns["nflds"] = \
-                [field_key2field[field_key] for field_key in field_keys]
-        elif self._fields_format == "columns":
-            # Let's first set all fields as columns to '', because we also
-            # need to set those which aren't from our model:
-            for col in self.columns:
-                if col.startswith(self.fields_as_columns_prefix):
-                    self.known_columns[col] = ""
-            # Now let's fill those of our model
-            known_columns.update(field_key2field)
+        ret = self.add_notes(
+            nmodel=nmodel,
+            nflds=nflds,
+            ntags=ntags,
+            nid=nid,
+            nguid=nguid,
+            nmod=nmod,
+            nusn=nusn,
+            others=others,
+            ignore_others=ignore_others,
+            inplace=inplace
+        )
+        if inplace:
+            # We get nids back
+            return ret[0]
         else:
-            raise ValueError(
-                "Fields have to be in 'list' or 'columns' format, but yours "
-                "are in '{}' format.".format(self._fields_format)
-            )
-
-        # Last step: others
-        # Make sure that we don't accidentally overwrite one of our fields
-        if not others:
-            others = {}
-        others = {
-            key: others[key] for key in others if key not in known_columns
-        }
-        known_columns.update(others)
-
-        missing = sorted(list(set(known_columns.keys()) - set(self.columns)))
-        if missing:
-            raise ValueError(
-                "Do not know how to fill the following column(s): {}. Remove"
-                "them or make sure you specify values using the 'others'"
-                "argument."
-            )
-
-        # Now we're ready
-        # add_data = collections.OrderedDict()
-        # for col in self.columns:
-        #     add_data[col] = known_columns[col]
-        add = pd.DataFrame(columns=self.columns, index=[nid])
-        for key, item in known_columns.items():
-            add.at[nid, key] = item
-        add = add.astype({
-            key: value for key, value in _columns.dtype_casts_all.items()
-            if key in self.columns
-        })
-        self.loc[nid] = add.loc[nid]
-
-        return nid
+            # We get new AnkiDataFrame back
+            return ret
 
     # Help
     # ==========================================================================
 
+    # todo: test?
     def help_col(self, column, ret=False) -> Union[str, None]:
         """
         Show description/help about a column. To get information about all
