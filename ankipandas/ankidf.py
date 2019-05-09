@@ -1243,12 +1243,12 @@ class AnkiDataFrame(pd.DataFrame):
     def _get_id(self) -> int:
         """ Generate ID from timestamp and increment if it is already in use.
         """
-        idx = int(time.time())
+        idx = int(1000*time.time())
         while idx in self.index:
             idx += 1
         return idx
 
-    # todo: test ignore_others
+    # todo: test others, ignore_others
     def add_notes(self,
                   nmodel: str,
                   nflds: Union[List[List[str]], Dict[str, List[str]]],
@@ -1353,7 +1353,7 @@ class AnkiDataFrame(pd.DataFrame):
         if duplicate_nguids:
             raise ValueError(
                 "The following globally unique IDs (guid) are already"
-                "present: {}.".format(", ".join(map(str, duplicate_nguids)))
+                " present: {}.".format(", ".join(map(str, duplicate_nguids)))
             )
 
         if nusn is None:
