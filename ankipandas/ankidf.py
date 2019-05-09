@@ -597,8 +597,13 @@ class AnkiDataFrame(pd.DataFrame):
                 if prefix + field not in self.columns:
                     self[prefix + field] = ""
             for ifield, field in enumerate(field_names):
+                print(prefix+field, fields[ifield].tolist())
+                # todo: can we speed this up?
                 self.loc[self.mid == mid, [prefix + field]] = \
-                    fields[ifield].tolist()
+                    pd.Series(
+                        fields[ifield].tolist(),
+                        index=self.loc[self.mid == mid].index
+                    )
         self.drop("nflds", axis=1, inplace=True)
         self._fields_format = "columns"
 
@@ -1320,6 +1325,9 @@ class AnkiDataFrame(pd.DataFrame):
                 "already present: {}".format(", ".join(map(str, nid)))
             )
 
+        if len(set(nid)) < len(nid):
+            raise ValueError("Your note ID specification contains duplicates!")
+
         if nmod is not None:
             if len(nmod) != n_notes:
                 raise ValueError(
@@ -1329,14 +1337,24 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             nmod = [int(time.time()) for _ in range(n_notes)]
 
+        # todo: Check that isn't present already
         if nguid is not None:
             if len(nguid) != n_notes:
                 raise ValueError(
-                    "Number of globally unique IDs doesn't match number of "
-                    "notes to  be added: {} "
+                    "Number of globally unique IDs (guid) doesn't match number "
+                    "of notes to  be added: {} "
                     "instead of {}.".format(len(nguid), n_notes))
         else:
             nguid = [guid() for _ in range(n_notes)]
+
+        duplicate_nguids = sorted(list(
+            set(nguid).intersection(self["nguid"].unique())
+        ))
+        if duplicate_nguids:
+            raise ValueError(
+                "The following globally unique IDs (guid) are already"
+                "present: {}.".format(", ".join(map(str, duplicate_nguids)))
+            )
 
         if nusn is None:
             nusn = -1

@@ -696,11 +696,78 @@ class TestAnkiDF(unittest.TestCase):
     # New
     # ==========================================================================
 
-    # New notes
+    # Add notes
     # --------------------------------------------------------------------------
 
-    # todo: also test with fields_as_columns!!
-    def test_new_notes_empty_fully_specified(self):
+    def test_new_notes_raises_inconsistent(self):
+        with self.assertRaises(ValueError):
+            self.nnotes().add_notes(
+                "Basic", [["1"], ["2"]], ntags=[["1"], ["2"]]
+            )
+        with self.assertRaises(ValueError):
+            self.nnotes().add_notes(
+                "Basic", [["1"], ["2"]], nid=[123, 124]
+            )
+        with self.assertRaises(ValueError):
+            self.nnotes().add_notes(
+                "Basic", [["1"], ["2"]], nguid=[123, 124]
+            )
+
+    def test_new_notes_raises_nid_clash(self):
+        with self.assertRaises(ValueError):
+            self.nnotes().add_notes(
+                "Basic", [["1", "1"], ["2", "2"]], nid=[10, 10]
+            )
+        with self.assertRaises(ValueError):
+            self.nnotes().add_note(
+                "Basic", ["1", "2"], nid=10
+            ).add_note(
+                "Basic", ["1", "2"], nid=10
+            )
+
+    def test_new_notes_raises_nguid_clash(self):
+        with self.assertRaises(ValueError):
+            self.nnotes().add_notes(
+                "Basic", [["1", "1"], ["2", "2"]], nguid=[10, 10]
+            )
+        with self.assertRaises(ValueError):
+            self.nnotes().add_note(
+                "Basic", ["1", "2"], nguid=10
+            ).add_note(
+                "Basic", ["1", "2"], nguid=10
+            )
+
+    def test_new_notes_fields_as_columns(self):
+        empty = AnkiDF.notes(self.db_path, empty=True)
+        empty.add_notes(
+            "Basic",
+            [["field1", "field21"], ["field2", "field22"]],
+            ntags=[["tag1", "tag2"], ["tag21", "tag22"]],
+            nguid=["cryptic", "cryptic2"],
+            nmod=[124, 1235],
+            nusn=[42, 17],
+            nid=[123, 125],
+            inplace=True
+        )
+
+        empty2 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
+        empty2.add_notes(
+            "Basic",
+            [["field1", "field21"], ["field2", "field22"]],
+            ntags=[["tag1", "tag2"], ["tag21", "tag22"]],
+            nguid=["cryptic", "cryptic2"],
+            nmod=[124, 1235],
+            nusn=[42, 17],
+            nid=[123, 125],
+            inplace=True
+        )
+
+        self.assertDictEqual(
+            empty.fields_as_columns().to_dict(),
+            empty2.to_dict()
+        )
+
+    def test_new_note_empty_fully_specified(self):
         empty = AnkiDF.notes(self.db_path, empty=True)
 
         init_dict = dict(
@@ -714,8 +781,6 @@ class TestAnkiDF(unittest.TestCase):
         nid = empty.add_note(nid=123, **init_dict, inplace=True)
         self.assertEqual(nid, 123)
         note = empty.loc[nid]
-        print(init_dict)
-        print(note.to_dict())
         self.assertDictEqual(init_dict, note.to_dict())
         self.assertEqual(len(empty), 1)
 
@@ -733,14 +798,27 @@ class TestAnkiDF(unittest.TestCase):
         self.assertDictEqual(init_dict2, note.to_dict())
         self.assertEqual(len(empty), 2)
 
-    def test_new_notes_raises_suplicate(self):
+        empty2 = AnkiDF.notes(self.db_path, empty=True)
+        empty2.add_notes(
+            "Basic",
+            [["field1", "field21"], ["field2", "field22"]],
+            ntags=[["tag1", "tag2"], ["tag21", "tag22"]],
+            nguid=["cryptic", "cryptic2"],
+            nmod=[124, 1235],
+            nusn=[42, 17],
+            nid=[123, 125],
+            inplace=True
+        )
+        self.assertTrue(empty.equals(empty2))
+
+    def test_new_note_raises_suplicate(self):
         empty = AnkiDF.notes(self.db_path, empty=True)
         empty.add_note("Basic", ["f1", "f2"], nid=10, inplace=True)
         self.assertEqual(len(empty), 1)
         with self.assertRaises(ValueError):
             empty.add_note("Basic", ["f3", "f4"], nid=10, inplace=True)
 
-    def test_new_notes_default_values(self):
+    def test_new_note_default_values(self):
         empty = AnkiDF.notes(self.db_path)
 
         init_dict = dict(
