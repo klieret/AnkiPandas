@@ -20,7 +20,7 @@ import ankipandas._columns as _columns
 from ankipandas.util.misc import invert_dict
 from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
-from ankipandas.util.guid import guid
+from ankipandas.util.guid import guid as generate_guid
 
 
 class AnkiDataFrame(pd.DataFrame):
@@ -966,7 +966,7 @@ class AnkiDataFrame(pd.DataFrame):
     def _set_guid(self):
         """ Update globally unique id """
         if self._anki_table == "notes":
-            self.loc[~self["nguid"].apply(bool)].apply(guid)
+            self.loc[~self["nguid"].apply(bool)].apply(generate_guid)
 
     # Raw and normalized
     # ==========================================================================
@@ -1248,42 +1248,92 @@ class AnkiDataFrame(pd.DataFrame):
             idx += 1
         return idx
 
+    def add_cards(
+        self,
+        nid,
+        deck,
+        ord=None,
+        mod=None,
+        usn=None,
+        queue=None,
+        type=None,
+        ivl=None,
+        factor=None,
+        reps=None,
+        lapses=None,
+        left=None,
+        odue=None,
+        odeck=None
+    ):
+        """
+        Add cards.
+
+        Args:
+            nid: Note IDs of the notes that you want to add cards for
+            deck: Name of deck to add cards to
+            ord: TODO
+            mod: List of modification timestamps.
+                Will be set automatically if ``None`` (default) and it is
+                discouraged to set your own.
+            usn: List of Update Sequence Numbers.
+                Will be set automatically (to -1, i.e. needs update)
+                if ``None`` (default) and it is
+                very discouraged to set your own.
+            queue:
+            type: List of card types ('learning', 'review', 'relearn', 'cram')
+
+            ivl:
+            factor:
+            reps:
+            lapses:
+            left:
+            odue:
+            odeck:
+
+        Returns:
+
+        """
+    # fixme: cord will be replaced
+
     # todo: test others, ignore_others
-    def add_notes(self,
-                  nmodel: str,
-                  nflds: Union[List[List[str]], Dict[str, List[str]]],
-                  ntags: List[List[str]] = None,
-                  nid=None,
-                  nguid=None,
-                  nmod=None,
-                  nusn=None,
-                  others: Union[Dict[str, List[str]]] = None,
-                  ignore_others=True,
-                  inplace=False
+    # todo: fields should be speified differently
+    def add_notes(
+        self,
+        model: str,
+        fields: Union[List[List[str]], Dict[str, List[str]]],
+        tags: List[List[str]] = None,
+        nid=None,
+        guid=None,
+        mod=None,
+        usn=None,
+        others: Union[Dict[str, List[str]]] = None,
+        ignore_others=True,
+        inplace=False
     ):
         """ Add multiple new notes corresponding to one model.
 
         Args:
-            nmodel: Name of the model (must exist already, check
+            model: Name of the model (must exist already, check
                 :meth:`list_models` for a list of available models)
-            nflds: Fields of the note either as list of lists, e.g.
+            fields: Fields of the note either as list of lists, e.g.
                 ``[[field1_note1, ... field1_noteM], ...,
                 [fieldN_note1, ... fieldN_noteM]]`` or dictionary
                 ``{field name: [field_value1, ..., field_valueM]}``.
                 In the latter case, if fields are not present, they are filled
                 with empty strings.
-            ntags: Tags of the note as list of list of strings:
+            tags: Tags of the note as list of list of strings:
                 ``[[tag1_note1, tag2_note1, ... ], ... [tag_1_noteM, ...]]``.
                 If ``None``, no tags will be added.
             nid: List of note IDs. Will be set automatically if ``None``
                 (default) and it is discouraged to set your own.
-            nguid: List of Globally Unique IDs. Will be set automatically if
+            guid: List of Globally Unique IDs. Will be set automatically if
                 ``None`` (default), and it is discouraged to set your own.
-            nmod: List of modification timestamps.
+            mod: List of modification timestamps.
                 Will be set automatically if ``None`` (default) and it is
                 discouraged to set your own.
-            nusn: List of Update Sequence Number.
-                Will be set automatically if ``None`` (default) and it is
+            usn: List of Update Sequence Number.
+                Will be set automatically (to -1, i.e. needs update)
+                if ``None`` (default) and it is
                 very discouraged to set your own.
             others: Dictionary of column contents for any other columns we might
                 encounter (if collides with one of the above column contents
@@ -1302,27 +1352,27 @@ class AnkiDataFrame(pd.DataFrame):
         """
         self._check_our_format()
         model2mid = raw.get_model2mid(self.db)
-        if nmodel not in model2mid.keys():
+        if model not in model2mid.keys():
             raise ValueError(
-                "No model of with name '{}' exists.".format(nmodel)
+                "No model of with name '{}' exists.".format(model)
             )
-        field_keys = raw.get_mid2fields(self.db)[model2mid[nmodel]]
-        if isinstance(nflds, Iterable) and not isinstance(nflds, dict):
-            lengths = sorted(list(set(map(len, nflds))))
-            if len(nflds) != len(field_keys):
+        field_keys = raw.get_mid2fields(self.db)[model2mid[model]]
+        if isinstance(fields, Iterable) and not isinstance(fields, dict):
+            lengths = sorted(list(set(map(len, fields))))
+            if len(fields) != len(field_keys):
                 raise ValueError(
                     "Model '{}' has {} fields but you supplied {}.".format(
-                        nmodel, len(field_keys), len(nflds)
+                        model, len(field_keys), len(fields)
                 ))
-            field_key2field = dict(zip(field_keys, nflds))
-        elif isinstance(nflds, dict):
-            unknown_fields = sorted(list(set(nflds.keys()) - set(field_keys)))
+            field_key2field = dict(zip(field_keys, fields))
+        elif isinstance(fields, dict):
+            unknown_fields = sorted(list(set(fields.keys()) - set(field_keys)))
             if unknown_fields:
                 raise ValueError(
                     "Unknown fields: {}".format(", ".join(unknown_fields))
                 )
-            lengths = sorted(list(set(map(len, nflds.values()))))
-            field_key2field = collections.defaultdict(str, nflds)
+            lengths = sorted(list(set(map(len, fields.values()))))
+            field_key2field = collections.defaultdict(str, fields)
         else:
             raise ValueError("Unsupported fields specification")
 
@@ -1336,14 +1386,14 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             raise ValueError("Unsupported fields specification")
 
-        if ntags is not None:
-            if len(ntags) != n_notes:
+        if tags is not None:
+            if len(tags) != n_notes:
                 raise ValueError(
                     "Number of tags doesn't match number of notes to"
-                    " be added: {} instead of {}.".format(len(ntags), n_notes)
+                    " be added: {} instead of {}.".format(len(tags), n_notes)
                 )
         else:
-            ntags = [[]] * n_notes
+            tags = [[]] * n_notes
 
         if nid is not None:
             if len(nid) != n_notes:
@@ -1363,27 +1413,27 @@ class AnkiDataFrame(pd.DataFrame):
         if len(set(nid)) < len(nid):
             raise ValueError("Your note ID specification contains duplicates!")
 
-        if nmod is not None:
-            if len(nmod) != n_notes:
+        if mod is not None:
+            if len(mod) != n_notes:
                 raise ValueError(
                     "Number of modification dates doesn't match number of "
                     "notes to  be added: {} "
-                    "instead of {}.".format(len(nmod), n_notes))
+                    "instead of {}.".format(len(mod), n_notes))
         else:
-            nmod = [int(time.time()) for _ in range(n_notes)]
+            mod = [int(time.time()) for _ in range(n_notes)]
 
         # todo: Check that isn't present already
-        if nguid is not None:
-            if len(nguid) != n_notes:
+        if guid is not None:
+            if len(guid) != n_notes:
                 raise ValueError(
                     "Number of globally unique IDs (guid) doesn't match number "
                     "of notes to  be added: {} "
-                    "instead of {}.".format(len(nguid), n_notes))
+                    "instead of {}.".format(len(guid), n_notes))
         else:
-            nguid = [guid() for _ in range(n_notes)]
+            guid = [generate_guid() for _ in range(n_notes)]
 
         duplicate_nguids = sorted(list(
-            set(nguid).intersection(self["nguid"].unique())
+            set(guid).intersection(self["nguid"].unique())
         ))
         if duplicate_nguids:
             raise ValueError(
@@ -1391,16 +1441,16 @@ class AnkiDataFrame(pd.DataFrame):
                 " present: {}.".format(", ".join(map(str, duplicate_nguids)))
             )
 
-        if nusn is None:
-            nusn = -1
+        if usn is None:
+            usn = -1
 
         # Now we need to decide on contents for EVERY column in the DF
         known_columns = {
-            "nmodel": nmodel,
-            "ntags": ntags,
-            "nguid": nguid,
-            "nmod": nmod,
-            "nusn": nusn
+            "nmodel": model,
+            "ntags": tags,
+            "nguid": guid,
+            "nmod": mod,
+            "nusn": usn
         }
 
         # More difficult: Field columns:
@@ -1462,29 +1512,30 @@ class AnkiDataFrame(pd.DataFrame):
 
     # todo: ignore_others keyword
     # todo: document inplace
-    def add_note(self, nmodel: str, nflds: Union[List[str], Dict[str, str]],
-                 ntags=None, nid=None, nguid=None, nmod=None, nusn=-1,
+    def add_note(self, model: str, fields: Union[List[str], Dict[str, str]],
+                 tags=None, nid=None, guid=None, mod=None, usn=-1,
                  others: Dict[str, str] = None, ignore_others=True,
                  inplace=False):
         """ Add new note.
 
         Args:
-            nmodel: Name of the model (must exist already, check
+            model: Name of the model (must exist already, check
                 :meth:`list_models` for a list of available models)
-            nflds: Fields of the note either as list or as dictionary
+            fields: Fields of the note either as list or as dictionary
                 ``{field name: field value}``. In the latter case, if fields
                 are not present, they are filled with empty string.
-            ntags: Tags of the note as string or Iterable thereof. Defaults to
+            tags: Tags of the note as string or Iterable thereof. Defaults to
                 no tags.
             nid: Note ID. Will be set automatically by default and it is
                 discouraged to set your own. If you do so and it already
                 exists, the existing note will be overwritten.
-            nguid: Note Globally Unique ID. Will be set automatically by
+            guid: Note Globally Unique ID. Will be set automatically by
                 default, and it is discouraged to set your own.
-            nmod: Modification timestamp. Will be set automatically by default
+            mod: Modification timestamp. Will be set automatically by default
                 and it is discouraged to set your own.
-            nusn: Update sequence number. Will be set automatically by default
-                and it is very discouraged to set your own.
+            usn: Update sequence number. Will be set automatically
+                (to -1, i.e. needs update) if ``None`` (default) and it is
+                very discouraged to set your own.
             others: Dictionary of column contents for any other columns we might
                 encounter (if collides with one of the above column contents
                 derived by the above arguments, it will be ignored)
@@ -1504,35 +1555,35 @@ class AnkiDataFrame(pd.DataFrame):
             For better performance, it is advisable to use :meth:`add_notes`,
             when adding many notes.
         """
-        if isinstance(nflds, Iterable) and not isinstance(nflds, dict):
-            nflds = [[content] for content in nflds]
-        elif isinstance(nflds, dict):
-            nflds = {key: [value] for key, value in nflds.items()}
+        if isinstance(fields, Iterable) and not isinstance(fields, dict):
+            fields = [[content] for content in fields]
+        elif isinstance(fields, dict):
+            fields = {key: [value] for key, value in fields.items()}
         else:
             raise ValueError(
-                "Unknown type for fields specification: {}".format(type(nflds))
+                "Unknown type for fields specification: {}".format(type(fields))
             )
-        if ntags is not None:
-            ntags = [ntags]
+        if tags is not None:
+            tags = [tags]
         if nid is not None:
             nid = [nid]
-        if nguid is not None:
-            nguid = [nguid]
-        if nmod is not None:
-            nmod = [nmod]
-        if nusn is not None:
-            nusn = [nusn]
+        if guid is not None:
+            guid = [guid]
+        if mod is not None:
+            mod = [mod]
+        if usn is not None:
+            usn = [usn]
         if others is not None:
             others = {key: [value] for key, value in others.items()}
 
         ret = self.add_notes(
-            nmodel=nmodel,
-            nflds=nflds,
-            ntags=ntags,
+            model=model,
+            fields=fields,
+            tags=tags,
             nid=nid,
-            nguid=nguid,
-            nmod=nmod,
-            nusn=nusn,
+            guid=guid,
+            mod=mod,
+            usn=usn,
             others=others,
             ignore_others=ignore_others,
             inplace=inplace
