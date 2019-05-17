@@ -666,7 +666,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
 
     def list_tags(self) -> List[str]:
-        """ Return sorted list of all tags. """
+        """ Return sorted list of all tags in the current table. """
         if "ntags" not in self.columns:
             raise ValueError(
                 "Tags column 'ntags' not present. Either use the notes table"
@@ -677,16 +677,27 @@ class AnkiDataFrame(pd.DataFrame):
                 [item for lst in self["ntags"].tolist() for item in lst]
             )))
 
-    def list_decks(self):
-        """ Return sorted list of deck names. """
-        decks = sorted(list(raw.get_did2deck(self.db).values()))
-        if "" in decks:
-            decks.remove("")
-        return decks
+    def list_decks(self) -> List[str]:
+        """ Return sorted list of deck names in the current table. """
+        if "cdeck" not in self.columns:
+            raise ValueError(
+                "Deck column 'cdeck' not present. Either use the cards table "
+                "or merge it into your table."
+            )
+        else:
+            decks = sorted(list(self["cdeck"].unique()))
+            if "" in decks:
+                decks.remove("")
+            return decks
 
     def list_models(self):
-        """ Return sorted list of model names. """
-        return sorted(list(raw.get_mid2model(self.db).values()))
+        """ Return sorted list of model names in the current table. """
+        if "nmodel" not in self.columns:
+            raise ValueError(
+                "Model column 'nmodel' not present. Either use the notes table"
+                " or merge it into your table."
+            )
+        return sorted(list(self["nmodel"].unique()))
 
     def has_tag(self, tags=None):
         """ Checks whether row has a certain tag ('ntags' column).

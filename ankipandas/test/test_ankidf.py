@@ -281,20 +281,18 @@ class TestAnkiDF(unittest.TestCase):
     # ==========================================================================
 
     def test_list_decks(self):
-        decks = self.notes.list_decks()
+        decks = self.cards.list_decks()
         self.assertTrue(
             set(decks).issuperset({"Testing", "EnglishGerman"})
         )
 
     def test_list_models(self):
         models = self.notes.list_models()
+        print(models)
         self.assertTrue(
             set(models).issuperset({
-                "Basic",
-                'Basic (and reversed card)',
-                'Basic (optional reversed card)',
-                'Basic (type in the answer)',
-                'Cloze'
+                'Basic',
+                'Basic (and reversed card)'
             })
         )
 
