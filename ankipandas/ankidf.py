@@ -866,7 +866,8 @@ class AnkiDataFrame(pd.DataFrame):
 
     def modified_columns(self, other: pd.DataFrame = None, _force=False,
                          only=True):
-        """ Compare with original table, show which rows were added.
+        """ Compare with original table, show which columns in which rows
+        were modified.
 
         Args:
             other: Compare with this :class:`pandas.DataFrame`.
@@ -1306,8 +1307,6 @@ class AnkiDataFrame(pd.DataFrame):
         guid=None,
         mod=None,
         usn=None,
-        others: Union[Dict[str, List[str]]] = None,
-        ignore_others=True,
         inplace=False
     ):
         """ Add multiple new notes corresponding to one model.
@@ -1316,11 +1315,13 @@ class AnkiDataFrame(pd.DataFrame):
             model: Name of the model (must exist already, check
                 :meth:`list_models` for a list of available models)
             fields: Fields of the note either as list of lists, e.g.
-                ``[[field1_note1, ... field1_noteM], ...,
-                [fieldN_note1, ... fieldN_noteM]]`` or dictionary
-                ``{field name: [field_value1, ..., field_valueM]}``.
-                In the latter case, if fields are not present, they are filled
-                with empty strings.
+                ``[[field1_note1, ... fieldN_note1], ...,
+                [field1_noteM, ... fieldN_noteM]]`` or dictionary
+                ``{field name: [field_value1, ..., field_valueM]}`` or list of
+                dictionaries: ``[{field_name: field_value for note 1}, ...,
+                {field_name: field_value for note N}]``.
+                If dictionaries are used: If fields are not present,
+                they are filled with empty strings.
             tags: Tags of the note as list of list of strings:
                 ``[[tag1_note1, tag2_note1, ... ], ... [tag_1_noteM, ...]]``.
                 If ``None``, no tags will be added.
@@ -1335,13 +1336,6 @@ class AnkiDataFrame(pd.DataFrame):
                 Will be set automatically (to -1, i.e. needs update)
                 if ``None`` (default) and it is
                 very discouraged to set your own.
-            others: Dictionary of column contents for any other columns we might
-                encounter (if collides with one of the above column contents
-                derived by the above arguments, it will be ignored).
-                E.g. ``{"some_column": [val_note_1, ..., val_note_N]}``.
-            ignore_others: Ignore any additional columns, that are not filled
-                automatically and are also not specified with the ``others``
-                argument and fill them with ``NaN``s.
             inplace: If ``False`` (default), return a new
                 :class:`~ankipandas.AnkiDataFrame`, if True, modify in place and
                 return new note ID
@@ -1351,6 +1345,8 @@ class AnkiDataFrame(pd.DataFrame):
             new note ID (int)
         """
         self._check_our_format()
+        if not self._anki_table == "notes":
+            raise ValueError("Notes can only be added to notes table.")
         model2mid = raw.get_model2mid(self.db)
         if model not in model2mid.keys():
             raise ValueError(
@@ -1477,26 +1473,6 @@ class AnkiDataFrame(pd.DataFrame):
                 "are in '{}' format.".format(self._fields_format)
             )
 
-        # Last step: others
-        # Make sure that we don't accidentally overwrite one of our fields
-        if not others:
-            others = {}
-        # todo: we should warn about this
-        others = {
-            key: others[key] for key in others if key not in known_columns
-        }
-        known_columns.update(others)
-
-        missing = sorted(list(set(self.columns) - set(known_columns.keys())))
-        if missing and not ignore_others:
-            raise ValueError(
-                "Do not know how to fill the following column(s): {}. Remove"
-                " them or make sure you specify values using the 'others'"
-                " argument. Or ignore this check by setting ignore_others=True "
-                "(which will probably fill the remaining "
-                "columns with NaNs)".format(", ".join(missing))
-            )
-
         add = pd.DataFrame(columns=self.columns, index=nid)
         for key, item in known_columns.items():
             add.loc[:, key] = pd.Series(item, index=nid)
@@ -1510,20 +1486,22 @@ class AnkiDataFrame(pd.DataFrame):
             replace_df_inplace(self, self.append(add))
             return nid
 
-    # todo: ignore_others keyword
-    # todo: document inplace
     def add_note(self, model: str, fields: Union[List[str], Dict[str, str]],
                  tags=None, nid=None, guid=None, mod=None, usn=-1,
-                 others: Dict[str, str] = None, ignore_others=True,
                  inplace=False):
         """ Add new note.
+
+        .. note::
+
+            For better performance, it is advisable to use :meth:`add_notes`,
+            when adding many notes.
 
         Args:
             model: Name of the model (must exist already, check
                 :meth:`list_models` for a list of available models)
             fields: Fields of the note either as list or as dictionary
                 ``{field name: field value}``. In the latter case, if fields
-                are not present, they are filled with empty string.
+                are not present, they are filled with empty strings.
             tags: Tags of the note as string or Iterable thereof. Defaults to
                 no tags.
             nid: Note ID. Will be set automatically by default and it is
@@ -1536,12 +1514,6 @@ class AnkiDataFrame(pd.DataFrame):
             usn: Update sequence number. Will be set automatically
                 (to -1, i.e. needs update) if ``None`` (default) and it is
                 very discouraged to set your own.
-            others: Dictionary of column contents for any other columns we might
-                encounter (if collides with one of the above column contents
-                derived by the above arguments, it will be ignored)
-            ignore_others: Ignore any additional columns, that are not filled
-                automatically and are also not specified with the ``others``
-                argument and fill them with NaNs
             inplace: If False (default), return a new
                 :class:`ankipandas.AnkiDataFrame`, if True, modify in place and
                 return new note ID
@@ -1550,10 +1522,6 @@ class AnkiDataFrame(pd.DataFrame):
             :class:`ankipandas.AnkiDataFrame` if ``inplace==True``, else
             new note ID (``int``)
 
-        .. note::
-
-            For better performance, it is advisable to use :meth:`add_notes`,
-            when adding many notes.
         """
         if isinstance(fields, Iterable) and not isinstance(fields, dict):
             fields = [[content] for content in fields]
@@ -1573,8 +1541,6 @@ class AnkiDataFrame(pd.DataFrame):
             mod = [mod]
         if usn is not None:
             usn = [usn]
-        if others is not None:
-            others = {key: [value] for key, value in others.items()}
 
         ret = self.add_notes(
             model=model,
@@ -1584,8 +1550,6 @@ class AnkiDataFrame(pd.DataFrame):
             guid=guid,
             mod=mod,
             usn=usn,
-            others=others,
-            ignore_others=ignore_others,
             inplace=inplace
         )
         if inplace:
