@@ -26,6 +26,7 @@ def replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
         df.drop(drop_cols, axis=1, inplace=True)
 
 
+# todo: this might be made more elegant in the future for sure...
 # fixme: This removes items whenever it can't merge!
 def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
               inplace=False, id_add="id", prepend="", replace=False,
@@ -80,8 +81,15 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
     if replace:
         # Simply remove all potential clashes
         replaced_columns = set(df_add.columns).intersection(set(df.columns))
-        print(replaced_columns)
         df = df.drop(replaced_columns, axis=1)
+
+    # If index: add as column for simplicity
+    if id_add not in df_add.columns:
+        assert(df_add.index.name == id_add)
+        df_add[id_add] = df_add.index
+    if id_df not in df.columns:
+        assert(df.index.name == id_df)
+        df_add[id_df] = df.index
 
     df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
 
@@ -89,7 +97,6 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
     # Careful: 'in' doesn't work with None
     if (columns and id_add not in columns) or \
             (drop_columns and id_add in drop_columns):
-        print("drop index")
         df_merge.drop(id_add, axis=1, inplace=True)
 
     # todo: make optional
@@ -98,7 +105,6 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
     if id_add in rename_dict:
         new_id_add_col = rename_dict[id_add]
     if new_id_add_col in df_merge.columns and id_df != new_id_add_col:
-        print("removing", new_id_add_col)
         df_merge.drop(new_id_add_col, axis=1, inplace=True)
 
     if inplace:
