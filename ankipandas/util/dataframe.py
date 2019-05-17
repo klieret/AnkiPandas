@@ -83,15 +83,23 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
         replaced_columns = set(df_add.columns).intersection(set(df.columns))
         df = df.drop(replaced_columns, axis=1)
 
-    # If index: add as column for simplicity
-    if id_add not in df_add.columns:
-        assert(df_add.index.name == id_add)
-        df_add[id_add] = df_add.index
-    if id_df not in df.columns:
-        assert(df.index.name == id_df)
-        df_add[id_df] = df.index
+    merge_kwargs = {}
 
-    df_merge = df.merge(df_add, left_on=id_df, right_on=id_add)
+    if id_add in df_add.columns:
+        merge_kwargs["right_on"] = id_add
+    elif id_add == df_add.index.name:
+        merge_kwargs["right_index"] = True
+    else:
+        raise ValueError("'{}' is neither index nor column.".format(id_add))
+
+    if id_df in df.columns:
+        merge_kwargs["left_on"] = id_df
+    elif id_df== df.index.name:
+        merge_kwargs["left_index"] = True
+    else:
+        raise ValueError("'{}' is neither index nor column.".format(id_df))
+
+    df_merge = df.merge(df_add, **merge_kwargs)
 
     # Now remove id_add if it was to be removed
     # Careful: 'in' doesn't work with None
