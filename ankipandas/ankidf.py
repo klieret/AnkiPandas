@@ -216,14 +216,12 @@ class AnkiDataFrame(pd.DataFrame):
     def equals(self, other):
         return pd.DataFrame(self).equals(other)
 
-    # todo: skip doc
     def append(self, *args, **kwargs):
         ret = super(AnkiDataFrame, self).append(*args, **kwargs)
         self._copy_attrs_to(ret)
         ret.astype(_columns.dtype_casts2[self._anki_table])
         return ret
 
-    # todo: skip doc
     def update(self, *args, **kwargs):
         super(AnkiDataFrame, self).update(*args, **kwargs)
         # Fix https://github.com/pandas-dev/pandas/issues/4094
