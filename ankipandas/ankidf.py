@@ -1305,7 +1305,6 @@ class AnkiDataFrame(pd.DataFrame):
         """
     # fixme: cord will be replaced
 
-    # todo: test others, ignore_others
     # todo: fields should be speified differently
     def add_notes(
         self,
@@ -1362,6 +1361,7 @@ class AnkiDataFrame(pd.DataFrame):
                 "No model of with name '{}' exists.".format(model)
             )
         field_keys = raw.get_mid2fields(self.db)[model2mid[model]]
+
         if isinstance(fields, Iterable) and not isinstance(fields, dict):
             lengths = sorted(list(set(map(len, fields))))
             if len(fields) != len(field_keys):
