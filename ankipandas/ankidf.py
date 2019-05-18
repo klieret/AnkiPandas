@@ -2,6 +2,7 @@
 
 # std
 import collections
+import copy
 import sqlite3
 import time
 
@@ -17,10 +18,11 @@ import ankipandas.raw as raw
 import ankipandas.util.dataframe
 from ankipandas.util.dataframe import replace_df_inplace
 import ankipandas._columns as _columns
-from ankipandas.util.misc import invert_dict
+from ankipandas.util.misc import invert_dict, flatten_list_list
 from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
 from ankipandas.util.guid import guid as generate_guid
+from ankipandas.util.types import *
 
 
 class AnkiDataFrame(pd.DataFrame):
@@ -352,7 +354,6 @@ class AnkiDataFrame(pd.DataFrame):
     # noinspection PyUnusedLocal
     @rid.setter
     def rid(self, value):
-        print("arg")
         if self._anki_table == "revs":
             raise ValueError(
                 "Review ID column should already be index and notes.rid() will "
@@ -595,7 +596,6 @@ class AnkiDataFrame(pd.DataFrame):
                 if prefix + field not in self.columns:
                     self[prefix + field] = ""
             for ifield, field in enumerate(field_names):
-                print(prefix+field, fields[ifield].tolist())
                 # todo: can we speed this up?
                 self.loc[self.mid == mid, [prefix + field]] = \
                     pd.Series(
@@ -1213,7 +1213,6 @@ class AnkiDataFrame(pd.DataFrame):
         if len(self) == 0:
             new = pd.DataFrame(columns=_columns.anki_columns[table])
         else:
-            print(_columns.anki_columns[table])
             new = pd.DataFrame(
                 self[_columns.anki_columns[table]]
             )
@@ -1250,13 +1249,29 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     # fixme: Needs microseconds?
-    def _get_id(self) -> int:
+    def _get_id(self, others=()) -> int:
         """ Generate ID from timestamp and increment if it is already in use.
+
+        .. warning::
+
+            Do not call repeatedly without adding new IDs to index (might
+            produce identical IDs). Rather use :meth:`_get_ids` instead.
         """
         idx = int(1000*time.time())
-        while idx in self.index:
+        while idx in self.index or idx in others:
             idx += 1
         return idx
+
+    def _get_ids(self, n=1) -> List[int]:
+        """ Generate ID from timestamp and increment if it is already in use.
+
+        Args:
+            n: Number of IDs to generate
+        """
+        indices = []
+        for i in range(n):
+            indices.append(self._get_id(others=indices))
+        return indices
 
     def add_cards(
         self,
@@ -1303,6 +1318,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
 
         """
+        pass
     # fixme: cord will be replaced
 
     # todo: fields should be speified differently
@@ -1355,6 +1371,9 @@ class AnkiDataFrame(pd.DataFrame):
         self._check_our_format()
         if not self._anki_table == "notes":
             raise ValueError("Notes can only be added to notes table.")
+
+        # --- Model ---
+
         model2mid = raw.get_model2mid(self.db)
         if model not in model2mid.keys():
             raise ValueError(
@@ -1362,34 +1381,56 @@ class AnkiDataFrame(pd.DataFrame):
             )
         field_keys = raw.get_mid2fields(self.db)[model2mid[model]]
 
-        if isinstance(fields, Iterable) and not isinstance(fields, dict):
-            lengths = sorted(list(set(map(len, fields))))
-            if len(fields) != len(field_keys):
-                raise ValueError(
-                    "Model '{}' has {} fields but you supplied {}.".format(
-                        model, len(field_keys), len(fields)
-                ))
-            field_key2field = dict(zip(field_keys, fields))
-        elif isinstance(fields, dict):
-            unknown_fields = sorted(list(set(fields.keys()) - set(field_keys)))
+        # --- Fields ---
+
+        if is_list_dict_like(fields):
+            n_notes = len(fields)
+            specified_fields = set(flatten_list_list(
+                list(map(lambda d: list(d.keys()), fields))
+            ))
+            unknown_fields = sorted(list(specified_fields - set(field_keys)))
             if unknown_fields:
                 raise ValueError(
                     "Unknown fields: {}".format(", ".join(unknown_fields))
                 )
-            lengths = sorted(list(set(map(len, fields.values()))))
-            field_key2field = collections.defaultdict(str, fields)
-        else:
-            raise ValueError("Unsupported fields specification")
-
-        if len(lengths) == 1:
-            n_notes = lengths[0]
-        elif len(lengths) >= 2:
-            raise ValueError(
-                "Inconsistent number of "
-                "notes: {}".format(", ".join(map(str, lengths)))
+            field_key2field = {
+                key: list(map(lambda d: d.get(key), fields))
+                for key in field_keys
+            }
+        elif is_list_list_like(fields):
+            n_fields = list(set(map(len, fields)))
+            n_notes = len(fields)
+            if not (len(n_fields) == 1 and n_fields[0] == len(field_keys)):
+                raise ValueError(
+                    "Wrong number of items for specification of field contents:"
+                    " There are {} fields for your model type, but you"
+                    " specified {} items.".format(
+                        len(field_keys),
+                        ", ".join(map(str, n_fields))
+                    )
+                )
+            field_key2field = {
+                field_keys[i]: list(map(lambda x: x[i], fields))
+                for i in range(len(field_keys))
+            }
+        elif is_dict_list_like(fields):
+            lengths = list(set(map(len, fields.values())))
+            if len(lengths) >= 2:
+                raise ValueError(
+                    "Inconsistent number of "
+                    "fields: {}".format(", ".join(map(str, lengths)))
             )
+            elif len(lengths) == 0:
+                raise ValueError("Are you trying to add zero notes?")
+            n_notes = lengths[0]
+            field_key2field = copy.deepcopy(fields)
+            for key in field_keys:
+                if key not in field_key2field:
+                    field_key2field[key] = [""] * n_notes
         else:
-            raise ValueError("Unsupported fields specification")
+            raise ValueError("Unsupported fields specification.")
+
+        # --- Tags ---
 
         if tags is not None:
             if len(tags) != n_notes:
@@ -1400,13 +1441,15 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             tags = [[]] * n_notes
 
+        # --- Nids ---
+
         if nid is not None:
             if len(nid) != n_notes:
                 raise ValueError(
                     "Number of note IDs doesn't match number of notes to"
                     " be added: {} instead of {}.".format(len(nid), n_notes))
         else:
-            nid = [self._get_id() for _ in range(n_notes)]
+            nid = self._get_ids(n=n_notes)
 
         already_present = sorted(list(set(nid).intersection(set(self.index))))
         if already_present:
@@ -1418,6 +1461,8 @@ class AnkiDataFrame(pd.DataFrame):
         if len(set(nid)) < len(nid):
             raise ValueError("Your note ID specification contains duplicates!")
 
+        # --- Mod ---
+
         if mod is not None:
             if len(mod) != n_notes:
                 raise ValueError(
@@ -1427,7 +1472,8 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             mod = [int(time.time()) for _ in range(n_notes)]
 
-        # todo: Check that isn't present already
+        # --- Guid ---
+
         if guid is not None:
             if len(guid) != n_notes:
                 raise ValueError(
@@ -1437,17 +1483,29 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             guid = [generate_guid() for _ in range(n_notes)]
 
-        duplicate_nguids = sorted(list(
+        existing_guids = sorted(list(
             set(guid).intersection(self["nguid"].unique())
         ))
-        if duplicate_nguids:
+        if existing_guids:
             raise ValueError(
                 "The following globally unique IDs (guid) are already"
-                " present: {}.".format(", ".join(map(str, duplicate_nguids)))
+                " present: {}.".format(", ".join(map(str, existing_guids)))
             )
+
+        # todo: make efficient
+        duplicate_guids = sorted(set([g for g in guid if guid.count(g) >= 2]))
+        if duplicate_guids:
+            raise ValueError(
+                "The following gloally unique IDs (guid) are not unique: ",
+                ", ".join(map(str, duplicate_guids))
+            )
+
+        # --- Usn ---
 
         if usn is None:
             usn = -1
+
+        # --- Collect all  ---
 
         # Now we need to decide on contents for EVERY column in the DF
         known_columns = {
@@ -1468,6 +1526,12 @@ class AnkiDataFrame(pd.DataFrame):
                 1
             ).tolist()
         elif self._fields_format == "columns":
+            # First we need to make sure that the df has the columns for our
+            # model (perhaps this is the first note of this model that we're
+            # adding, so fields_as_columns() didn't add them).
+            for col in field_keys:
+                if col not in self:
+                    self[self.fields_as_columns_prefix + col] = ""
             # Let's first set all fields as columns to '', because we also
             # need to set those which aren't from our model:
             for col in self.columns:
@@ -1532,10 +1596,10 @@ class AnkiDataFrame(pd.DataFrame):
             new note ID (``int``)
 
         """
-        if isinstance(fields, Iterable) and not isinstance(fields, dict):
-            fields = [[content] for content in fields]
+        if is_list_like(fields):
+            fields = [fields]
         elif isinstance(fields, dict):
-            fields = {key: [value] for key, value in fields.items()}
+            fields = [fields]
         else:
             raise ValueError(
                 "Unknown type for fields specification: {}".format(type(fields))

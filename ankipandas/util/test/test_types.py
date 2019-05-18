@@ -3,10 +3,6 @@
 # std
 import unittest
 
-# 3rd
-# fixme add to dep
-from typeguard import check_type
-
 # ours
 from ankipandas.util.types import *
 
@@ -15,8 +11,26 @@ class TestTypes(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_ListLike(self):
-        pass
+    def test_is_list_like(self):
+        self.assertTrue(is_list_like([1, 2]))
+        self.assertTrue(is_list_like((1, 2)))
+        self.assertFalse(is_list_like("asdf"))
+
+    def test_is_list_list_like(self):
+        self.assertTrue(is_list_list_like([[1, 2]]))
+        self.assertTrue(is_list_list_like([(1, 2)]))
+        self.assertFalse(is_list_list_like([(1, 2), 3]))
+
+    def test_is_list_dict_like(self):
+        self.assertTrue(is_list_dict_like([{1: 3}, {4: 5}]))
+        self.assertTrue(is_list_dict_like([]))
+        self.assertFalse(is_list_dict_like([(1, 2), (4, 5)]))
+
+    def test_is_dict_list_like(self):
+        self.assertTrue(is_dict_list_like({1: [], 2: (3, 4)}))
+        self.assertTrue(is_dict_list_like({}))
+        self.assertFalse(is_dict_list_like([(1, 2), (4, 5)]))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -700,46 +700,46 @@ class TestAnkiDF(unittest.TestCase):
     def test_new_notes_raises_inconsistent(self):
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
-                "Basic", [["1"], ["2"]], tags=[["1"], ["2"]]
+                "Basic", [["1", "2"]], tags=[["1"], ["2"]]
             )
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
-                "Basic", [["1"], ["2"]], nid=[123, 124]
+                "Basic", [["1", "2"]], nid=[123, 124]
             )
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
-                "Basic", [["1"], ["2"]], guid=[123, 124]
+                "Basic", [["1", "2"]], guid=[123, 124]
             )
 
     def test_new_notes_raises_nid_clash(self):
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
-                "Basic", [["1", "1"], ["2", "2"]], nid=[10, 10]
+                "Basic", [["11", "12"], ["22", "22"]], nid=[10, 10]
             )
         with self.assertRaises(ValueError):
             self.nnotes().add_note(
-                "Basic", ["1", "2"], nid=10
+                "Basic", ["11", "12"], nid=10
             ).add_note(
-                "Basic", ["1", "2"], nid=10
+                "Basic", ["21", "22"], nid=10
             )
 
     def test_new_notes_raises_nguid_clash(self):
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
-                "Basic", [["1", "1"], ["2", "2"]], guid=[10, 10]
+                "Basic", [["11", "12"], ["21", "22"]], guid=[10, 10]
             )
         with self.assertRaises(ValueError):
             self.nnotes().add_note(
-                "Basic", ["1", "2"], guid=10
+                "Basic", ["11", "12"], guid=10
             ).add_note(
-                "Basic", ["1", "2"], guid=10
+                "Basic", ["21", "22"], guid=10
             )
 
     def test_new_notes_fields_as_columns(self):
         empty = AnkiDF.notes(self.db_path, empty=True)
         empty.add_notes(
             "Basic",
-            [["field1", "field21"], ["field2", "field22"]],
+            [["field1", "field2"], ["field21", "field22"]],
             tags=[["tag1", "tag2"], ["tag21", "tag22"]],
             guid=["cryptic", "cryptic2"],
             mod=[124, 1235],
@@ -751,7 +751,7 @@ class TestAnkiDF(unittest.TestCase):
         empty2 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
         empty2.add_notes(
             "Basic",
-            [["field1", "field21"], ["field2", "field22"]],
+            [["field1", "field2"], ["field21", "field22"]],
             tags=[["tag1", "tag2"], ["tag21", "tag22"]],
             guid=["cryptic", "cryptic2"],
             mod=[124, 1235],
@@ -765,7 +765,8 @@ class TestAnkiDF(unittest.TestCase):
             empty2.to_dict()
         )
 
-    def _notes_dict(self, notes):
+    @staticmethod
+    def _notes_dict(notes):
         return {
             "model": notes["nmodel"],
             "fields": notes["nflds"],
@@ -809,7 +810,7 @@ class TestAnkiDF(unittest.TestCase):
         empty2 = AnkiDF.notes(self.db_path, empty=True)
         empty2.add_notes(
             "Basic",
-            [["field1", "field21"], ["field2", "field22"]],
+            [["field1", "field2"], ["field21", "field22"]],
             tags=[["tag1", "tag2"], ["tag21", "tag22"]],
             guid=["cryptic", "cryptic2"],
             mod=[124, 1235],
@@ -844,9 +845,78 @@ class TestAnkiDF(unittest.TestCase):
         with self.assertRaises(ValueError):
             empty.add_note("doesntexist", [])
         with self.assertRaises(ValueError):
-            empty.add_note("Basic", [])
-        with self.assertRaises(ValueError):
             empty.add_note("Basic", ["1", "2", "3"])
+
+    def test_new_notes_equivalent_field_specifications(self):
+        empty1 = AnkiDF.notes(self.db_path, empty=True)
+        empty2 = AnkiDF.notes(self.db_path, empty=True)
+        empty3 = AnkiDF.notes(self.db_path, empty=True)
+
+        empty1.add_notes(
+            "Basic",
+            [["11", "12"], ["21", "22"]],
+            inplace=True
+        )
+        empty2.add_notes(
+            "Basic",
+            [
+                {"Front": "11", "Back": "12"},
+                {"Front": "21", "Back": "22"},
+            ],
+            inplace=True
+        )
+        empty3.add_notes(
+            "Basic",
+            {
+                "Front": ["11", "21"],
+                "Back": ["12", "22"]
+            },
+            inplace=True
+        )
+        self.assertListEqual(empty1["nflds"].tolist(), empty2["nflds"].tolist())
+        self.assertListEqual(empty2["nflds"].tolist(), empty3["nflds"].tolist())
+
+    def test_new_notes_equivalent_field_specifications_fields_as_columns(self):
+        empty1 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
+        empty2 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
+        empty3 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
+
+        empty1.add_notes(
+            "Basic",
+            [["11", "12"], ["21", "22"]],
+            inplace=True
+        )
+        empty2.add_notes(
+            "Basic",
+            [
+                {"Front": "11", "Back": "12"},
+                {"Front": "21", "Back": "22"},
+            ],
+            inplace=True
+        )
+        empty3.add_notes(
+            "Basic",
+            {
+                "Front": ["11", "21"],
+                "Back": ["12", "22"]
+            },
+            inplace=True
+        )
+
+        p = empty1.fields_as_columns_prefix
+
+        self.assertListEqual(
+            empty1[p + "Front"].tolist(), empty2[p + "Front"].tolist()
+        )
+        self.assertListEqual(
+            empty2[p + "Front"].tolist(), empty3[p + "Front"].tolist()
+        )
+        self.assertListEqual(
+            empty1[p + "Back"].tolist(), empty2[p + "Back"].tolist()
+        )
+        self.assertListEqual(
+            empty2[p + "Back"].tolist(), empty3[p + "Back"].tolist()
+        )
 
     # Write
     # ==========================================================================

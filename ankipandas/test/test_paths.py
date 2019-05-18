@@ -12,6 +12,7 @@ from randomfiletree import sample_random_elements, iterative_gaussian_tree
 # ours
 import ankipandas.paths as paths
 from ankipandas._columns import *
+from ankipandas.util.misc import flatten_list_list
 
 
 def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:
@@ -32,18 +33,6 @@ def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:
         p.touch()
         files.add(p)
     return list(files)
-
-
-def flatten_list(lst: List[List[Any]]) -> List[Any]:
-    """ Takes a list of lists and returns a list of all elements.
-
-    Args:
-        lst: List of Lists
-
-    Returns:
-        list
-    """
-    return [item for sublist in lst for item in sublist]
 
 
 class TestFindDatabase(unittest.TestCase):
@@ -91,7 +80,7 @@ class TestFindDatabase(unittest.TestCase):
 
     def test__find_database(self):
         for d in self.dirs:
-            a = sorted(map(str, flatten_list(
+            a = sorted(map(str, flatten_list_list(
                 paths._find_db(
                     self.dirs[d].name, maxdepth=None, break_on_first=False
                 ).values()
