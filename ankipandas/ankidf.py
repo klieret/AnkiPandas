@@ -10,7 +10,7 @@ import time
 import numpy as np
 import pandas as pd
 import pathlib
-from typing import Union, List, Dict, Iterable
+from typing import Union, List, Dict, Optional, Iterable
 
 # ours
 import ankipandas.paths
@@ -177,11 +177,6 @@ class AnkiDataFrame(pd.DataFrame):
             cards = ankipandas.AnkiDataFrame.cards()
 
         """
-        if empty and (path is not None or user is not None):
-            log.warning(
-                "When initialized with empty==True, no database is "
-                "initialized, so the path and user argument are ignored."
-            )
         return cls._table_constructor(path, user, "cards", empty=empty)
 
     @classmethod
@@ -1262,29 +1257,83 @@ class AnkiDataFrame(pd.DataFrame):
             idx += 1
         return idx
 
+    def add_card(
+            self,
+            nid: int,
+            cdeck: str,
+            cord: Optional[Union[int, List[int]]] = None,
+            cmod: Optional[int] = None,
+            cusn: Optional[int] = None,
+            cqueue: Optional[str] = None,
+            ctype: Optional[str] = None,
+            civl: Optional[int] = None,
+            cfactor: Optional[int] = None,
+            creps: Optional[int] = None,
+            clapses: Optional[int] = None,
+            cleft: Optional[int] = None,
+            cdue: Optional[int] = None,
+            inplace=False
+    ):
+        ret = self.add_cards(
+            nid=[nid],
+            cdeck=cdeck,
+            cord=cord,
+            cmod=cmod,
+            cusn=cusn,
+            cqueue=cqueue,
+            ctype=ctype,
+            civl=civl,
+            cfactor=cfactor,
+            creps=creps,
+            clapses=clapses,
+            cleft=cleft,
+            cdue=cdue,
+            inplace=inplace
+        )
+        if inplace:
+            # We get nids back
+            return ret[0]
+        else:
+            # We get new AnkiDataFrame back
+            return ret
+
+    # fixme: update add_card with new keyword arguments
+    # todo: check Deck existing
+    # todo: change order of arguments?
+    # todo: check if nid exists?
     # todo: add back codeck? etc.
+    # todo: cid option?
+    # fixme: cord will be replaced
     def add_cards(
         self,
-        nid,
-        cdeck,
-        cord=None,
-        cmod=None,
-        cusn=None,
-        cqueue=None,
-        ctype=None,
-        civl=None,
-        cfactor=None,
-        creps=None,
-        clapses=None,
-        cleft=None,
+        nid: List[int],
+        cdeck: Union[str, List[str]],
+        cord: Optional[Union[int, List[int]]] = None,
+        cmod: Optional[Union[int, List[int]]] = None,
+        cusn: Optional[Union[int, List[int]]] = None,
+        cqueue: Optional[Union[str, List[str]]] = None,
+        ctype: Optional[Union[str, List[str]]] = None,
+        civl: Optional[Union[int, List[int]]] = None,
+        cfactor: Optional[Union[int, List[int]]] = None,
+        creps: Optional[Union[int, List[int]]] = None,
+        clapses: Optional[Union[int, List[int]]] = None,
+        cleft: Optional[Union[int, List[int]]] = None,
+        cdue: Optional[Union[int, List[int]]] = None,
+        inplace=False
     ):
         """
-        Add cards.
+        Add cards belonging to notes of one model.
 
         Args:
             nid: Note IDs of the notes that you want to add cards for
-            cdeck: Name of deck to add cards to
-            cord: TODO
+            cdeck: Name of deck to add cards to as string or list of strings
+                (different deck for each nid).
+            cord: Number of the template to add cards for as int or list
+                thereof. The template corresponds to the reviewing
+                direction. If left ``None`` (default), cards for all
+                templates will be added.
+                It is not possible to specify different cord for different
+                nids!
             cmod: List of modification timestamps.
                 Will be set automatically if ``None`` (default) and it is
                 discouraged to set your own.
@@ -1292,19 +1341,202 @@ class AnkiDataFrame(pd.DataFrame):
                 Will be set automatically (to -1, i.e. needs update)
                 if ``None`` (default) and it is
                 very discouraged to set your own.
-            cqueue:
-            ctype: List of card types ('learning', 'review', 'relearn', 'cram')
-
-            civl:
-            cfactor:
-            creps:
-            clapses:
-            cleft:
+            cqueue: 'sched buried', 'user buried', 'suspended', 'new',
+                'learning', 'due', 'in learning' (learning but next rev at
+                least a day after the previous review). If ``None`` (default),
+                'new' is chosen for all cards. Specify as string or list
+                thereof.
+            ctype: List of card types ('learning', 'review', 'relearn', 'cram').
+                If ``None`` (default) 'learning' is chosen for all.
+            civl: The new interval that the card was pushed to after the review.
+                Positive values are in days, negative values are in seconds
+                (for learning cards).  If ``None`` (default) 0 is chosen for
+                all cards.
+            cfactor: The new ease factor of the card in permille. If ``None``
+                (default) 0 is chosen for all.
+            creps: Number of reviews. If ``None`` (default), 0 is chosen for
+                all cards.
+            clapses: The number of times the card went from a 'was answered
+                correctly' to 'was answered incorrectly'. If ``None`` (default),
+                0 is chosen for all cards.
+            cleft: Of the form ``a*1000+b``, with: ``b`` the number of reps
+                left till graduation and ``a`` the number of reps left today.
+                If ``None`` (default), 0 is chosen for all cards.
+            cdue: Due is used differently for different card types: new:
+                note id or random int, due: integer day, relative to the
+                collection's creation time, learning: integer timestamp.
+                If ``None`` (default), check that we're adding a new card and
+                set to note ID.
+            inplace: If ``False`` (default), return a new
+                :class:`~ankipandas.AnkiDataFrame`, if True, modify in place and
+                return new card IDs
 
         Returns:
+            :class:`~ankipandas.AnkiDataFrame` if ``inplace==True``, else
+            list of new card IDs
 
         """
-        pass
+        self._check_our_format()
+        if not self._anki_table == "cards":
+            raise ValueError("Cards can only be added to cards table!")
+
+        # --- Ord ---
+
+        nid2mid = raw.get_nid2mid(self.db)
+        missing_nids = sorted(list(set(nid) - set(nid2mid.keys())))
+        if missing_nids:
+            raise ValueError(
+                "The following note IDs (nid) can't be found in the notes "
+                "table: {}. Perhaps you didn't call notes.write() to write "
+                "them back into the database?".format(
+                    ", ".join(map(str, missing_nids))
+                )
+            )
+
+        mids = list(set(map(lambda x: nid2mid[x], nid)))
+        if len(mids) >= 2:
+            raise ValueError(
+                "It is only supported to add cards for notes of the same model"
+                ", but you're trying to add cards for notes of "
+                "models: {}".format(", ".join(map(str, mids)))
+            )
+        mid = mids[0]
+
+        minfo = raw.get_model_info(self.db)
+
+        available_ords = list(map(lambda x: x["ord"], minfo[mid]["tmpls"]))
+        if cord is None:
+            cord = available_ords
+        elif isinstance(cord, int):
+            cord = [cord]
+        elif is_list_like(cord):
+            pass
+        else:
+            raise ValueError(
+                "Unknown type for cord specifiation: {}".format(type(cord))
+            )
+        not_available = sorted(list(set(cord) - set(available_ords)))
+        if not_available:
+            raise ValueError(
+                "The following templates are not available for notes of "
+                "this model: {}".format(", ".join(map(str, not_available)))
+            )
+
+        # --- Rest ---
+
+        def _handle_input(inpt, name, default, typ, options=None):
+            if inpt is None:
+                inpt = [default] * len(nid)
+            elif is_list_like(inpt):
+                if len(inpt) != len(nid):
+                    raise ValueError(
+                        "Number of {} doesn't match number of "
+                        "cards to  be added: {} "
+                        "instead of {}.".format(
+                            name, len(cmod), len(nid))
+                    )
+            elif isinstance(inpt, typ):
+                inpt = [inpt] * len(nid)
+            else:
+                raise ValueError(
+                    "Invalid type of {} specification: {}".format(
+                        name, type(inpt)
+                    )
+                )
+            if options is not None:
+                invalid = sorted(list(set(inpt) - set(options)))
+                if invalid:
+                    raise ValueError(
+                        "The following values are no valid "
+                        "entries for {}: {}".format(
+                            name,
+                            ", ".join(invalid)
+                        )
+                    )
+            return inpt
+
+        cmod = _handle_input(cmod, "cmod", int(time.time()), int)
+        cusn = _handle_input(cusn, "cusn", -1, int)
+        cqueue = _handle_input(
+            cqueue,
+            "cqueue",
+            "new",
+            str,
+            options=['sched buried', 'user buried', 'suspended', 'new',
+                     'learning', 'due', 'in learning']
+        )
+        ctype = _handle_input(
+            ctype,
+            "ctype",
+            "learning",
+            str,
+            options=['learning', 'review', 'relearn', 'cram']
+        )
+        civl = _handle_input(civl, "civl", 0, int)
+        cfactor = _handle_input(cfactor, "cfactor", 0, int)
+        creps = _handle_input(creps, "creps", 0, int)
+        clapses = _handle_input(clapses, "clapses", 0, int)
+        cleft = _handle_input(cleft, "cleft", 0, int)
+
+        if cdue is None:
+            if set(cqueue) == {"new"}:
+                cdue = nid
+            else:
+                raise ValueError(
+                    "Due date can only be set automatically for cards of type"
+                    "/queue 'new', but you have types: {}".format(
+                        ", ".join(set(cqueue))
+                    )
+                )
+        elif is_list_like(cdue):
+            if len(cdue) != len(nid):
+                raise ValueError(
+                    "Number of cdue doesn't match number of "
+                    "cards to  be added: {} "
+                    "instead of {}.".format(len(cmod), len(nid))
+                )
+        elif isinstance(cdue, int):
+            cdue = [cdue] * len(nid)
+        else:
+            raise ValueError(
+                "Invalid type of cdue specification: {}".format(type(cdue))
+            )
+
+        # Now we need to decide on contents for EVERY column in the DF
+        all_cids = self._get_ids(n=len(nid) * len(cord))
+        add = pd.DataFrame(columns=self.columns, index=all_cids)
+        for icord, co in enumerate(cord):
+            cid = all_cids[icord*len(nid) : (icord+1)*len(nid)]
+            known_columns = {
+                "nid": nid,
+                "cdeck": cdeck,
+                "cord": [co] * len(nid),
+                "cdue": cdue,
+                "cmod": cmod,
+                "cusn": cusn,
+                "cqueue": cqueue,
+                "ctype": ctype,
+                "civl": civl,
+                "cfactor": cfactor,
+                "creps": creps,
+                "clapses": clapses,
+                "cleft": cleft,
+                "codeck": [""] * len(nid),
+                "codue": [0] * len(nid)
+            }
+
+            for key, item in known_columns.items():
+                add.loc[:, key] = pd.Series(item, index=cid)
+            add = add.astype({
+                key: value for key, value in _columns.dtype_casts_all.items()
+                if key in self.columns
+            })
+
+        if not inplace:
+            return self.append(add)
+        else:
+            replace_df_inplace(self, self.append(add))
+            return all_cids
 
     def _get_ids(self, n=1) -> List[int]:
         """ Generate ID from timestamp and increment if it is already in use.
@@ -1316,7 +1548,6 @@ class AnkiDataFrame(pd.DataFrame):
         for i in range(n):
             indices.append(self._get_id(others=indices))
         return indices
-    # fixme: cord will be replaced
 
     # Todo: If tags single list: Same for all!
     def add_notes(
@@ -1501,6 +1732,13 @@ class AnkiDataFrame(pd.DataFrame):
 
         if nusn is None:
             nusn = -1
+        else:
+            if len(nusn) != n_notes:
+                raise ValueError(
+                    "Number of update sequence numbers (usn) doesn't match"
+                    "number of notes to  be added: {} "
+                    "instead of {}.".format(len(nusn), n_notes)
+                )
 
         # --- Collect all  ---
 

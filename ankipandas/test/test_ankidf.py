@@ -233,9 +233,7 @@ class TestAnkiDF(unittest.TestCase):
             "cards": set(self.cards.did),
             "revs": set(self.revs.did)
         }
-        print(did2s)
         dids = set(raw.get_did2deck(self.db).keys())
-        print(dids)
         for table, dids2 in did2s.items():
             with self.subTest(table=table):
                 self.assertTrue(dids2.issubset(dids))
@@ -288,7 +286,6 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_list_models(self):
         models = self.notes.list_models()
-        print(models)
         self.assertTrue(
             set(models).issuperset({
                 'Basic',
@@ -694,6 +691,84 @@ class TestAnkiDF(unittest.TestCase):
     # New
     # ==========================================================================
 
+    # Add cards
+    # --------------------------------------------------------------------------
+
+    @staticmethod
+    def _cards_dict(card):
+        return dict(
+            nid=card["nid"],
+            cdeck=card["cdeck"],
+            cord=card["cord"],
+            cmod=card["cmod"],
+            cusn=card["cusn"],
+            cqueue=card["cqueue"],
+            ctype=card["ctype"],
+            civl=card["civl"],
+            cfactor=card["cfactor"],
+            clapses=card["clapses"],
+            cleft=card["cleft"],
+            cdue=card["cdue"]
+        )
+
+    def test_new_card_fully_specified(self):
+        empty = AnkiDF.cards(self.db_path, empty=True)
+
+        nid = list(raw.get_nid2mid(self.db).keys())[0]
+        deck = list(raw.get_did2deck(self.db).values())[0]
+
+        init_dict = dict(
+            nid=nid,
+            cdeck=deck,
+            cord=0,
+            cmod=123,
+            cusn=5,
+            cqueue="learning",
+            ctype="relearn",
+            civl=5,
+            cfactor=17,
+            clapses=89,
+            cleft=15,
+            cdue=178
+        )
+
+        cid = empty.add_card(**init_dict, inplace=True)
+        card = empty.loc[cid]
+        self.assertDictEqual(init_dict, self._cards_dict(card))
+        self.assertEqual(len(empty), 1)
+
+    def test_new_cards_vs_new_card(self):
+        empty = AnkiDF.cards(self.db_path, empty=True)
+        empty2 = AnkiDF.cards(self.db_path, empty=True)
+
+        nid = list(raw.get_nid2mid(self.db).keys())[0]
+        deck = list(raw.get_did2deck(self.db).values())[0]
+
+        init_dict2 = dict(
+            nid=[nid],
+            cdeck=deck,
+            cord=0,
+            cmod=123,
+            cusn=5,
+            cqueue="learning",
+            ctype="relearn",
+            civl=5,
+            cfactor=17,
+            clapses=89,
+            cleft=15,
+            cdue=178
+        )
+        init_dict1 = copy.deepcopy(init_dict2)
+        init_dict1["nid"] = nid
+
+        cids = empty2.add_cards(**init_dict2, inplace=True)
+        card2 = empty2.loc[cids[0]]
+
+        cid = empty.add_card(**init_dict1, inplace=True)
+        card1 = empty.loc[cid]
+
+        self.assertDictEqual(self._cards_dict(card2), self._cards_dict(card1))
+
     # Add notes
     # --------------------------------------------------------------------------
 
@@ -713,14 +788,14 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_new_notes_raises_nid_clash(self):
         with self.assertRaises(ValueError):
-            self.nnotes().add_notes(
-                "Basic", [["11", "12"], ["22", "22"]], nid=[10, 10]
-            )
-        with self.assertRaises(ValueError):
             self.nnotes().add_note(
                 "Basic", ["11", "12"], nid=10
             ).add_note(
                 "Basic", ["21", "22"], nid=10
+            )
+        with self.assertRaises(ValueError):
+            self.nnotes().add_notes(
+                "Basic", [["11", "12"], ["22", "22"]], nid=[10, 10]
             )
 
     def test_new_notes_raises_nguid_clash(self):

@@ -267,7 +267,10 @@ def get_model_info(db: sqlite3.Connection) -> dict:
     Returns:
         Nested dictionary
     """
-    return get_info(db)["models"]
+    return {
+        int(key): value
+        for key, value in get_info(db)["models"].items()
+    }
 
 
 @lru_cache(CACHE_SIZE)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # std
+import copy
 from pathlib import Path
 
 # 3rd
@@ -159,9 +160,8 @@ dtype_casts2 = {
         "cfactor": int,
         "creps": int,
         "clapses": int,
-        "clef": int,
+        "cleft": int,
         "codue": int,
-        "codid": int,
     },
     "notes": {
         "nmod": int,
@@ -177,6 +177,6 @@ dtype_casts2 = {
         "rtime": int,
     }
 }
-dtype_casts_all = dtype_casts2["cards"]
+dtype_casts_all = copy.deepcopy(dtype_casts2["cards"])
 dtype_casts_all.update(dtype_casts2["notes"])
 dtype_casts_all.update(dtype_casts2["revs"])
