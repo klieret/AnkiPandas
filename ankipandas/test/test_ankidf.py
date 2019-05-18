@@ -700,7 +700,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_new_notes_raises_inconsistent(self):
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
-                "Basic", [["1", "2"]], tags=[["1"], ["2"]]
+                "Basic", [["1", "2"]], ntags=[["1"], ["2"]]
             )
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
@@ -708,7 +708,7 @@ class TestAnkiDF(unittest.TestCase):
             )
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
-                "Basic", [["1", "2"]], guid=[123, 124]
+                "Basic", [["1", "2"]], nguid=[123, 124]
             )
 
     def test_new_notes_raises_nid_clash(self):
@@ -726,13 +726,13 @@ class TestAnkiDF(unittest.TestCase):
     def test_new_notes_raises_nguid_clash(self):
         with self.assertRaises(ValueError):
             self.nnotes().add_notes(
-                "Basic", [["11", "12"], ["21", "22"]], guid=[10, 10]
+                "Basic", [["11", "12"], ["21", "22"]], nguid=[10, 10]
             )
         with self.assertRaises(ValueError):
             self.nnotes().add_note(
-                "Basic", ["11", "12"], guid=10
+                "Basic", ["11", "12"], nguid=10
             ).add_note(
-                "Basic", ["21", "22"], guid=10
+                "Basic", ["21", "22"], nguid=10
             )
 
     def test_new_notes_fields_as_columns(self):
@@ -740,10 +740,10 @@ class TestAnkiDF(unittest.TestCase):
         empty.add_notes(
             "Basic",
             [["field1", "field2"], ["field21", "field22"]],
-            tags=[["tag1", "tag2"], ["tag21", "tag22"]],
-            guid=["cryptic", "cryptic2"],
-            mod=[124, 1235],
-            usn=[42, 17],
+            ntags=[["tag1", "tag2"], ["tag21", "tag22"]],
+            nguid=["cryptic", "cryptic2"],
+            nmod=[124, 1235],
+            nusn=[42, 17],
             nid=[123, 125],
             inplace=True
         )
@@ -752,10 +752,10 @@ class TestAnkiDF(unittest.TestCase):
         empty2.add_notes(
             "Basic",
             [["field1", "field2"], ["field21", "field22"]],
-            tags=[["tag1", "tag2"], ["tag21", "tag22"]],
-            guid=["cryptic", "cryptic2"],
-            mod=[124, 1235],
-            usn=[42, 17],
+            ntags=[["tag1", "tag2"], ["tag21", "tag22"]],
+            nguid=["cryptic", "cryptic2"],
+            nmod=[124, 1235],
+            nusn=[42, 17],
             nid=[123, 125],
             inplace=True
         )
@@ -768,24 +768,24 @@ class TestAnkiDF(unittest.TestCase):
     @staticmethod
     def _notes_dict(notes):
         return {
-            "model": notes["nmodel"],
-            "fields": notes["nflds"],
-            "tags": notes["ntags"],
-            "guid": notes["nguid"],
-            "mod": notes["nmod"],
-            "usn": notes["nusn"]
+            "nmodel": notes["nmodel"],
+            "nflds": notes["nflds"],
+            "ntags": notes["ntags"],
+            "nguid": notes["nguid"],
+            "nmod": notes["nmod"],
+            "nusn": notes["nusn"]
         }
 
     def test_new_note_empty_fully_specified(self):
         empty = AnkiDF.notes(self.db_path, empty=True)
 
         init_dict = dict(
-            model="Basic",
-            fields=["field1", "field2"],
-            tags=["tag1", "tag2"],
-            guid="cryptic",
-            mod=124,
-            usn=42,
+            nmodel="Basic",
+            nflds=["field1", "field2"],
+            ntags=["tag1", "tag2"],
+            nguid="cryptic",
+            nmod=124,
+            nusn=42,
         )
         nid = empty.add_note(nid=123, **init_dict, inplace=True)
         self.assertEqual(nid, 123)
@@ -794,12 +794,12 @@ class TestAnkiDF(unittest.TestCase):
         self.assertEqual(len(empty), 1)
 
         init_dict2 = dict(
-            model="Basic",
-            fields=["field21", "field22"],
-            tags=["tag21", "tag22"],
-            guid="cryptic2",
-            mod=1235,
-            usn=17,
+            nmodel="Basic",
+            nflds=["field21", "field22"],
+            ntags=["tag21", "tag22"],
+            nguid="cryptic2",
+            nmod=1235,
+            nusn=17,
         )
         nid = empty.add_note(nid=125, **init_dict2, inplace=True)
         self.assertEqual(nid, 125)
@@ -811,10 +811,10 @@ class TestAnkiDF(unittest.TestCase):
         empty2.add_notes(
             "Basic",
             [["field1", "field2"], ["field21", "field22"]],
-            tags=[["tag1", "tag2"], ["tag21", "tag22"]],
-            guid=["cryptic", "cryptic2"],
-            mod=[124, 1235],
-            usn=[42, 17],
+            ntags=[["tag1", "tag2"], ["tag21", "tag22"]],
+            nguid=["cryptic", "cryptic2"],
+            nmod=[124, 1235],
+            nusn=[42, 17],
             nid=[123, 125],
             inplace=True
         )
@@ -831,14 +831,14 @@ class TestAnkiDF(unittest.TestCase):
         empty = AnkiDF.notes(self.db_path)
 
         init_dict = dict(
-            model="Basic",
-            fields=["field1", "field2"],
+            nmodel="Basic",
+            nflds=["field1", "field2"],
         )
         nid = empty.add_note(nid=123, **init_dict, inplace=True)
         self.assertEqual(nid, 123)
         note = empty.loc[nid].to_dict()
-        self.assertEqual(note["nmodel"], init_dict["model"])
-        self.assertEqual(note["nflds"], init_dict["fields"])
+        self.assertEqual(note["nmodel"], init_dict["nmodel"])
+        self.assertEqual(note["nflds"], init_dict["nflds"])
 
     def test_new_note_raises(self):
         empty = AnkiDF.notes(self.db_path, empty=True)
