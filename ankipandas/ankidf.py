@@ -1297,13 +1297,9 @@ class AnkiDataFrame(pd.DataFrame):
             # We get new AnkiDataFrame back
             return ret
 
-    # fixme: update add_card with new keyword arguments
-    # todo: check Deck existing
     # todo: change order of arguments?
-    # todo: check if nid exists?
-    # todo: add back codeck? etc.
-    # todo: cid option?
     # fixme: cord will be replaced
+    # todo: duplicate cards (same note, same cord)?
     def add_cards(
         self,
         nid: List[int],
@@ -1422,6 +1418,57 @@ class AnkiDataFrame(pd.DataFrame):
                 "this model: {}".format(", ".join(map(str, not_available)))
             )
 
+        # --- Deck ---
+
+        if isinstance(cdeck, str):
+            cdeck = [cdeck] * len(nid)
+        elif is_list_like(cdeck):
+            if len(cdeck) != len(nid):
+                raise ValueError(
+                    "Number of decks doesn't match number of "
+                    "notes for which cards should be added: {} "
+                    "instead of {}.".format(len(cmod), len(nid))
+                )
+        else:
+            raise ValueError("Unknown format for cdeck: {}".format(
+                type(cdeck))
+            )
+        unknown_decks = sorted(list(
+            set(cdeck) - set(raw.get_did2deck(self.db).values())
+        ))
+        if unknown_decks:
+            raise ValueError(
+                "The following decks do not seem to exist: {}".format(
+                    ", ".join(unknown_decks)
+                )
+            )
+
+        # --- Due ---
+
+        if cdue is None:
+            if set(cqueue) == {"new"}:
+                cdue = nid
+            else:
+                raise ValueError(
+                    "Due date can only be set automatically for cards of type"
+                    "/queue 'new', but you have types: {}".format(
+                        ", ".join(set(cqueue))
+                    )
+                )
+        elif is_list_like(cdue):
+            if len(cdue) != len(nid):
+                raise ValueError(
+                    "Number of cdue doesn't match number of "
+                    "notes for which cards should be added: {} "
+                    "instead of {}.".format(len(cmod), len(nid))
+                )
+        elif isinstance(cdue, int):
+            cdue = [cdue] * len(nid)
+        else:
+            raise ValueError(
+                "Invalid type of cdue specification: {}".format(type(cdue))
+            )
+
         # --- Rest ---
 
         def _handle_input(inpt, name, default, typ, options=None):
@@ -1431,7 +1478,7 @@ class AnkiDataFrame(pd.DataFrame):
                 if len(inpt) != len(nid):
                     raise ValueError(
                         "Number of {} doesn't match number of "
-                        "cards to  be added: {} "
+                        "notes for which cards should be added: {} "
                         "instead of {}.".format(
                             name, len(cmod), len(nid))
                     )
@@ -1478,35 +1525,11 @@ class AnkiDataFrame(pd.DataFrame):
         clapses = _handle_input(clapses, "clapses", 0, int)
         cleft = _handle_input(cleft, "cleft", 0, int)
 
-        if cdue is None:
-            if set(cqueue) == {"new"}:
-                cdue = nid
-            else:
-                raise ValueError(
-                    "Due date can only be set automatically for cards of type"
-                    "/queue 'new', but you have types: {}".format(
-                        ", ".join(set(cqueue))
-                    )
-                )
-        elif is_list_like(cdue):
-            if len(cdue) != len(nid):
-                raise ValueError(
-                    "Number of cdue doesn't match number of "
-                    "cards to  be added: {} "
-                    "instead of {}.".format(len(cmod), len(nid))
-                )
-        elif isinstance(cdue, int):
-            cdue = [cdue] * len(nid)
-        else:
-            raise ValueError(
-                "Invalid type of cdue specification: {}".format(type(cdue))
-            )
-
         # Now we need to decide on contents for EVERY column in the DF
         all_cids = self._get_ids(n=len(nid) * len(cord))
         add = pd.DataFrame(columns=self.columns, index=all_cids)
         for icord, co in enumerate(cord):
-            cid = all_cids[icord*len(nid) : (icord+1)*len(nid)]
+            cid = all_cids[icord*len(nid): (icord+1)*len(nid)]
             known_columns = {
                 "nid": nid,
                 "cdeck": cdeck,

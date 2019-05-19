@@ -713,13 +713,17 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_new_card_fully_specified(self):
         empty = AnkiDF.cards(self.db_path, empty=True)
+        empty_combined = AnkiDF.cards(self.db_path, empty=True)
 
-        nid = list(raw.get_nid2mid(self.db).keys())[0]
-        deck = list(raw.get_did2deck(self.db).values())[0]
+        # Careful: Need notes of the same model!
+        nid1 = 1555579352896
+        nid2 = 1557223191575
+        deck1 = list(raw.get_did2deck(self.db).values())[0]
+        deck2 = list(raw.get_did2deck(self.db).values())[1]
 
-        init_dict = dict(
-            nid=nid,
-            cdeck=deck,
+        init_dict1 = dict(
+            nid=nid1,
+            cdeck=deck1,
             cord=0,
             cmod=123,
             cusn=5,
@@ -731,13 +735,58 @@ class TestAnkiDF(unittest.TestCase):
             cleft=15,
             cdue=178
         )
+        init_dict2 = dict(
+            nid=nid2,
+            cdeck=deck2,
+            cord=0,
+            cmod=1123,
+            cusn=15,
+            cqueue="due",
+            ctype="review",
+            civl=15,
+            cfactor=117,
+            clapses=189,
+            cleft=115,
+            cdue=1178
+        )
+        init_dict_combined = dict(
+            nid=[nid1, nid2],
+            cdeck=[deck1, deck2],
+            cord=0,
+            cmod=[123, 1123],
+            cusn=[5, 15],
+            cqueue=["learning", "due"],
+            ctype=["relearn", "review"],
+            civl=[5, 15],
+            cfactor=[17, 117],
+            clapses=[89, 189],
+            cleft=[15, 115],
+            cdue=[178, 1178]
+        )
 
-        cid = empty.add_card(**init_dict, inplace=True)
-        card = empty.loc[cid]
-        self.assertDictEqual(init_dict, self._cards_dict(card))
-        self.assertEqual(len(empty), 1)
+        cid1 = empty.add_card(**init_dict1, inplace=True)
+        card1 = empty.loc[cid1]
+        cid2 = empty.add_card(**init_dict2, inplace=True)
+        card2 = empty.loc[cid2]
+
+        cid1, cid2 = empty_combined.add_cards(
+            **init_dict_combined,
+            inplace=True
+        )
+        card1c = empty_combined.loc[cid1]
+        card2c = empty_combined.loc[cid2]
+
+        self.assertDictEqual(init_dict1, self._cards_dict(card1))
+        self.assertDictEqual(init_dict2, self._cards_dict(card2))
+        self.assertDictEqual(init_dict1, self._cards_dict(card1c))
+        self.assertDictEqual(init_dict2, self._cards_dict(card2c))
+
+        self.assertEqual(len(empty), 2)
+        self.assertEqual(len(empty_combined), 2)
 
     def test_new_cards_vs_new_card(self):
+        # Also done in test_new_card_fully_specified
+
         empty = AnkiDF.cards(self.db_path, empty=True)
         empty2 = AnkiDF.cards(self.db_path, empty=True)
 
