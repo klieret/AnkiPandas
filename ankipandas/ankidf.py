@@ -29,7 +29,7 @@ class AnkiDataFrame(pd.DataFrame):
     #: Additional attributes of a :class:`AnkiDataFrame` that a normal
     #: :class:`pandas.DataFrame` does not posess. These will be copied in the
     #: constructor.
-    _attributes = ("db", "db_path", "_anki_table", "fields_as_columns_prefix",
+    _attributes = ("col", "_anki_table", "fields_as_columns_prefix",
                    "_fields_format", "_df_format")
 
     def __init__(self, *args, **kwargs):
@@ -53,12 +53,8 @@ class AnkiDataFrame(pd.DataFrame):
         # :attr:`._attributes`. Also all of them have to be initialized as None!
         # (see the code where we copy attributes).
 
-        #: Opened Anki database (:class:`sqlite3.Connection`)
-        self.db = None  # type: sqlite3.Connection
-
-        #: Path to Anki database that is opened as :attr:`.db`
-        #:   (:class:`pathlib.Path`)
-        self.db_path = None  # type: pathlib.Path
+        # todo: document
+        self.col = None
 
         #: Type of anki table: 'notes', 'cards' or 'revlog'. This corresponds to
         #: the meaning of the ID row.
@@ -105,108 +101,24 @@ class AnkiDataFrame(pd.DataFrame):
     # Constructors
     # ==========================================================================
 
-    def _load_db(self, path):
-        self.db = raw.load_db(path)
-        self.db_path = path
-
-    def _get_table(self, path, user, table, empty):
+    def _get_table(self, col, table, empty=False):
         self._anki_table = table
         self._df_format = "anki"
-
-        if not path:
-            path = self.db_path
-        self._load_db(ankipandas.paths.db_path_input(path, user=user))
+        self.col = col
 
         if empty:
             df = raw.get_empty_table(table)
         else:
-            df = raw.get_table(self.db, table)
+            df = raw.get_table(col.db, table)
 
         replace_df_inplace(self, df)
         self.normalize(inplace=True)
 
     @classmethod
-    def _table_constructor(cls, path, user, table, empty=False):
+    def init_with_table(cls, col, table, empty=False):
         new = AnkiDataFrame()
-        new._get_table(path, user, table, empty=empty)
+        new._get_table(col, table, empty=empty)
         return new
-
-    @classmethod
-    def notes(cls, path=None, user=None, empty=False):
-        """ Initialize :class:`AnkiDataFrame` with notes table loaded from Anki
-        database.
-
-        Args:
-            path: (Search) path to database see
-                :py:func:`~ankipandas.paths.db_path_input` for more
-                information.
-            user: Anki user name. See
-                :py:func:`~ankipandas.paths.db_path_input` for more
-                information.
-            empty: Return empty table.
-
-        Example:
-
-        .. code-block:: python
-
-            import ankipandas
-            notes = ankipandas.AnkiDataFrame.notes()
-
-        """
-        return cls._table_constructor(path, user, "notes", empty=empty)
-
-    @classmethod
-    def cards(cls, path=None, user=None, empty=False):
-        """ Initialize :class:`AnkiDataFrame` with cards table loaded from Anki
-        database.
-
-        Args:
-            path: (Search) path to database see
-                :func:`~ankipandas.paths.db_path_input` for more
-                information.
-            user: Anki user name. See
-                :func:`~ankipandas.paths.db_path_input` for more
-                information.
-            empty: Return empty table.
-
-        Example:
-
-        .. code-block:: python
-
-            import ankipandas
-            cards = ankipandas.AnkiDataFrame.cards()
-
-        """
-        return cls._table_constructor(path, user, "cards", empty=empty)
-
-    @classmethod
-    def revs(cls, path=None, user=None, empty=False):
-        """ Initialize :class:`AnkiDataFrame` with review table loaded from Anki
-        database.
-
-        Args:
-            path: (Search) path to database see
-                :func:`~ankipandas.paths.db_path_input` for more
-                information.
-            user: Anki user name. See
-                :func:`~ankipandas.paths.db_path_input` for more
-                information.
-            empty: Return empty table.
-
-        Example:
-
-        .. code-block:: python
-
-            import ankipandas
-            revs = ankipandas.AnkiDataFrame.revs()
-
-        """
-        if empty and (path is not None or user is not None):
-            log.warning(
-                "When initialized with empty==True, no database is "
-                "initialized, so the path and user argument are ignored."
-            )
-        return cls._table_constructor(path, user, "revs", empty=empty)
 
     # Fixes
     # ==========================================================================
@@ -257,6 +169,23 @@ class AnkiDataFrame(pd.DataFrame):
                 "raw=True option when loading? You can try switching to the "
                 "required format using the normalize() method."
             )
+
+    # Properties
+    # ==========================================================================
+
+    # todo: remove?
+    @property
+    def db(self):
+        """Opened Anki database (:class:`sqlite3.Connection`)"""
+        return self.col.db
+
+    # todo: remove
+    @property
+    def db_path(self):
+        """ Path to Anki database that is opened as :attr:`.db`
+        (:class:`pathlib.Path`)
+        """
+        return self.col.path
 
     # IDs
     # ==========================================================================
@@ -482,7 +411,7 @@ class AnkiDataFrame(pd.DataFrame):
             self["nid"] = self.nid
         return ankipandas.util.dataframe.merge_dfs(
             df=self,
-            df_add=AnkiDataFrame.notes(self.db_path),
+            df_add=self.col.notes(),
             id_df="nid",
             id_add="nid",
             inplace=inplace,
@@ -522,7 +451,7 @@ class AnkiDataFrame(pd.DataFrame):
         self._check_our_format()
         return ankipandas.util.dataframe.merge_dfs(
             df=self,
-            df_add=AnkiDataFrame.cards(self.db_path),
+            df_add=self.col.cards(),
             id_df="cid",
             inplace=inplace,
             columns=columns,
@@ -850,9 +779,7 @@ class AnkiDataFrame(pd.DataFrame):
             self._check_our_format()
 
         if other is None:
-            other = self._table_constructor(
-                self.db_path, None, self._anki_table
-            )
+            other = self.init_with_table(col=self.col, table=self._anki_table)
 
         other_nids = set(other.index)
         inters = set(self.index).intersection(other_nids)
@@ -885,9 +812,7 @@ class AnkiDataFrame(pd.DataFrame):
             are considered to be modified as well.
         """
         if other is None:
-            other = self._table_constructor(
-                self.db_path, None, self._anki_table
-            )
+            other = self.init_with_table(col=self.col, table=self._anki_table)
         cols = [c for c in self.columns if c in other.columns]
         other_nids = set(other.index)
         inters = set(self.index).intersection(other_nids)

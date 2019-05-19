@@ -22,30 +22,6 @@ class TestRawRead(unittest.TestCase):
     def tearDown(self):
         close_db(self.db)
 
-    def test_cards(self):
-        cards = AnkiDF.cards(self.db_path)
-        self.assertGreater(len(cards), 11)
-        self.assertEqual(
-            list(sorted(cards.columns)),
-            sorted(our_columns["cards"])
-        )
-
-    def test_notes(self):
-        notes = AnkiDF.notes(self.db_path)
-        self.assertGreater(len(notes), 6)
-        self.assertEqual(
-            list(sorted(notes.columns)),
-            sorted(our_columns["notes"])
-        )
-
-    def test_get_revs(self):
-        revs = AnkiDF.revs(self.db_path)
-        # todo assert length
-        self.assertEqual(
-            list(sorted(revs.columns)),
-            sorted(our_columns["revs"])
-        )
-
     def test_get_deck_info(self):
         get_deck_info(self.db)
         # todo
