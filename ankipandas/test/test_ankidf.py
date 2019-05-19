@@ -711,15 +711,76 @@ class TestAnkiDF(unittest.TestCase):
             cdue=card["cdue"]
         )
 
+    def _test_new_card_default_values(self, cards, **kwargs):
+        self.assertEqual(cards["cusn"].unique().tolist(), [-1])
+        self.assertEqual(cards["cqueue"].unique().tolist(), ["new"])
+        self.assertEqual(cards["ctype"].unique().tolist(), ["learning"])
+        self.assertEqual(cards["civl"].unique().tolist(), [0])
+        self.assertEqual(cards["cfactor"].unique().tolist(), [0])
+        self.assertEqual(cards["creps"].unique().tolist(), [0])
+        self.assertEqual(cards["cleft"].unique().tolist(), [0])
+        for key, value in kwargs.items():
+            self.assertEqual(cards[key].unique().tolist(), [value])
+
     def test_new_cards_default_values(self):
         empty = AnkiDF.cards(self.db_path, empty=True)
 
-        nid = 1555579352896
+        nid1 = 1555579352896
+        nid2 = 1557223191575
+        nids = [nid1, nid2]
         deck = list(raw.get_did2deck(self.db).values())[0]
 
-        cid = empty.add_card(nid, deck, inplace=True)
-        print("CID", cid)
-        # card = empty.loc[cid]
+        kwargs = dict(cdeck=deck)
+
+        with self.subTest(type="default values single note"):
+            self._test_new_card_default_values(
+                empty.add_card(nid1, deck), **kwargs
+            )
+        with self.subTest(type="default values single card"):
+            self._test_new_card_default_values(
+                empty.add_card(nid1, deck, cord=0), **kwargs, cord=0
+            )
+        with self.subTest(type="default values several notes"):
+            self._test_new_card_default_values(
+                empty.add_cards(nids, deck), **kwargs
+            )
+        with self.subTest(type="default values several notes one cord"):
+            self._test_new_card_default_values(
+                empty.add_cards(nids, deck, cord=0), **kwargs, cord=0
+            )
+
+    def test_new_cards_raises_missing_nid(self):
+        empty = AnkiDF.cards(self.db_path, empty=True)
+        nids = [1555579352896, -15, -16]
+        with self.assertRaises(ValueError) as context:
+            empty.add_cards(nids, "Default")
+        self.assertTrue("-15" in str(context.exception))
+        self.assertTrue("-16" in str(context.exception))
+        self.assertFalse("1555579352896" in str(context.exception))
+
+    def test_new_cards_raises_inconsistent_model(self):
+        empty = AnkiDF.cards(self.db_path, empty=True)
+        nids = [1555579352896, 1555579337683]
+        with self.assertRaises(ValueError) as context:
+            empty.add_cards(nids, "Default")
+        self.assertTrue("for notes of the same model" in str(context.exception))
+
+    def test_new_cards_raises_missing_deck(self):
+        empty = AnkiDF.cards(self.db_path, empty=True)
+        nids = [1555579352896]
+        deck = "not existing for sure"
+        with self.assertRaises(ValueError) as context:
+            empty.add_cards(nids, deck)
+        self.assertTrue(deck in str(context.exception))
+
+    def test_new_cards_raises_due_default_not_new(self):
+        empty = AnkiDF.cards(self.db_path, empty=True)
+        nids = [1555579352896]
+        deck = list(raw.get_did2deck(self.db).values())[0]
+        with self.assertRaises(ValueError) as context:
+            empty.add_cards(nids, deck, cqueue="learning")
+        print(context.exception)
+        self.assertTrue("Due date can only be set" in str(context.exception))
 
     def test_new_card_fully_specified(self):
         empty = AnkiDF.cards(self.db_path, empty=True)

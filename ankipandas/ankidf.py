@@ -1245,7 +1245,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     # todo: docstring (note: Always returns list!)
     # fixme: Needs microseconds?
-    def _get_id(self, others=()) -> List[int]:
+    def _get_id(self, others=()) -> int:
         """ Generate ID from timestamp and increment if it is already in use.
 
         .. warning::
@@ -1551,7 +1551,6 @@ class AnkiDataFrame(pd.DataFrame):
                 key: value for key, value in _columns.dtype_casts_all.items()
                 if key in self.columns
             })
-
 
         if not inplace:
             return self.append(add)
