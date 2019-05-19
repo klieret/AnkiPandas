@@ -1243,8 +1243,9 @@ class AnkiDataFrame(pd.DataFrame):
     # Append
     # ==========================================================================
 
+    # todo: docstring (note: Always returns list!)
     # fixme: Needs microseconds?
-    def _get_id(self, others=()) -> int:
+    def _get_id(self, others=()) -> List[int]:
         """ Generate ID from timestamp and increment if it is already in use.
 
         .. warning::
@@ -1274,7 +1275,7 @@ class AnkiDataFrame(pd.DataFrame):
             cdue: Optional[int] = None,
             inplace=False
     ):
-        ret = self.add_cards(
+        return self.add_cards(
             nid=[nid],
             cdeck=cdeck,
             cord=cord,
@@ -1290,12 +1291,6 @@ class AnkiDataFrame(pd.DataFrame):
             cdue=cdue,
             inplace=inplace
         )
-        if inplace:
-            # We get nids back
-            return ret[0]
-        else:
-            # We get new AnkiDataFrame back
-            return ret
 
     # todo: change order of arguments?
     # fixme: cord will be replaced
@@ -1443,32 +1438,6 @@ class AnkiDataFrame(pd.DataFrame):
                 )
             )
 
-        # --- Due ---
-
-        if cdue is None:
-            if set(cqueue) == {"new"}:
-                cdue = nid
-            else:
-                raise ValueError(
-                    "Due date can only be set automatically for cards of type"
-                    "/queue 'new', but you have types: {}".format(
-                        ", ".join(set(cqueue))
-                    )
-                )
-        elif is_list_like(cdue):
-            if len(cdue) != len(nid):
-                raise ValueError(
-                    "Number of cdue doesn't match number of "
-                    "notes for which cards should be added: {} "
-                    "instead of {}.".format(len(cmod), len(nid))
-                )
-        elif isinstance(cdue, int):
-            cdue = [cdue] * len(nid)
-        else:
-            raise ValueError(
-                "Invalid type of cdue specification: {}".format(type(cdue))
-            )
-
         # --- Rest ---
 
         def _handle_input(inpt, name, default, typ, options=None):
@@ -1525,6 +1494,33 @@ class AnkiDataFrame(pd.DataFrame):
         clapses = _handle_input(clapses, "clapses", 0, int)
         cleft = _handle_input(cleft, "cleft", 0, int)
 
+        # --- Due ---
+        # Careful: Has to come after cqueue is defined!
+
+        if cdue is None:
+            if set(cqueue) == {"new"}:
+                cdue = nid
+            else:
+                raise ValueError(
+                    "Due date can only be set automatically for cards of type"
+                    "/queue 'new', but you have types: {}".format(
+                        ", ".join(set(cqueue))
+                    )
+                )
+        elif is_list_like(cdue):
+            if len(cdue) != len(nid):
+                raise ValueError(
+                    "Number of cdue doesn't match number of "
+                    "notes for which cards should be added: {} "
+                    "instead of {}.".format(len(cmod), len(nid))
+                )
+        elif isinstance(cdue, int):
+            cdue = [cdue] * len(nid)
+        else:
+            raise ValueError(
+                "Invalid type of cdue specification: {}".format(type(cdue))
+            )
+
         # Now we need to decide on contents for EVERY column in the DF
         all_cids = self._get_ids(n=len(nid) * len(cord))
         add = pd.DataFrame(columns=self.columns, index=all_cids)
@@ -1549,11 +1545,13 @@ class AnkiDataFrame(pd.DataFrame):
             }
 
             for key, item in known_columns.items():
-                add.loc[:, key] = pd.Series(item, index=cid)
-            add = add.astype({
+                add.loc[cid, key] = pd.Series(item, index=cid)
+
+        add = add.astype({
                 key: value for key, value in _columns.dtype_casts_all.items()
                 if key in self.columns
             })
+
 
         if not inplace:
             return self.append(add)

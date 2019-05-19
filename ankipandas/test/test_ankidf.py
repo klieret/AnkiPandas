@@ -711,6 +711,16 @@ class TestAnkiDF(unittest.TestCase):
             cdue=card["cdue"]
         )
 
+    def test_new_cards_default_values(self):
+        empty = AnkiDF.cards(self.db_path, empty=True)
+
+        nid = 1555579352896
+        deck = list(raw.get_did2deck(self.db).values())[0]
+
+        cid = empty.add_card(nid, deck, inplace=True)
+        print("CID", cid)
+        # card = empty.loc[cid]
+
     def test_new_card_fully_specified(self):
         empty = AnkiDF.cards(self.db_path, empty=True)
         empty_combined = AnkiDF.cards(self.db_path, empty=True)
@@ -764,9 +774,9 @@ class TestAnkiDF(unittest.TestCase):
             cdue=[178, 1178]
         )
 
-        cid1 = empty.add_card(**init_dict1, inplace=True)
+        cid1 = empty.add_card(**init_dict1, inplace=True)[0]
         card1 = empty.loc[cid1]
-        cid2 = empty.add_card(**init_dict2, inplace=True)
+        cid2 = empty.add_card(**init_dict2, inplace=True)[0]
         card2 = empty.loc[cid2]
 
         cid1, cid2 = empty_combined.add_cards(
@@ -813,7 +823,7 @@ class TestAnkiDF(unittest.TestCase):
         cids = empty2.add_cards(**init_dict2, inplace=True)
         card2 = empty2.loc[cids[0]]
 
-        cid = empty.add_card(**init_dict1, inplace=True)
+        cid = empty.add_card(**init_dict1, inplace=True)[0]
         card1 = empty.loc[cid]
 
         self.assertDictEqual(self._cards_dict(card2), self._cards_dict(card1))
