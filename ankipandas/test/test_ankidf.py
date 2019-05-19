@@ -40,6 +40,10 @@ class TestAnkiDF(unittest.TestCase):
         }
         self.adfs = [self.notes, self.cards, self.revs]
 
+        self.empty_notes = AnkiDF.notes(self.db_path, empty=True)
+        self.empty_cards = AnkiDF.cards(self.db_path, empty=True)
+        self.empty_revs = AnkiDF.revs(self.db_path, empty=True)
+
     def nnotes(self):
         return self.notes.copy()
 
@@ -48,6 +52,15 @@ class TestAnkiDF(unittest.TestCase):
 
     def nrevs(self):
         return self.revs.copy()
+
+    def nenotes(self):
+        return self.empty_notes.copy()
+
+    def necards(self):
+        return self.empty_cards.copy()
+
+    def nerevs(self):
+        return self.empty_revs.copy()
 
     def ntable(self, table):
         if table == "notes":
@@ -723,7 +736,7 @@ class TestAnkiDF(unittest.TestCase):
             self.assertEqual(cards[key].unique().tolist(), [value])
 
     def test_new_cards_default_values(self):
-        empty = AnkiDF.cards(self.db_path, empty=True)
+        empty = self.necards()
 
         nid1 = 1555579352896
         nid2 = 1557223191575
@@ -750,7 +763,7 @@ class TestAnkiDF(unittest.TestCase):
             )
 
     def test_new_cards_raises_missing_nid(self):
-        empty = AnkiDF.cards(self.db_path, empty=True)
+        empty = self.necards()
         nids = [1555579352896, -15, -16]
         with self.assertRaises(ValueError) as context:
             empty.add_cards(nids, "Default")
@@ -759,14 +772,14 @@ class TestAnkiDF(unittest.TestCase):
         self.assertFalse("1555579352896" in str(context.exception))
 
     def test_new_cards_raises_inconsistent_model(self):
-        empty = AnkiDF.cards(self.db_path, empty=True)
+        empty = self.necards()
         nids = [1555579352896, 1555579337683]
         with self.assertRaises(ValueError) as context:
             empty.add_cards(nids, "Default")
         self.assertTrue("for notes of the same model" in str(context.exception))
 
     def test_new_cards_raises_missing_deck(self):
-        empty = AnkiDF.cards(self.db_path, empty=True)
+        empty = self.necards()
         nids = [1555579352896]
         deck = "not existing for sure"
         with self.assertRaises(ValueError) as context:
@@ -774,7 +787,7 @@ class TestAnkiDF(unittest.TestCase):
         self.assertTrue(deck in str(context.exception))
 
     def test_new_cards_raises_due_default_not_new(self):
-        empty = AnkiDF.cards(self.db_path, empty=True)
+        empty = self.necards()
         nids = [1555579352896]
         deck = list(raw.get_did2deck(self.db).values())[0]
         with self.assertRaises(ValueError) as context:
@@ -783,8 +796,8 @@ class TestAnkiDF(unittest.TestCase):
         self.assertTrue("Due date can only be set" in str(context.exception))
 
     def test_new_card_fully_specified(self):
-        empty = AnkiDF.cards(self.db_path, empty=True)
-        empty_combined = AnkiDF.cards(self.db_path, empty=True)
+        empty = self.necards()
+        empty_combined = self.necards()
 
         # Careful: Need notes of the same model!
         nid1 = 1555579352896
@@ -858,8 +871,8 @@ class TestAnkiDF(unittest.TestCase):
     def test_new_cards_vs_new_card(self):
         # Also done in test_new_card_fully_specified
 
-        empty = AnkiDF.cards(self.db_path, empty=True)
-        empty2 = AnkiDF.cards(self.db_path, empty=True)
+        empty = self.necards()
+        empty2 = self.necards()
 
         nid = list(raw.get_nid2mid(self.db).keys())[0]
         deck = list(raw.get_did2deck(self.db).values())[0]
@@ -931,7 +944,7 @@ class TestAnkiDF(unittest.TestCase):
             )
 
     def test_new_notes_fields_as_columns(self):
-        empty = AnkiDF.notes(self.db_path, empty=True)
+        empty = self.nenotes()
         empty.add_notes(
             "Basic",
             [["field1", "field2"], ["field21", "field22"]],
@@ -943,7 +956,7 @@ class TestAnkiDF(unittest.TestCase):
             inplace=True
         )
 
-        empty2 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
+        empty2 = self.nenotes().fields_as_columns()
         empty2.add_notes(
             "Basic",
             [["field1", "field2"], ["field21", "field22"]],
@@ -972,7 +985,7 @@ class TestAnkiDF(unittest.TestCase):
         }
 
     def test_new_note_empty_fully_specified(self):
-        empty = AnkiDF.notes(self.db_path, empty=True)
+        empty = self.nenotes()
 
         init_dict = dict(
             nmodel="Basic",
@@ -1016,14 +1029,14 @@ class TestAnkiDF(unittest.TestCase):
         self.assertTrue(empty.equals(empty2))
 
     def test_new_note_raises_suplicate(self):
-        empty = AnkiDF.notes(self.db_path, empty=True)
+        empty = self.nenotes()
         empty.add_note("Basic", ["f1", "f2"], nid=10, inplace=True)
         self.assertEqual(len(empty), 1)
         with self.assertRaises(ValueError):
             empty.add_note("Basic", ["f3", "f4"], nid=10, inplace=True)
 
     def test_new_note_default_values(self):
-        empty = AnkiDF.notes(self.db_path)
+        empty = self.nenotes()
 
         init_dict = dict(
             nmodel="Basic",
@@ -1036,16 +1049,16 @@ class TestAnkiDF(unittest.TestCase):
         self.assertEqual(note["nflds"], init_dict["nflds"])
 
     def test_new_note_raises(self):
-        empty = AnkiDF.notes(self.db_path, empty=True)
+        empty = self.nenotes()
         with self.assertRaises(ValueError):
             empty.add_note("doesntexist", [])
         with self.assertRaises(ValueError):
             empty.add_note("Basic", ["1", "2", "3"])
 
     def test_new_notes_equivalent_field_specifications(self):
-        empty1 = AnkiDF.notes(self.db_path, empty=True)
-        empty2 = AnkiDF.notes(self.db_path, empty=True)
-        empty3 = AnkiDF.notes(self.db_path, empty=True)
+        empty1 = self.nenotes()
+        empty2 = self.nenotes()
+        empty3 = self.nenotes()
 
         empty1.add_notes(
             "Basic",
@@ -1072,9 +1085,9 @@ class TestAnkiDF(unittest.TestCase):
         self.assertListEqual(empty2["nflds"].tolist(), empty3["nflds"].tolist())
 
     def test_new_notes_equivalent_field_specifications_fields_as_columns(self):
-        empty1 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
-        empty2 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
-        empty3 = AnkiDF.notes(self.db_path, empty=True).fields_as_columns()
+        empty1 = self.nenotes().fields_as_columns()
+        empty2 = self.nenotes().fields_as_columns()
+        empty3 = self.nenotes().fields_as_columns()
 
         empty1.add_notes(
             "Basic",
