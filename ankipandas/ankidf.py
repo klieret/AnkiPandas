@@ -857,7 +857,7 @@ class AnkiDataFrame(pd.DataFrame):
         inters = set(self.index).intersection(other_nids)
         result = pd.Series(na, index=self.index)
         new_bools = np.any(
-            other[other.index.isin(inters)].values !=
+            other.loc[other.index.isin(inters), list(self.columns)].values !=
             self[self.index.isin(inters)].values,
             axis=1
         )
