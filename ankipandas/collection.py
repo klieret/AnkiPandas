@@ -24,9 +24,39 @@ class Collection(object):
         #: Opened Anki database (:class:`sqlite3.Connection`)
         self.db = raw.load_db(self._working_path)
 
-        self.notes = AnkiDataFrame.init_with_table(self, "notes")
-        self.cards = AnkiDataFrame.init_with_table(self, "cards")
-        self.revs = AnkiDataFrame.init_with_table(self, "revs")
+        self._notes = None
+        self._cards = None
+        self._revs = None
+    
+    @property
+    def notes(self):
+        if self._notes is None:
+            self._notes = AnkiDataFrame.init_with_table(self, "notes")
+        return self._notes
+
+    @notes.setter
+    def notes(self, value):
+        self._notes = value
+    
+    @property
+    def cards(self):
+        if self._cards is None:
+            self._cards = AnkiDataFrame.init_with_table(self, "cards")
+        return self._cards
+
+    @cards.setter
+    def cards(self, value):
+        self._cards = value
+    
+    @property
+    def revs(self):
+        if self._revs is None:
+            self._revs = AnkiDataFrame.init_with_table(self, "revs")
+        return self._revs
+
+    @revs.setter
+    def revs(self, value):
+        self._revs = value
 
     def __del__(self):
         if self._working_dir is not None:
