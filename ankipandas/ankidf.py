@@ -779,7 +779,7 @@ class AnkiDataFrame(pd.DataFrame):
             self._check_our_format()
 
         if other is None:
-            other = self.init_with_table(col=self.col, table=self._anki_table)
+            other = self.col._get_original_item(self._anki_table)
 
         other_nids = set(other.index)
         inters = set(self.index).intersection(other_nids)
@@ -846,6 +846,7 @@ class AnkiDataFrame(pd.DataFrame):
         if other is not None:
             other_nids = set(other.index)
         else:
+            # todo [Perf] Use original_...
             other_nids = set(raw.get_ids(self.db, self._anki_table))
 
         new_indices = set(self.index) - other_nids
@@ -869,6 +870,7 @@ class AnkiDataFrame(pd.DataFrame):
         if other is not None:
             other_nids = set(other.index)
         else:
+            # todo [Perf] Use original_...
             other_nids = set(raw.get_ids(self.db, self._anki_table))
 
         deleted_indices = other_nids - set(self.index)
@@ -1144,6 +1146,37 @@ class AnkiDataFrame(pd.DataFrame):
 
     # Write
     # ==========================================================================
+
+    def summarize_changes(self, output="print") -> Optional[dict]:
+        """ Summarize changes that were made with respect to the table
+        as loaded from the database.
+
+        Args:
+            output: Output mode: 'print' (default: print)
+                or 'dict' (return as dictionary)
+
+        Returns:
+            None or dictionary
+        """
+        as_dict = {
+            "n": len(self),
+            "n_modified": sum(self.was_modified(na=False)),
+            "n_added": sum(self.was_added()),
+            "n_deleted": sum(self.was_deleted())
+        }
+        as_dict["has_changes"] = as_dict["n_modified"] or \
+                                 as_dict["n_added"] or \
+                                 as_dict["n_delted"]
+        if output == "print":
+            print("Total rows: {}".format(as_dict["n"]))
+            print("Compared to original version:")
+            print("Modified rows: {}".format(as_dict["n_modified"]))
+            print("Added rows: {}".format(as_dict["n_added"]))
+            print("Deleted rows: {}".format(as_dict["n_deleted"]))
+        elif output == "dict":
+            return as_dict
+        else:
+            raise ValueError("Invalid output setting: {}".format(output))
 
     def write(self, mode, backup_folder: Union[pathlib.PurePath, str] = None):
         """ Creates a backup of the database and then writes back the new
