@@ -1166,7 +1166,7 @@ class AnkiDataFrame(pd.DataFrame):
         }
         as_dict["has_changes"] = as_dict["n_modified"] or \
                                  as_dict["n_added"] or \
-                                 as_dict["n_delted"]
+                                 as_dict["n_deleted"]
         if output == "print":
             print("Total rows: {}".format(as_dict["n"]))
             print("Compared to original version:")

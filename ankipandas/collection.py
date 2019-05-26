@@ -25,9 +25,12 @@ class Collection(object):
         #: Opened Anki database (:class:`sqlite3.Connection`)
         self.db = raw.load_db(self._working_path)
 
-        self._notes = None  # type: Optional[AnkiDataFrame]
-        self._cards = None  # type: Optional[AnkiDataFrame]
-        self._revs = None  # type: Optional[AnkiDataFrame]
+        #: Should be accessed with _get_item!
+        self.__items = {
+            "notes": None,
+            "cards": None,
+            "revs": None
+        }  # type: Dict[str, AnkiDataFrame]
 
         #: Should be accessed with _get_original_item!
         self.__original_items = {
@@ -35,6 +38,7 @@ class Collection(object):
             "cards": None,
             "revs": None
         }  # type: Dict[str, AnkiDataFrame]
+
 
     def _get_original_item(self, item):
         r = self.__original_items[item]
@@ -44,39 +48,36 @@ class Collection(object):
                 self.__original_items[item] = r
         return r
 
+    def _get_item(self, item):
+        r = self.__items[item]
+        if r is None:
+            r = self._get_original_item(item)
+            self.__items[item] = r
+        return r
 
     @property
     def notes(self):
-        if self._notes is None:
-            self._notes = AnkiDataFrame.init_with_table(self, "notes")
-            self._original_notes = self._notes.copy()
-        return self._notes
+        return self._get_item("notes")
 
     @notes.setter
     def notes(self, value):
-        self._notes = value
+        self.__items["notes"] = value
     
     @property
     def cards(self):
-        if self._cards is None:
-            self._cards = AnkiDataFrame.init_with_table(self, "cards")
-            self._original_cards = self._cards.copy()
-        return self._cards
+        return self._get_item("cards")
 
     @cards.setter
     def cards(self, value):
-        self._cards = value
+        self.__items["cards"] = value
     
     @property
     def revs(self):
-        if self._revs is None:
-            self._revs = AnkiDataFrame.init_with_table(self, "revs")
-            self._original_revs = self._revs.copy()
-        return self._revs
+        return self._get_item("revs")
 
     @revs.setter
     def revs(self, value):
-        self._revs = value
+        self.__items["revs"] = value
 
     def __del__(self):
         if self._working_dir is not None:
@@ -107,19 +108,14 @@ class Collection(object):
         """
         if output == "dict":
             as_dict = {}
-            if self._notes is not None:
-                as_dict["notes"] = self._notes.summarize_changes(output="dict")
-            if self._cards is not None:
-                as_dict["notes"] = self._notes.summarize_changes(output="dict")
-            if self._revs is not None:
-                as_dict["notes"] = self._notes.summarize_changes(output="dict")
+            for key, value in self.__items.items():
+                if value is not None:
+                    as_dict[key] = value.summarize_changes(output="dict")
             return as_dict
         elif output == "print":
-            if self._notes is not None:
-                self._notes.summarize_changes()
-            if self._cards is not None:
-                self._cards.summarize_changes()
-            if self._revs is not None:
-                self._revs.summarize_changes()
+            for key, value in self.__items.items():
+                if value is not None:
+                    print("======== {} ========".format(key))
+                    value.summarize_changes()
         else:
             raise ValueError("Invalid output setting: {}".format(output))
