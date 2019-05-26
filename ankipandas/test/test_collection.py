@@ -23,7 +23,6 @@ class TestCollection(unittest.TestCase):
     # Summarize changes
     # ==========================================================================
 
-
     def test_summarize_changes_uninitialized(self):
         col = Collection(self.db_path)
         sc = col.summarize_changes(output="dict")

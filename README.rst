@@ -169,8 +169,8 @@ Add the ``difficult-japanese`` and ``marked`` tag to all notes that contain the 
 
     selection = col.notes.has_tags(["Japanese", "leech"])
     selection = selection.add_tag(["difficult-japanese", "marked"])
-    notes.update(selection)
-    notes.write()  # Overwrites your database after creating a backup!
+    col.notes.update(selection)
+    col.write()  # Overwrites your database after creating a backup!
 
 Set the ``language`` field to ``English`` for all notes of model ``LanguageModel`` that are tagged with ``English``:
 
@@ -178,7 +178,8 @@ Set the ``language`` field to ``English`` for all notes of model ``LanguageModel
 
     selection = col.notes.has_tag(["English"]).query("model=='LanguageModel'").fields_as_columns()
     selection["language"] = "English"
-    notes.update(selection).write()
+    col.notes.update(selection)
+    col.write()
 
 Move all cards tagged ``leech`` to the deck ``Leeches Only``:
 
@@ -186,7 +187,8 @@ Move all cards tagged ``leech`` to the deck ``Leeches Only``:
 
     selection = col.cards.has_tag("leech")
     selection["cdeck"] = "Leeches Only"
-    cards.update(selection).write()
+    col.cards.update(selection)
+    col.write()
 
 Troubleshooting
 ---------------
