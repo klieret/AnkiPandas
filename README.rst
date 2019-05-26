@@ -61,10 +61,14 @@ That means you can
 
 **Pros**
 
-* Easy installation via python package manager (independent of your Anki installation)
-* Just one line of code to get started
-* Bring together information about cards_, notes_, models_, decks_ and more in just one table!
-* `Fully documented <https://ankipandas.readthedocs.io/>`_
+* **Easy installation** via python package manager (independent of your Anki installation)
+* **Simple**: Just one line of code to get started
+* **Convenient**: Bring together information about cards_, notes_, models_, decks_ and more in just one table!
+* **Fully documented**: |fullyDocumented|_
+* **Well tested**: More than 100 unit tests to keep everything in check
+
+.. |fullyDocumented| replace:: Documentation on readthedocs
+.. _fullyDocumented: https://ankipandas.readthedocs.io/
 
 .. _cards: https://apps.ankiweb.net/docs/manual.html#cards
 .. _notes: https://apps.ankiweb.net/docs/manual.html#notes-&-fields
@@ -104,21 +108,23 @@ Starting up is as easy as this:
 
 .. code:: python
 
-    from ankipandas import AnkiDataFrame
+    from ankipandas import Collection
 
-    notes = AnkiDataFrame.notes()
+    col = Collection()
 
-And you have a dataframe containing all notes, with additional methods that make
-many things easy.
-Similarly, you can load cards or reviews using ``cards()`` or ``revs()``.
-If called without any argument ``notes()`` (and friends) tries to find
+And ``col.notes`` will be dataframe containing all notes, with additional
+methods that make many things easy.
+Similarly, you can access cards or reviews using ``col.cards`` or ``col.revs``.
+
+If called without any argument ``Collection()`` tries to find
 your Anki database by itself. However this might take some time.
-To make it easier, simply supply (part of) the path to the database and (if you have
-more than one user) your Anki user name, e.g.
-``AnkiDataFrame.cards(".local/share/Anki2/", user="User 1")`` on many Linux
+To make it easier, simply supply (part of) the path to the database and
+(if you have more than one user) your Anki user name, e.g.
+``Collection(".local/share/Anki2/", user="User 1")`` on many Linux
 installations.
 
-To get information about the interpretation of each column, use ``notes.help_cols()``.
+To get information about the interpretation of each column, use
+``notes.help_cols()``.
 
 Take a look at the documentation_ to find out more about more about the
 available methods!
@@ -134,22 +140,20 @@ Show a histogram of the number of reviews (repetitions) of each card for all dec
 
 .. code:: python
 
-    cards = AnkiDataFrame.cards()
-    cards.hist(column="creps", by="cdeck")
+    col.cards.hist(column="creps", by="cdeck")
 
 Show the number of leeches per deck as pie chart:
 
 .. code:: python
 
-    cards = AnkiDataFrame.cards()
-    selection = cards[cards.has_tag("leech")]
+    selection = col.cards[cards.has_tag("leech")]
     selection["cdeck"].value_counts().plot.pie()
 
 Find all notes of model ``MnemoticModel`` with empty ``Mnemotic`` field:
 
 .. code:: python
 
-    notes = AnkiDataFrame.notes().fields_as_columns()
+    notes = col.notes.fields_as_columns()
     notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
 
 Manipulations
@@ -160,8 +164,7 @@ Add the ``difficult-japanese`` and ``marked`` tag to all notes that contain the 
 
 .. code:: python
 
-    notes = AnkiDataFrame.notes()
-    selection = notes.has_tags(["Japanese", "leech"])
+    selection = col.notes.has_tags(["Japanese", "leech"])
     selection = selection.add_tag(["difficult-japanese", "marked"])
     notes.update(selection)
     notes.write()  # Overwrites your database after creating a backup!
@@ -170,8 +173,7 @@ Set the ``language`` field to ``English`` for all notes of model ``LanguageModel
 
 .. code:: python
 
-    notes = AnkiDataFrame.notes()
-    selection = notes.has_tag(["English"]).query("model=='LanguageModel'").fields_as_columns()
+    selection = col.notes.has_tag(["English"]).query("model=='LanguageModel'").fields_as_columns()
     selection["language"] = "English"
     notes.update(selection).write()
 
@@ -179,8 +181,7 @@ Move all cards tagged ``leech`` to the deck ``Leeches Only``:
 
 .. code:: python
 
-    cards = AnkiDataFrame.cards().merge_notes()
-    selection = cards.has_tag("leech")
+    selection = col.cards.has_tag("leech")
     selection["cdeck"] = "Leeches Only"
     cards.update(selection).write()
 
