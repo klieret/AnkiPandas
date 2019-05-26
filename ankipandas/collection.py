@@ -18,12 +18,8 @@ class Collection(object):
         #: Path to currently loaded database
         self.path = path
 
-        self._working_dir = tempfile.TemporaryDirectory()
-        self._working_path = Path(self._working_dir.name) / "collection.anki2"
-        shutil.copy2(str(self.path), str(self._working_path))
-
         #: Opened Anki database (:class:`sqlite3.Connection`)
-        self.db = raw.load_db(self._working_path)
+        self.db = raw.load_db(self.path)
 
         #: Should be accessed with _get_item!
         self.__items = {
@@ -38,7 +34,6 @@ class Collection(object):
             "cards": None,
             "revs": None
         }  # type: Dict[str, AnkiDataFrame]
-
 
     def _get_original_item(self, item):
         r = self.__original_items[item]
@@ -78,10 +73,6 @@ class Collection(object):
     @revs.setter
     def revs(self, value):
         self.__items["revs"] = value
-
-    def __del__(self):
-        if self._working_dir is not None:
-            self._working_dir.cleanup()
 
     def empty_notes(self):
         return AnkiDataFrame.init_with_table(self, "notes", empty=True)
