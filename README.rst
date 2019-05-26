@@ -27,7 +27,7 @@ Analyze and manipulate your Anki collection using pandas!
 
 .. start-body
 
-**NOTE: THIS PROJECT IS STILL AT AN EARLY DEVELOPMENT VERSION. TRY OUT WITH CARE.**
+**NOTE: THIS PROJECT IS STILL RATHER FRESH. TRY OUT WITH CARE AND GIVE FEEDBACK!**
 
 Description
 -----------
@@ -45,7 +45,7 @@ So what could be better than to bring both together?
 With ``AnkiPandas`` you can use ``pandas`` to easily analyze or manipulate your
 Anki flashcards.
 
-That means you can
+Using ``pandas`` allows you to easily
 
 * **Select**: Easily select arbitrary subsets of your cards, notes or reviews
   (`one of many introductions <https://medium.com/dunder-data/6fcd0170be9c>`_,
@@ -54,14 +54,17 @@ That means you can
   `seaborn`_ (statistical analysis) or `matplotlib`_
 * **Manipulate**: Apply fast bulk operations to the table (e.g. add tags, change decks, set field contents, suspend cards, ...)
   or iterate over the table and perform these manipulations step by step
+* **Import and Export**: Pandas can export and import to csv, MS Excel, HTML, JSON, ...
+  (`io documentation`_)
 
 .. _built in tools: https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html
 .. _matplotlib: https://matplotlib.org/
 .. _seaborn: https://seaborn.pydata.org/
+.. _io documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html
 
 **Pros**
 
-* **Easy installation** via python package manager (independent of your Anki installation)
+* **Easy installation**: Install via python package manager (independent of your Anki installation)
 * **Simple**: Just one line of code to get started
 * **Convenient**: Bring together information about cards_, notes_, models_, decks_ and more in just one table!
 * **Fully documented**: |fullyDocumented|_

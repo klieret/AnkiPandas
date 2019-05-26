@@ -78,7 +78,7 @@ author = 'Kilian Lieret'
 
 this_dir = pathlib.Path(__file__).resolve().parent
 with (this_dir / ".." / "ankipandas" / "version.txt").open() as vf:
-    version = vf.read()
+    version = vf.read().strip()
 print("Version as read from version.txt: '{}'".format(version))
 
 # The short X.Y version.

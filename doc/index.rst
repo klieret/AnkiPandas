@@ -15,6 +15,7 @@ line of code!
     :maxdepth: 2
     :caption: Module documentation
 
+    collection
     ankidf
     paths
     raw

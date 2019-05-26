@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 
 # std
-import collections
 import copy
-import sqlite3
 import time
 
 # 3rd
 import numpy as np
 import pandas as pd
 import pathlib
-from typing import Union, List, Dict, Optional, Iterable
+from typing import Union, List, Dict, Optional
 
 # ours
 import ankipandas.paths
@@ -643,7 +641,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         Examples:
 
-            .. code-block::
+            .. code-block:: python
 
                 # Get all tagged notes:
                 notes[notes.has_tag()]
@@ -683,7 +681,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         Examples:
 
-            .. code-block::
+            .. code-block:: python
 
                 # Get all notes tagged BOTH Japanese or Chinese
                 bilingual_notes = notes[notes.has_tags(["Japanese", "Chinese"])]

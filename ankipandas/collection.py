@@ -2,10 +2,10 @@
 
 # std
 from pathlib import Path
-import shutil
-import tempfile
 from typing import Optional, Dict
+import sqlite3
 
+# ours
 import ankipandas.paths
 import ankipandas.raw as raw
 from ankipandas.ankidf import AnkiDataFrame
@@ -13,13 +13,43 @@ from ankipandas.ankidf import AnkiDataFrame
 
 class Collection(object):
     def __init__(self, path, user=None):
+        """ Initialize :class:`~ankipandas.collection.Collection` object.
+
+        Args:
+            path: (Search) path to database see
+                :py:func:`~ankipandas.paths.db_path_input` for more
+                information.
+            user: Anki user name. See
+                :py:func:`~ankipandas.paths.db_path_input` for more
+                information.
+
+        Examples:
+
+        .. code-block:: python
+
+            from ankipandas import Collection
+
+            # Let ankipandas find the db for you
+            col = Collection()
+
+            # Let ankipandas find the db for this user (important if you have
+            # more than one user account in Anki)
+            col = Collection(user="User 1")
+
+            # Specify full path to Anki's database
+            col = Collection("/full/path/to/collection.anki2")
+
+            # Speficy partial path to Anki's database and specify user
+            col = Collection("/partial/path/to/collection", user="User 1")
+
+        """
         path = ankipandas.paths.db_path_input(path, user=user)
 
         #: Path to currently loaded database
-        self.path = path
+        self.path = path  # type: Path
 
         #: Opened Anki database (:class:`sqlite3.Connection`)
-        self.db = raw.load_db(self.path)
+        self.db = raw.load_db(self.path)  # type: sqlite3.Connection
 
         #: Should be accessed with _get_item!
         self.__items = {
@@ -51,7 +81,8 @@ class Collection(object):
         return r
 
     @property
-    def notes(self):
+    def notes(self) -> AnkiDataFrame:
+        """ Notes as :class:`ankipandas.ankidf.AnkiDataFrame`. """
         return self._get_item("notes")
 
     @notes.setter
@@ -59,7 +90,8 @@ class Collection(object):
         self.__items["notes"] = value
     
     @property
-    def cards(self):
+    def cards(self) -> AnkiDataFrame:
+        """ Cards as :class:`ankipandas.ankidf.AnkiDataFrame`. """
         return self._get_item("cards")
 
     @cards.setter
@@ -67,7 +99,8 @@ class Collection(object):
         self.__items["cards"] = value
     
     @property
-    def revs(self):
+    def revs(self) -> AnkiDataFrame:
+        """ Reviews as :class:`ankipandas.ankidf.AnkiDataFrame`. """
         return self._get_item("revs")
 
     @revs.setter
@@ -75,12 +108,18 @@ class Collection(object):
         self.__items["revs"] = value
 
     def empty_notes(self):
+        """ Similar :class:`ankipandas.ankidf.AnkiDataFrame`
+        to :attr:`notes`, but without any rows. """
         return AnkiDataFrame.init_with_table(self, "notes", empty=True)
 
     def empty_cards(self):
+        """ Similar :class:`ankipandas.ankidf.AnkiDataFrame`
+        to :attr:`cards`, but without any rows. """
         return AnkiDataFrame.init_with_table(self, "cards", empty=True)
 
     def empty_revs(self):
+        """ Similar :class:`ankipandas.ankidf.AnkiDataFrame`
+        to :attr:`revs`, but without any rows. """
         return AnkiDataFrame.init_with_table(self, "revs", empty=True)
 
     def summarize_changes(self, output="print") -> Optional[Dict[str, dict]]:

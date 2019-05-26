@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 
 """ These function implement the more direct interactions with the Anki
-database and provide basic functionality that is then used to implement
-:class:`ankipandas.ankidf.AnkiDataFrame`.
+database and provide basic functionality that is then used to implement the
+functionality in :class:`~ankipandas.collection.Collection`,
+:class:`ankipandas.ankidf.AnkiDataFrame` etc.
+
+.. warning::
+
+    Please only use these function if you know what you are doing, as they
+    come with less consistency checks as the functionality implemented in
+    :class:`~ankipandas.collection.Collection` and
+    :class:`ankipandas.ankidf.AnkiDataFrame`.
+    Also note that the functions here are considered to be internal, i.e. might
+    change without prior notice.
 """
 
 # std
