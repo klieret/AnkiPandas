@@ -1153,25 +1153,6 @@ class TestAnkiDF(unittest.TestCase):
             empty2[p + "Back"].tolist(), empty3[p + "Back"].tolist()
         )
 
-    # Write
-    # ==========================================================================
-
-    def test_read_write_identical(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            db_path = shutil.copy2(str(self.db_path), tmpdir)
-            (pathlib.Path(tmpdir) / "backups").mkdir()
-            for table in self.table2adf:
-                with self.subTest(table=table):
-                    adf = AnkiDF.init_with_table(
-                        Collection(db_path), table=table
-                    )
-                    adf.write("update")
-                    adf_reloaded = AnkiDF.init_with_table(
-                        Collection(db_path), table=table
-                    )
-                    adf_old = AnkiDF.init_with_table(self.col, table=table)
-                    self.assertTrue(adf_reloaded.equals(adf_old))
-
     # Help
     # ==========================================================================
 

@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 # std
-from pathlib import Path
-from typing import Optional, Dict
+from pathlib import Path, PurePath
+from typing import Optional, Dict, Union
 import sqlite3
 
 # ours
 import ankipandas.paths
 import ankipandas.raw as raw
 from ankipandas.ankidf import AnkiDataFrame
+from ankipandas.util.log import log
 
 
 class Collection(object):
@@ -149,3 +150,78 @@ class Collection(object):
                     value.summarize_changes()
         else:
             raise ValueError("Invalid output setting: {}".format(output))
+
+    def write(self, modify=False, add=False, delete=False,
+              backup_folder: Union[PurePath, str] = None):
+        """ Creates a backup of the database and then writes back the new
+        data.
+
+        .. danger::
+
+            The switches ``modify``, ``add`` and ``delete`` will run additional
+            cross-checks, but do not rely on them to 100%!
+
+        .. warning::
+
+            It is recommended to run :meth:`summarize_changes` before to check
+            whether the changes match your expectation.
+
+        .. note::
+
+            Please make sure to thoroughly check your collection in Anki after
+            every write process!
+
+        Args:
+            modify: Allow modification of existing items (notes, cards, etc.)
+            add: Allow adding of new items (notes, cards, etc.)
+            delete: Allow deletion of items (notes, cards, etc.)
+            backup_folder: Path to backup folder. If None is given, the backup
+                is created in the Anki backup directory (if found).
+
+        Returns:
+            None
+        """
+        if not modify and not add and not delete:
+            log.warning(
+                "Please set modify=True, add=True or delete=True, you're"
+                "literally not allowing me any modification at all."
+            )
+            return None
+        backup_path = ankipandas.paths.backup_db(
+            self.path, backup_folder=backup_folder
+        )
+        log.info("Backup created at {}.".format(backup_path.resolve()))
+        for key, value in self.__items.items():
+            if value is None:
+                log.debug("Write: Skipping {}, because it's None.".format(key))
+                continue
+            if key in ["notes", "cards", "revs"]:
+                if not delete:
+                    ndeleted = sum(value.was_deleted())
+                    if ndeleted:
+                        raise ValueError(
+                            "You specified delete=False, but {} rows of item "
+                            "{} would be deleted.".format(ndeleted, key)
+                        )
+                if not modify:
+                    nmodified = sum(value.was_modified(na=False))
+                    if nmodified:
+                        raise ValueError(
+                            "You specified modify=False, but {} rows of item "
+                            "{} would be modified.".format(nmodified, key)
+                        )
+                if not add:
+                    nadded = sum(value.was_added())
+                    if nadded:
+                        raise ValueError(
+                            "You specified add=False, but {} rows of item "
+                            "{} would be modified.".format(nadded, key)
+                        )
+
+                mode = "replace"
+                # todo: introduce additional cross checks!
+                if modify and not add and not delete:
+                    mode = "update"
+                if add and not modify and not delete:
+                    mode = "append"
+                raw.set_table(self.db, value.raw(), table=key, mode=mode)

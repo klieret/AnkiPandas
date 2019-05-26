@@ -1176,25 +1176,6 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             raise ValueError("Invalid output setting: {}".format(output))
 
-    def write(self, mode, backup_folder: Union[pathlib.PurePath, str] = None):
-        """ Creates a backup of the database and then writes back the new
-        data.
-
-        Args:
-            mode: ``update``: Update only existing entries, ``append``: Only
-                append new entries, but do not modify,
-                ``replace``: Append, modify and delete
-            backup_folder: Path to backup folder. If None is given, the backup
-                is created in the Anki backup directory (if found).
-
-        Returns:
-            None
-        """
-        backup_path = ankipandas.paths.backup_db(
-            self.db_path, backup_folder=backup_folder
-        )
-        log.info("Backup created at {}.".format(backup_path.resolve()))
-        raw.set_table(self.db, self.raw(), table=self._anki_table, mode=mode)
 
     # Append
     # ==========================================================================
