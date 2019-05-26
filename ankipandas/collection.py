@@ -51,7 +51,7 @@ class Collection(object):
     def _get_item(self, item):
         r = self.__items[item]
         if r is None:
-            r = self._get_original_item(item)
+            r = self._get_original_item(item).copy(True)
             self.__items[item] = r
         return r
 

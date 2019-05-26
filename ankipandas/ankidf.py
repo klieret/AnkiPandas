@@ -542,7 +542,7 @@ class AnkiDataFrame(pd.DataFrame):
         """
         self._check_our_format()
         if not inplace:
-            df = self.copy()  # deep?
+            df = self.copy(True)
             df.fields_as_list(
                 inplace=True,
             )
@@ -711,7 +711,7 @@ class AnkiDataFrame(pd.DataFrame):
         """
         self._check_our_format()
         if not inplace:
-            df = self.copy()  # deep?
+            df = self.copy(True)
             df.add_tag(tags, inplace=True)
             return df
 
@@ -739,7 +739,7 @@ class AnkiDataFrame(pd.DataFrame):
         """
         self._check_our_format()
         if not inplace:
-            df = self.copy()  # deep?
+            df = self.copy(True)
             df.remove_tag(tags, inplace=True)
             return df
 
@@ -918,7 +918,7 @@ class AnkiDataFrame(pd.DataFrame):
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
         if not inplace:
-            df = self.copy()
+            df = self.copy(True)
             df.normalize(inplace=True, force=force)
             return df
 
@@ -1013,7 +1013,7 @@ class AnkiDataFrame(pd.DataFrame):
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
         if not inplace:
-            df = self.copy()  # deep?
+            df = self.copy(True)
             df.raw(inplace=True, force=force)
             return df
 
@@ -1164,7 +1164,7 @@ class AnkiDataFrame(pd.DataFrame):
             "n_added": sum(self.was_added()),
             "n_deleted": sum(self.was_deleted())
         }
-        as_dict["has_changes"] = as_dict["n_modified"] or \
+        as_dict["has_changed"] = as_dict["n_modified"] or \
                                  as_dict["n_added"] or \
                                  as_dict["n_deleted"]
         if output == "print":
