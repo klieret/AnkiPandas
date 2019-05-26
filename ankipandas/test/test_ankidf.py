@@ -33,9 +33,9 @@ class TestAnkiDF(unittest.TestCase):
         self.col = Collection(self.db_path)
 
         # Do not modify this one!
-        self.notes = self.col.notes()
-        self.cards = self.col.cards()
-        self.revs = self.col.revs()
+        self.notes = self.col.notes
+        self.cards = self.col.cards
+        self.revs = self.col.revs
         self.table2adf = {
             "notes": self.notes,
             "cards": self.cards,
@@ -43,9 +43,9 @@ class TestAnkiDF(unittest.TestCase):
         }
         self.adfs = [self.notes, self.cards, self.revs]
 
-        self.empty_notes = self.col.notes(empty=True)
-        self.empty_cards = self.col.cards(empty=True)
-        self.empty_revs = self.col.revs(empty=True)
+        self.empty_notes = self.col.empty_notes()
+        self.empty_cards = self.col.empty_cards()
+        self.empty_revs = self.col.empty_revs()
 
     def nnotes(self):
         return self.notes.copy()
@@ -90,9 +90,9 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_empty(self):
         eadfs = {
-            "notes": self.col.notes(empty=True),
-            "cards": self.col.cards(empty=True),
-            "revs": self.col.revs(empty=True)
+            "notes": self.col.empty_notes(),
+            "cards": self.col.empty_cards(),
+            "revs": self.col.empty_revs()
         }
         for table, eadf in eadfs.items():
             self.assertEqual(len(eadf), 0)
@@ -1042,7 +1042,7 @@ class TestAnkiDF(unittest.TestCase):
         self.assertDictEqual(init_dict2, self._notes_dict(note))
         self.assertEqual(len(empty), 2)
 
-        empty2 = self.col.notes(empty=True)
+        empty2 = self.nenotes()
         empty2.add_notes(
             "Basic",
             [["field1", "field2"], ["field21", "field22"]],

@@ -411,7 +411,7 @@ class AnkiDataFrame(pd.DataFrame):
             self["nid"] = self.nid
         return ankipandas.util.dataframe.merge_dfs(
             df=self,
-            df_add=self.col.notes(),
+            df_add=self.col.notes,
             id_df="nid",
             id_add="nid",
             inplace=inplace,
@@ -451,7 +451,7 @@ class AnkiDataFrame(pd.DataFrame):
         self._check_our_format()
         return ankipandas.util.dataframe.merge_dfs(
             df=self,
-            df_add=self.col.cards(),
+            df_add=self.col.cards,
             id_df="cid",
             inplace=inplace,
             columns=columns,
