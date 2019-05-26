@@ -2,8 +2,9 @@
 
 # std
 from pathlib import Path, PurePath
-from typing import Optional, Dict, Union
 import sqlite3
+from typing import Optional, Dict, Union
+import time
 
 # ours
 import ankipandas.paths
@@ -225,3 +226,15 @@ class Collection(object):
                 if add and not modify and not delete:
                     mode = "append"
                 raw.set_table(self.db, value.raw(), table=key, mode=mode)
+        info = raw.get_info(self.db)
+        info["mod"] = int(time.time() * 1000)  # Modification time stamp
+        info["usn"] = -1  # Signals update needed
+        if self.__items["notes"] is not None:
+            missing_tags = list(
+                set(info["tags"].keys()) - \
+                set(self.__items["notes"].list_tags())
+            )
+            for tag in missing_tags:
+                # I'm assuming that this is the usn (update sequence number)
+                # of the tags
+                info["tags"][tag] = -1
