@@ -107,6 +107,8 @@ of this repository:
 Usage
 -----
 
+**Note: The initialization syntax will change slightly soon.**
+
 Starting up is as easy as this:
 
 .. code:: python

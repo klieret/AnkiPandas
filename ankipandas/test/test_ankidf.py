@@ -501,6 +501,7 @@ class TestAnkiDF(unittest.TestCase):
         for table in ["cards", "revs", "notes"]:
             with self.subTest(table=table):
                 adf = self.ntable(table)
+                adf["new_col"] = "blargh"
                 adf_old = adf.copy()
                 n = len(adf)
                 adf = adf.drop(adf.index)
@@ -533,6 +534,7 @@ class TestAnkiDF(unittest.TestCase):
         for table in ["cards", "revs", "notes"]:
             with self.subTest(table=table):
                 adf = self.ntable(table)
+                adf["new_col"] = "blargh"
                 adf_old = adf.copy()
                 adf[adf.columns[2]] = "changed!"
                 self.assertEqual(
