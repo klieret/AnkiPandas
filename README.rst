@@ -1,7 +1,7 @@
 Analyze and manipulate your Anki collection using pandas!
 =========================================================
 
-|Build Status| |Coveralls| |Doc Status| |Pypi package| |Chat| |License|
+|Build Status| |Coveralls| |Doc Status| |Pypi package| |Chat| |License| |Black|
 
 .. |Build Status| image:: https://travis-ci.org/klieret/AnkiPandas.svg?branch=master
    :target: https://travis-ci.org/klieret/AnkiPandas
@@ -24,6 +24,10 @@ Analyze and manipulate your Anki collection using pandas!
 .. |License| image:: https://img.shields.io/github/license/klieret/ankipandas.svg
    :target: https://github.com/klieret/ankipandas/blob/master/LICENSE.txt
    :alt: License
+
+.. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/python/black
+   :alt: Black
 
 .. start-body
 
