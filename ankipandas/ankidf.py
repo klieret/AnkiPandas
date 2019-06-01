@@ -171,19 +171,10 @@ class AnkiDataFrame(pd.DataFrame):
     # Properties
     # ==========================================================================
 
-    # todo: remove?
     @property
     def db(self):
         """Opened Anki database (:class:`sqlite3.Connection`)"""
         return self.col.db
-
-    # todo: remove
-    @property
-    def db_path(self):
-        """ Path to Anki database that is opened as :attr:`.db`
-        (:class:`pathlib.Path`)
-        """
-        return self.col.path
 
     # IDs
     # ==========================================================================
