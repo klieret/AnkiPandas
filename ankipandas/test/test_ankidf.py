@@ -10,8 +10,6 @@ Everything else is tested here.
 import pathlib
 import unittest
 import copy
-import shutil
-import tempfile
 
 # 3rd
 import numpy as np
