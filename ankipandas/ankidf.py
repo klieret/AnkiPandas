@@ -180,6 +180,19 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     @property
+    def id(self):
+        """ Return note/card/review ID as :class:`pandas.Series` of integers.
+        """
+        if self._anki_table == "notes":
+            return self.nid
+        elif self._anki_table == "cards":
+            return self.cid
+        elif self._anki_table == "revs":
+            return self.rid
+        else:
+            self._invalid_table()
+
+    @property
     def nid(self):
         """ Note ID as :class:`pandas.Series` of integers. """
         self._check_our_format()
@@ -749,7 +762,6 @@ class AnkiDataFrame(pd.DataFrame):
     # Compare
     # ==========================================================================
 
-    # todo: other comparison source
     def was_modified(self, other: pd.DataFrame = None, na=True,
                      _force=False):
         """ Compare with original table, show which rows have changed.
@@ -833,12 +845,11 @@ class AnkiDataFrame(pd.DataFrame):
             self._check_our_format()
 
         if other is not None:
-            other_nids = set(other.index)
+            other_ids = set(other.index)
         else:
-            # todo [Perf] Use original_...
-            other_nids = set(raw.get_ids(self.db, self._anki_table))
+            other_ids = set(self.col._get_original_item(self._anki_table).id)
 
-        new_indices = set(self.index) - other_nids
+        new_indices = set(self.index) - other_ids
         return self.index.isin(new_indices)
 
     def was_deleted(self, other: pd.DataFrame = None, _force=False):
@@ -857,12 +868,11 @@ class AnkiDataFrame(pd.DataFrame):
             self._check_our_format()
 
         if other is not None:
-            other_nids = set(other.index)
+            other_ids = set(other.index)
         else:
-            # todo [Perf] Use original_...
-            other_nids = set(raw.get_ids(self.db, self._anki_table))
+            other_ids = set(self.col._get_original_item(self._anki_table).id)
 
-        deleted_indices = other_nids - set(self.index)
+        deleted_indices = other_ids - set(self.index)
         return sorted(list(deleted_indices))
 
     # Update modification stamps and similar
