@@ -36,6 +36,7 @@ CACHE_SIZE = 32
 # Open/Close db
 # ==============================================================================
 
+
 def load_db(path: Union[str, pathlib.PurePath]) -> sqlite3.Connection:
     """
     Load database from path.
@@ -48,9 +49,7 @@ def load_db(path: Union[str, pathlib.PurePath]) -> sqlite3.Connection:
     """
     path = pathlib.Path(path)
     if not path.is_file():
-        raise FileNotFoundError(
-            "Not a file/file not found: {}".format(path)
-        )
+        raise FileNotFoundError("Not a file/file not found: {}".format(path))
     return sqlite3.connect(str(path.resolve()))
 
 
@@ -69,6 +68,7 @@ def close_db(db: sqlite3.Connection) -> None:
 # Basic getters
 # ==============================================================================
 
+
 def get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
     """ Get raw table from the Anki database.
 
@@ -81,8 +81,7 @@ def get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
     """
 
     df = pd.read_sql_query(
-        "SELECT * FROM {}".format(tables_ours2anki[table]),
-        db
+        "SELECT * FROM {}".format(tables_ours2anki[table]), db
     )
     return df
 
@@ -112,7 +111,7 @@ def get_info(db: sqlite3.Connection) -> dict:
         Nested dictionary.
     """
     _df = pd.read_sql_query("SELECT * FROM col ", db)
-    assert(len(_df) == 1)
+    assert len(_df) == 1
     ret = {}
     for col in _df.columns:
         val = _df[col][0]
@@ -126,13 +125,17 @@ def get_info(db: sqlite3.Connection) -> dict:
 # Basic Setters
 # ==============================================================================
 
-def _consolidate_tables(df: pd.DataFrame, df_old: pd.DataFrame, mode: str,
-                        id_column="id"):
+
+def _consolidate_tables(
+    df: pd.DataFrame, df_old: pd.DataFrame, mode: str, id_column="id"
+):
 
     if not list(df.columns) == list(df_old.columns):
-        raise ValueError("Columns do not match: Old: {}, New: {}".format(
-            ", ".join(df_old.columns), ", ".join(df.columns)
-        ))
+        raise ValueError(
+            "Columns do not match: Old: {}, New: {}".format(
+                ", ".join(df_old.columns), ", ".join(df.columns)
+            )
+        )
 
     old_indices = set(df_old[id_column])
     new_indices = set(df[id_column])
@@ -173,9 +176,13 @@ def _consolidate_tables(df: pd.DataFrame, df_old: pd.DataFrame, mode: str,
 
 
 # fixme: update mode also can delete things if we do not have all rows
-def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
-              mode: str, id_column="id",
-              ) -> None:
+def set_table(
+    db: sqlite3.Connection,
+    df: pd.DataFrame,
+    table: str,
+    mode: str,
+    id_column="id",
+) -> None:
     """
     Write table back to database.
 
@@ -190,8 +197,9 @@ def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
         None
     """
     df_old = get_table(db, table)
-    df_new = _consolidate_tables(df=df, df_old=df_old, mode=mode,
-                                 id_column=id_column)
+    df_new = _consolidate_tables(
+        df=df, df_old=df_old, mode=mode, id_column=id_column
+    )
     df_new.to_sql(tables_ours2anki[table], db, if_exists="replace", index=False)
 
 
@@ -200,6 +208,7 @@ def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
 
 # todo: Using decorators here causes the function signatures to be messed up
 #  with sphinx but oh well.
+
 
 @lru_cache(CACHE_SIZE)
 def get_ids(db: sqlite3.Connection, table: str) -> List[int]:
@@ -239,10 +248,7 @@ def get_did2deck(db: sqlite3.Connection) -> Dict[int, str]:
         Dictionary mapping
     """
     dinfo = get_deck_info(db)
-    _did2dec = {
-        int(did): dinfo[did]["name"]
-        for did in dinfo
-    }
+    _did2dec = {int(did): dinfo[did]["name"] for did in dinfo}
     return defaultdict(str, _did2dec)
 
 
@@ -257,10 +263,7 @@ def get_deck2did(db: sqlite3.Connection) -> Dict[str, int]:
         Dictionary mapping of deck id to deck name
     """
     dinfo = get_deck_info(db)
-    _did2dec = {
-        dinfo[did]["name"]: int(did)
-        for did in dinfo
-    }
+    _did2dec = {dinfo[did]["name"]: int(did) for did in dinfo}
     return defaultdict(int, _did2dec)
 
 
@@ -274,10 +277,7 @@ def get_model_info(db: sqlite3.Connection) -> dict:
     Returns:
         Nested dictionary
     """
-    return {
-        int(key): value
-        for key, value in get_info(db)["models"].items()
-    }
+    return {int(key): value for key, value in get_info(db)["models"].items()}
 
 
 @lru_cache(CACHE_SIZE)
@@ -291,10 +291,7 @@ def get_mid2model(db: sqlite3.Connection) -> Dict[int, str]:
         Dictionary mapping
     """
     minfo = get_model_info(db)
-    _mid2model = {
-        int(mid): minfo[mid]["name"]
-        for mid in minfo
-    }
+    _mid2model = {int(mid): minfo[mid]["name"] for mid in minfo}
     return defaultdict(str, _mid2model)
 
 
@@ -309,10 +306,7 @@ def get_model2mid(db: sqlite3.Connection) -> Dict[str, int]:
         Dictionary mapping
     """
     minfo = get_model_info(db)
-    _mid2model = {
-        minfo[mid]["name"]: int(mid)
-        for mid in minfo
-    }
+    _mid2model = {minfo[mid]["name"]: int(mid) for mid in minfo}
     return defaultdict(int, _mid2model)
 
 
@@ -320,10 +314,7 @@ def get_model2mid(db: sqlite3.Connection) -> Dict[str, int]:
 def get_mid2sortfield(db: sqlite3.Connection) -> Dict[int, int]:
     """ Mapping of model ID to index of sort field. """
     minfo = get_model_info(db)
-    _mid2sortfield = {
-        mid: minfo[mid]["sortf"]
-        for mid in minfo
-    }
+    _mid2sortfield = {mid: minfo[mid]["sortf"] for mid in minfo}
     return defaultdict(int, _mid2sortfield)
 
 
@@ -339,10 +330,7 @@ def get_mid2fields(db: sqlite3.Connection) -> Dict[int, List[str]]:
     """
     minfo = get_model_info(db)
     return {
-        int(mid): [
-            flds["name"] for flds in minfo[mid]["flds"]
-        ]
-        for mid in minfo
+        int(mid): [flds["name"] for flds in minfo[mid]["flds"]] for mid in minfo
     }
 
 

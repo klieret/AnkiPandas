@@ -9,6 +9,7 @@ from ankipandas.util.log import log, get_logger, set_log_level
 
 class TestLogging(unittest.TestCase):
     """ Only tests that things run without error. """
+
     def test_log(self):
         log.info("Test info")
         log.warning("Test warning")

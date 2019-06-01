@@ -57,14 +57,14 @@ class Collection(object):
         self.__items = {
             "notes": None,
             "cards": None,
-            "revs": None
+            "revs": None,
         }  # type: Dict[str, AnkiDataFrame]
 
         #: Should be accessed with _get_original_item!
         self.__original_items = {
             "notes": None,
             "cards": None,
-            "revs": None
+            "revs": None,
         }  # type: Dict[str, AnkiDataFrame]
 
     def _get_original_item(self, item):
@@ -90,7 +90,7 @@ class Collection(object):
     @notes.setter
     def notes(self, value):
         self.__items["notes"] = value
-    
+
     @property
     def cards(self) -> AnkiDataFrame:
         """ Cards as :class:`ankipandas.ankidf.AnkiDataFrame`. """
@@ -99,7 +99,7 @@ class Collection(object):
     @cards.setter
     def cards(self, value):
         self.__items["cards"] = value
-    
+
     @property
     def revs(self) -> AnkiDataFrame:
         """ Reviews as :class:`ankipandas.ankidf.AnkiDataFrame`. """
@@ -152,8 +152,13 @@ class Collection(object):
         else:
             raise ValueError("Invalid output setting: {}".format(output))
 
-    def write(self, modify=False, add=False, delete=False,
-              backup_folder: Union[PurePath, str] = None):
+    def write(
+        self,
+        modify=False,
+        add=False,
+        delete=False,
+        backup_folder: Union[PurePath, str] = None,
+    ):
         """ Creates a backup of the database and then writes back the new
         data.
 
@@ -230,8 +235,8 @@ class Collection(object):
         info["usn"] = -1  # Signals update needed
         if self.__items["notes"] is not None:
             missing_tags = list(
-                set(info["tags"].keys()) - \
-                set(self.__items["notes"].list_tags())
+                set(info["tags"].keys())
+                - set(self.__items["notes"].list_tags())
             )
             for tag in missing_tags:
                 # I'm assuming that this is the usn (update sequence number)

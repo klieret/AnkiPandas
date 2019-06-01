@@ -23,15 +23,14 @@ def get_logger():
 
     sh = colorlog.StreamHandler()
     log_colors = {
-        'DEBUG': 'cyan',
-        'INFO': 'green',
-        'WARNING': 'yellow',
-        'ERROR': 'red',
-        'CRITICAL': 'red'
+        "DEBUG": "cyan",
+        "INFO": "green",
+        "WARNING": "yellow",
+        "ERROR": "red",
+        "CRITICAL": "red",
     }
     formatter = colorlog.ColoredFormatter(
-        '%(log_color)s%(levelname)s: %(message)s',
-        log_colors=log_colors
+        "%(log_color)s%(levelname)s: %(message)s", log_colors=log_colors
     )
     sh.setFormatter(formatter)
     # Controlled by overall logger level

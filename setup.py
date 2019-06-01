@@ -10,6 +10,7 @@ you will need administrator rights).
 
 # std
 from distutils.core import setup
+
 # noinspection PyUnresolvedReferences
 import setuptools  # see below (1)
 from pathlib import Path
@@ -18,14 +19,12 @@ from pathlib import Path
 # Without this import, install_requires won't work.
 
 
-keywords = [
-    "anki",
-    "pandas",
-    "dataframe",
-]
+keywords = ["anki", "pandas", "dataframe"]
 
-description = "Load your anki database as a pandas DataFrame with just one " \
-              "line of code!"
+description = (
+    "Load your anki database as a pandas DataFrame with just one "
+    "line of code!"
+)
 
 this_dir = Path(__file__).resolve().parent
 
@@ -39,13 +38,14 @@ with (this_dir / "ankipandas" / "version.txt").open() as vf:
 
 with (this_dir / "requirements.txt").open() as rf:
     requirements = [
-        req.strip() for req in rf.readlines()
+        req.strip()
+        for req in rf.readlines()
         if req.strip() and not req.startswith("#")
     ]
 
 
 setup(
-    name='ankipandas',
+    name="ankipandas",
     version=version,
     packages=packages,
     url="https://github.com/klieret/ankipandas",
@@ -54,9 +54,7 @@ setup(
         "Documentation": "https://ankipandas.readthedocs.io/",
         "Source Code": "https://github.com/klieret/ankipandas/",
     },
-    package_data={
-        'ankipandas': ['anki_fields.csv', 'data/*'],
-    },
+    package_data={"ankipandas": ["anki_fields.csv", "data/*"]},
     install_requires=requirements,
     license="MIT",
     keywords=keywords,
@@ -69,6 +67,6 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Database",
         "Topic :: Education",
-        "Topic :: Utilities"
+        "Topic :: Utilities",
     ],
 )

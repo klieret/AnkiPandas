@@ -53,6 +53,7 @@ def _ents_to_txt(html):
             except KeyError:
                 pass
         return text  # leave as is
+
     return _reEnts.sub(fixup, html)
 
 

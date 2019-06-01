@@ -18,9 +18,13 @@ from ankipandas.util.log import log
 
 
 @lru_cache(32)
-def _find_db(search_path, maxdepth=6,
-             filename="collection.anki2",
-             break_on_first=False, user=None):
+def _find_db(
+    search_path,
+    maxdepth=6,
+    filename="collection.anki2",
+    break_on_first=False,
+    user=None,
+):
     """
     Like find_database but only for one search path at a time. Also doesn't
     raise any error, even if the search path doesn't exist.
@@ -67,11 +71,11 @@ def _find_db(search_path, maxdepth=6,
 
 @lru_cache(32)
 def find_db(
-        search_paths=None,
-        maxdepth=8,
-        filename="collection.anki2",
-        user=None,
-        break_on_first=True,
+    search_paths=None,
+    maxdepth=8,
+    filename="collection.anki2",
+    user=None,
+    break_on_first=True,
 ) -> pathlib.Path:
     """
     Find path to anki2 database.
@@ -104,7 +108,7 @@ def find_db(
             "~/.local/share/Anki2/",
             "~/Documents/Anki2",
             "~/Anki2/",
-            pathlib.Path.home()
+            pathlib.Path.home(),
         ]
     if break_on_first:
         log.warning(
@@ -123,8 +127,8 @@ def find_db(
                 maxdepth=maxdepth,
                 filename=filename,
                 user=user,
-                break_on_first=break_on_first
-            )
+                break_on_first=break_on_first,
+            ),
         }
         if break_on_first:
             if user is not None:
@@ -144,9 +148,7 @@ def find_db(
         if len(found.keys()) >= 2:
             raise ValueError(
                 "Found databases for more than one user: {}. Please specify "
-                "the user.".format(
-                    ", ".join(found.keys())
-                )
+                "the user.".format(", ".join(found.keys()))
             )
         elif len(found.keys()) == 0:
             raise ValueError(
@@ -158,8 +160,7 @@ def find_db(
     if len(found) >= 2:
         raise ValueError(
             "Found more than one database belonging to user {} at {}".format(
-                user,
-                ", ".join(found)
+                user, ", ".join(found)
             )
         )
     found = found[0]
@@ -168,8 +169,9 @@ def find_db(
 
 
 @lru_cache(32)
-def db_path_input(path: Union[str, pathlib.PurePath] = None,
-                  user: str = None) -> pathlib.Path:
+def db_path_input(
+    path: Union[str, pathlib.PurePath] = None, user: str = None
+) -> pathlib.Path:
     """ Helper function to interpret user input of path to database.
 
     1. If no path is given, we search through some default locations
@@ -202,13 +204,9 @@ def db_path_input(path: Union[str, pathlib.PurePath] = None,
             result = path
         else:
             result = find_db(
-                search_paths=(path,),
-                user=user,
-                break_on_first=False
+                search_paths=(path,), user=user, break_on_first=False
             )
-            log.info(
-                "Database found at '{}'.".format(result)
-            )
+            log.info("Database found at '{}'.".format(result))
     if result:
         return result
     else:
@@ -223,8 +221,8 @@ def db_backup_file_name() -> str:
 
 
 def get_anki_backup_folder(
-        path: Union[str, pathlib.PurePath],
-        nexist="raise") -> pathlib.Path:
+    path: Union[str, pathlib.PurePath], nexist="raise"
+) -> pathlib.Path:
     """ Return path to Anki backup folder.
 
     Args:
@@ -250,9 +248,10 @@ def get_anki_backup_folder(
     return backup_folder
 
 
-def backup_db(db_path: Union[str, pathlib.PurePath],
-              backup_folder: Union[str, pathlib.PurePath] = None) \
-        -> pathlib.Path:
+def backup_db(
+    db_path: Union[str, pathlib.PurePath],
+    backup_folder: Union[str, pathlib.PurePath] = None,
+) -> pathlib.Path:
     """
     Back up database file.
 
@@ -273,9 +272,7 @@ def backup_db(db_path: Union[str, pathlib.PurePath],
     else:
         backup_folder = get_anki_backup_folder(db_path, nexist="raise")
     if not db_path.is_file():
-        raise FileNotFoundError(
-            "Database does not seem to exist."
-        )
+        raise FileNotFoundError("Database does not seem to exist.")
     backup_path = backup_folder / db_backup_file_name()
     shutil.copy2(str(db_path), str(backup_path))
     return backup_path

@@ -28,10 +28,18 @@ def replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
 
 # todo: this might be made more elegant in the future for sure...
 # fixme: This removes items whenever it can't merge!
-def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
-              inplace=False, id_add="id", prepend="", replace=False,
-              prepend_clash_only=True, columns=None,
-              drop_columns=None):
+def merge_dfs(
+    df: pd.DataFrame,
+    df_add: pd.DataFrame,
+    id_df: str,
+    inplace=False,
+    id_add="id",
+    prepend="",
+    replace=False,
+    prepend_clash_only=True,
+    columns=None,
+    drop_columns=None,
+):
     """
     Merge information from two dataframes.
 
@@ -59,20 +67,16 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
     # better performing
     if columns:
         df_add = df_add.drop(
-            set(df_add.columns)-(set(columns) | {id_add}), axis=1
+            set(df_add.columns) - (set(columns) | {id_add}), axis=1
         )
     if drop_columns:
         df_add = df_add.drop(set(drop_columns) - {id_add}, axis=1)
     # Careful: Rename columns after dropping unwanted ones
     if prepend_clash_only:
         col_clash = set(df.columns) & set(df_add.columns)
-        rename_dict = {
-            col: prepend + col for col in col_clash
-        }
+        rename_dict = {col: prepend + col for col in col_clash}
     else:
-        rename_dict = {
-            col: prepend + col for col in df_add.columns
-        }
+        rename_dict = {col: prepend + col for col in df_add.columns}
     df_add = df_add.rename(columns=rename_dict)
     # Careful: Might have renamed id_add as well
     if id_add in rename_dict:
@@ -94,7 +98,7 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
 
     if id_df in df.columns:
         merge_kwargs["left_on"] = id_df
-    elif id_df== df.index.name:
+    elif id_df == df.index.name:
         merge_kwargs["left_index"] = True
     else:
         raise ValueError("'{}' is neither index nor column.".format(id_df))
@@ -103,8 +107,9 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
 
     # Now remove id_add if it was to be removed
     # Careful: 'in' doesn't work with None
-    if (columns and id_add not in columns) or \
-            (drop_columns and id_add in drop_columns):
+    if (columns and id_add not in columns) or (
+        drop_columns and id_add in drop_columns
+    ):
         df_merge.drop(id_add, axis=1, inplace=True)
 
     # Make sure we don't have two ID columns

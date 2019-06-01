@@ -27,8 +27,13 @@ class AnkiDataFrame(pd.DataFrame):
     #: Additional attributes of a :class:`AnkiDataFrame` that a normal
     #: :class:`pandas.DataFrame` does not posess. These will be copied in the
     #: constructor.
-    _attributes = ("col", "_anki_table", "fields_as_columns_prefix",
-                   "_fields_format", "_df_format")
+    _attributes = (
+        "col",
+        "_anki_table",
+        "fields_as_columns_prefix",
+        "_fields_format",
+        "_df_format",
+    )
 
     def __init__(self, *args, **kwargs):
         """ Initializes a blank :class:`AnkiDataFrame`.
@@ -76,10 +81,12 @@ class AnkiDataFrame(pd.DataFrame):
     def _constructor(self):
         """ This needs to be overriden so that any DataFrame operations do not
         return a :class:`pandas.DataFrame` but a :class:`AnkiDataFrame`."""
+
         def __constructor(*args, **kw):
             df = self.__class__(*args, **kw)
             self._copy_attrs_to(df)
             return df
+
         return __constructor
 
     def _copy_attrs_to(self, df):
@@ -289,7 +296,8 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             raise ValueError(
                 "Setting a review index 'rid' makes no sense in "
-                "tables other than 'rev'.")
+                "tables other than 'rev'."
+            )
 
     @property
     def mid(self):
@@ -317,7 +325,8 @@ class AnkiDataFrame(pd.DataFrame):
             log.warning(
                 "You can set an additional 'mid' column, but this will always"
                 " be overwritten with the information from the 'nmodel' "
-                "column.")
+                "column."
+            )
         self["mid"] = value
 
     @property
@@ -347,7 +356,8 @@ class AnkiDataFrame(pd.DataFrame):
             log.warning(
                 "You can set an additional deck ID 'did' column, but this "
                 "will always be overwritten with the information from the "
-                "'cdeck' column.")
+                "'cdeck' column."
+            )
         self["did"] = value
 
     @property
@@ -387,9 +397,14 @@ class AnkiDataFrame(pd.DataFrame):
     # Merge tables
     # ==========================================================================
 
-    def merge_notes(self, inplace=False, columns=None,
-                    drop_columns=None, prepend="n",
-                    prepend_clash_only=True):
+    def merge_notes(
+        self,
+        inplace=False,
+        columns=None,
+        drop_columns=None,
+        prepend="n",
+        prepend_clash_only=True,
+    ):
         """ Merge note table into existing dataframe.
 
         Args:
@@ -420,11 +435,17 @@ class AnkiDataFrame(pd.DataFrame):
             prepend=prepend,
             prepend_clash_only=prepend_clash_only,
             columns=columns,
-            drop_columns=drop_columns
+            drop_columns=drop_columns,
         )
 
-    def merge_cards(self, inplace=False, columns=None, drop_columns=None,
-                    prepend="c", prepend_clash_only=True):
+    def merge_cards(
+        self,
+        inplace=False,
+        columns=None,
+        drop_columns=None,
+        prepend="c",
+        prepend_clash_only=True,
+    ):
         """
         Merges information from the card table into the current dataframe.
 
@@ -460,7 +481,7 @@ class AnkiDataFrame(pd.DataFrame):
             drop_columns=drop_columns,
             id_add="cid",
             prepend=prepend,
-            prepend_clash_only=prepend_clash_only
+            prepend_clash_only=prepend_clash_only,
         )
 
     # Toggle format
@@ -485,9 +506,7 @@ class AnkiDataFrame(pd.DataFrame):
             return df
 
         if "nflds" not in self.columns:
-            raise ValueError(
-                "Could not find fields column 'nflds'."
-            )
+            raise ValueError("Could not find fields column 'nflds'.")
 
         if self._fields_format == "columns":
             log.warning(
@@ -523,11 +542,10 @@ class AnkiDataFrame(pd.DataFrame):
                     self[prefix + field] = ""
             for ifield, field in enumerate(field_names):
                 # todo: can we speed this up?
-                self.loc[self.mid == mid, [prefix + field]] = \
-                    pd.Series(
-                        fields[ifield].tolist(),
-                        index=self.loc[self.mid == mid].index
-                    )
+                self.loc[self.mid == mid, [prefix + field]] = pd.Series(
+                    fields[ifield].tolist(),
+                    index=self.loc[self.mid == mid].index,
+                )
         self.drop("nflds", axis=1, inplace=True)
         self._fields_format = "columns"
 
@@ -545,9 +563,7 @@ class AnkiDataFrame(pd.DataFrame):
         self._check_our_format()
         if not inplace:
             df = self.copy(True)
-            df.fields_as_list(
-                inplace=True,
-            )
+            df.fields_as_list(inplace=True)
             return df
 
         if self._fields_format == "list":
@@ -573,14 +589,11 @@ class AnkiDataFrame(pd.DataFrame):
         to_drop = []
         for mid in mids:
             fields = raw.get_mid2fields(self.db)[mid]
-            fields = [
-                self.fields_as_columns_prefix + field for field in fields
-            ]
-            self.loc[self.mid == mid, "nflds"] = \
-                pd.Series(
-                    self.loc[self.mid == mid, fields].values.tolist(),
-                    index=self.loc[self.mid == mid].index
-                )
+            fields = [self.fields_as_columns_prefix + field for field in fields]
+            self.loc[self.mid == mid, "nflds"] = pd.Series(
+                self.loc[self.mid == mid, fields].values.tolist(),
+                index=self.loc[self.mid == mid].index,
+            )
             # Careful: Do not delete the fields here yet, other models
             # might still use them
             to_drop.extend(fields)
@@ -605,9 +618,13 @@ class AnkiDataFrame(pd.DataFrame):
                 " or merge it into your table."
             )
         else:
-            return sorted(list(set(
-                [item for lst in self["ntags"].tolist() for item in lst]
-            )))
+            return sorted(
+                list(
+                    set(
+                        [item for lst in self["ntags"].tolist() for item in lst]
+                    )
+                )
+            )
 
     def list_decks(self) -> List[str]:
         """ Return sorted list of deck names in the current table. """
@@ -762,8 +779,7 @@ class AnkiDataFrame(pd.DataFrame):
     # Compare
     # ==========================================================================
 
-    def was_modified(self, other: pd.DataFrame = None, na=True,
-                     _force=False):
+    def was_modified(self, other: pd.DataFrame = None, na=True, _force=False):
         """ Compare with original table, show which rows have changed.
 
         Args:
@@ -786,18 +802,18 @@ class AnkiDataFrame(pd.DataFrame):
         inters = set(self.index).intersection(other_nids)
         result = pd.Series(na, index=self.index)
         new_bools = np.any(
-            other.loc[other.index.isin(inters), list(self.columns)].values !=
-            self[self.index.isin(inters)].values,
-            axis=1
+            other.loc[other.index.isin(inters), list(self.columns)].values
+            != self[self.index.isin(inters)].values,
+            axis=1,
         )
         result.loc[self.index.isin(inters)] = pd.Series(
-            new_bools,
-            index=result[self.index.isin(inters)].index
+            new_bools, index=result[self.index.isin(inters)].index
         )
         return result
 
-    def modified_columns(self, other: pd.DataFrame = None, _force=False,
-                         only=True):
+    def modified_columns(
+        self, other: pd.DataFrame = None, _force=False, only=True
+    ):
         """ Compare with original table, show which columns in which rows
         were modified.
 
@@ -825,7 +841,7 @@ class AnkiDataFrame(pd.DataFrame):
         return pd.DataFrame(
             self.loc[inters, cols].values != other.loc[inters, cols].values,
             index=self.loc[inters].index,
-            columns=cols
+            columns=cols,
         )
 
     def was_added(self, other: pd.DataFrame = None, _force=False):
@@ -882,7 +898,7 @@ class AnkiDataFrame(pd.DataFrame):
         """ Update usn (update sequence number) for all changed rows. """
         self.loc[
             self.was_modified(na=True, _force=True),
-            _columns.columns_anki2ours[self._anki_table]["usn"]
+            _columns.columns_anki2ours[self._anki_table]["usn"],
         ] = -1
 
     def _set_mod(self):
@@ -890,7 +906,7 @@ class AnkiDataFrame(pd.DataFrame):
         if self._anki_table in ["cards", "notes"]:
             self.loc[
                 self.was_modified(na=True, _force=True),
-                _columns.columns_anki2ours[self._anki_table]["mod"]
+                _columns.columns_anki2ours[self._anki_table]["mod"],
             ] = int(time.time())
 
     # todo: test
@@ -945,10 +961,7 @@ class AnkiDataFrame(pd.DataFrame):
         # Renames
         # -------
 
-        self.rename(
-            columns=_columns.columns_anki2ours[table],
-            inplace=True
-        )
+        self.rename(columns=_columns.columns_anki2ours[table], inplace=True)
 
         # Value maps
         # ----------
@@ -976,10 +989,9 @@ class AnkiDataFrame(pd.DataFrame):
 
         if table == "notes":
             # Tags as list, rather than string joined by space
-            self["ntags"] = \
-                self["ntags"].apply(
-                    lambda joined: [item for item in joined.split(" ") if item]
-                )
+            self["ntags"] = self["ntags"].apply(
+                lambda joined: [item for item in joined.split(" ") if item]
+            )
 
         # Fields
         # ------
@@ -992,8 +1004,7 @@ class AnkiDataFrame(pd.DataFrame):
         # Drop columns
         # ------------
 
-        drop_columns = \
-            set(self.columns) - set(_columns.our_columns[table])
+        drop_columns = set(self.columns) - set(_columns.our_columns[table])
         self.drop(drop_columns, axis=1, inplace=True)
 
         self._df_format = "ours"
@@ -1048,16 +1059,10 @@ class AnkiDataFrame(pd.DataFrame):
         self.reset_index(inplace=True, drop=False)
 
         if table == "cards":
-            self["did"] = self["cdeck"].map(
-                raw.get_deck2did(self.db)
-            )
-            self["odid"] = self["codeck"].map(
-                raw.get_deck2did(self.db)
-            )
+            self["did"] = self["cdeck"].map(raw.get_deck2did(self.db))
+            self["odid"] = self["codeck"].map(raw.get_deck2did(self.db))
         if table == "notes":
-            self["mid"] = self["nmodel"].map(
-                raw.get_model2mid(self.db)
-            )
+            self["mid"] = self["nmodel"].map(raw.get_model2mid(self.db))
 
         # Fields & Hashes
         # ---------------
@@ -1109,8 +1114,7 @@ class AnkiDataFrame(pd.DataFrame):
         # -------
 
         self.rename(
-            columns=invert_dict(_columns.columns_anki2ours[table]),
-            inplace=True
+            columns=invert_dict(_columns.columns_anki2ours[table]), inplace=True
         )
         self.rename(columns={"index": "id"}, inplace=True)
 
@@ -1134,9 +1138,7 @@ class AnkiDataFrame(pd.DataFrame):
         if len(self) == 0:
             new = pd.DataFrame(columns=_columns.anki_columns[table])
         else:
-            new = pd.DataFrame(
-                self[_columns.anki_columns[table]]
-            )
+            new = pd.DataFrame(self[_columns.anki_columns[table]])
         self.drop(self.columns, axis=1, inplace=True)
         for col in new.columns:
             self[col] = new[col]
@@ -1161,11 +1163,11 @@ class AnkiDataFrame(pd.DataFrame):
             "n": len(self),
             "n_modified": sum(self.was_modified(na=False)),
             "n_added": sum(self.was_added()),
-            "n_deleted": sum(self.was_deleted())
+            "n_deleted": sum(self.was_deleted()),
         }
-        as_dict["has_changed"] = as_dict["n_modified"] or \
-                                 as_dict["n_added"] or \
-                                 as_dict["n_deleted"]
+        as_dict["has_changed"] = (
+            as_dict["n_modified"] or as_dict["n_added"] or as_dict["n_deleted"]
+        )
         if output == "print":
             print("Total rows: {}".format(as_dict["n"]))
             print("Compared to original version:")
@@ -1188,27 +1190,27 @@ class AnkiDataFrame(pd.DataFrame):
             Do not call repeatedly without adding new IDs to index (might
             produce identical IDs). Rather use :meth:`_get_ids` instead.
         """
-        idx = int(1000*time.time())
+        idx = int(1000 * time.time())
         while idx in self.index or idx in others:
             idx += 1
         return idx
 
     def add_card(
-            self,
-            nid: int,
-            cdeck: str,
-            cord: Optional[Union[int, List[int]]] = None,
-            cmod: Optional[int] = None,
-            cusn: Optional[int] = None,
-            cqueue: Optional[str] = None,
-            ctype: Optional[str] = None,
-            civl: Optional[int] = None,
-            cfactor: Optional[int] = None,
-            creps: Optional[int] = None,
-            clapses: Optional[int] = None,
-            cleft: Optional[int] = None,
-            cdue: Optional[int] = None,
-            inplace=False
+        self,
+        nid: int,
+        cdeck: str,
+        cord: Optional[Union[int, List[int]]] = None,
+        cmod: Optional[int] = None,
+        cusn: Optional[int] = None,
+        cqueue: Optional[str] = None,
+        ctype: Optional[str] = None,
+        civl: Optional[int] = None,
+        cfactor: Optional[int] = None,
+        creps: Optional[int] = None,
+        clapses: Optional[int] = None,
+        cleft: Optional[int] = None,
+        cdue: Optional[int] = None,
+        inplace=False,
     ):
         return self.add_cards(
             nid=[nid],
@@ -1224,7 +1226,7 @@ class AnkiDataFrame(pd.DataFrame):
             clapses=clapses,
             cleft=cleft,
             cdue=cdue,
-            inplace=inplace
+            inplace=inplace,
         )
 
     # todo: change order of arguments?
@@ -1245,7 +1247,7 @@ class AnkiDataFrame(pd.DataFrame):
         clapses: Optional[Union[int, List[int]]] = None,
         cleft: Optional[Union[int, List[int]]] = None,
         cdue: Optional[Union[int, List[int]]] = None,
-        inplace=False
+        inplace=False,
     ):
         """
         Add cards belonging to notes of one model.
@@ -1360,12 +1362,10 @@ class AnkiDataFrame(pd.DataFrame):
                     "instead of {}.".format(len(cmod), len(nid))
                 )
         else:
-            raise ValueError("Unknown format for cdeck: {}".format(
-                type(cdeck))
-            )
-        unknown_decks = sorted(list(
-            set(cdeck) - set(raw.get_did2deck(self.db).values())
-        ))
+            raise ValueError("Unknown format for cdeck: {}".format(type(cdeck)))
+        unknown_decks = sorted(
+            list(set(cdeck) - set(raw.get_did2deck(self.db).values()))
+        )
         if unknown_decks:
             raise ValueError(
                 "The following decks do not seem to exist: {}".format(
@@ -1383,8 +1383,7 @@ class AnkiDataFrame(pd.DataFrame):
                     raise ValueError(
                         "Number of {} doesn't match number of "
                         "notes for which cards should be added: {} "
-                        "instead of {}.".format(
-                            name, len(cmod), len(nid))
+                        "instead of {}.".format(name, len(cmod), len(nid))
                     )
             elif isinstance(inpt, typ):
                 inpt = [inpt] * len(nid)
@@ -1399,10 +1398,7 @@ class AnkiDataFrame(pd.DataFrame):
                 if invalid:
                     raise ValueError(
                         "The following values are no valid "
-                        "entries for {}: {}".format(
-                            name,
-                            ", ".join(invalid)
-                        )
+                        "entries for {}: {}".format(name, ", ".join(invalid))
                     )
             return inpt
 
@@ -1413,15 +1409,22 @@ class AnkiDataFrame(pd.DataFrame):
             "cqueue",
             "new",
             str,
-            options=['sched buried', 'user buried', 'suspended', 'new',
-                     'learning', 'due', 'in learning']
+            options=[
+                "sched buried",
+                "user buried",
+                "suspended",
+                "new",
+                "learning",
+                "due",
+                "in learning",
+            ],
         )
         ctype = _handle_input(
             ctype,
             "ctype",
             "learning",
             str,
-            options=['learning', 'review', 'relearn', 'cram']
+            options=["learning", "review", "relearn", "cram"],
         )
         civl = _handle_input(civl, "civl", 0, int)
         cfactor = _handle_input(cfactor, "cfactor", 0, int)
@@ -1460,7 +1463,7 @@ class AnkiDataFrame(pd.DataFrame):
         all_cids = self._get_ids(n=len(nid) * len(cord))
         add = pd.DataFrame(columns=self.columns, index=all_cids)
         for icord, co in enumerate(cord):
-            cid = all_cids[icord*len(nid): (icord+1)*len(nid)]
+            cid = all_cids[icord * len(nid) : (icord + 1) * len(nid)]
             known_columns = {
                 "nid": nid,
                 "cdeck": cdeck,
@@ -1476,16 +1479,19 @@ class AnkiDataFrame(pd.DataFrame):
                 "clapses": clapses,
                 "cleft": cleft,
                 "codeck": [""] * len(nid),
-                "codue": [0] * len(nid)
+                "codue": [0] * len(nid),
             }
 
             for key, item in known_columns.items():
                 add.loc[cid, key] = pd.Series(item, index=cid)
 
-        add = add.astype({
-                key: value for key, value in _columns.dtype_casts_all.items()
+        add = add.astype(
+            {
+                key: value
+                for key, value in _columns.dtype_casts_all.items()
                 if key in self.columns
-            })
+            }
+        )
 
         if not inplace:
             return self.append(add)
@@ -1514,7 +1520,7 @@ class AnkiDataFrame(pd.DataFrame):
         nguid=None,
         nmod=None,
         nusn=None,
-        inplace=False
+        inplace=False,
     ):
         """ Add multiple new notes corresponding to one model.
 
@@ -1568,9 +1574,9 @@ class AnkiDataFrame(pd.DataFrame):
 
         if is_list_dict_like(nflds):
             n_notes = len(nflds)
-            specified_fields = set(flatten_list_list(
-                list(map(lambda d: list(d.keys()), nflds))
-            ))
+            specified_fields = set(
+                flatten_list_list(list(map(lambda d: list(d.keys()), nflds)))
+            )
             unknown_fields = sorted(list(specified_fields - set(field_keys)))
             if unknown_fields:
                 raise ValueError(
@@ -1588,8 +1594,7 @@ class AnkiDataFrame(pd.DataFrame):
                     "Wrong number of items for specification of field contents:"
                     " There are {} fields for your model type, but you"
                     " specified {} items.".format(
-                        len(field_keys),
-                        ", ".join(map(str, n_fields))
+                        len(field_keys), ", ".join(map(str, n_fields))
                     )
                 )
             field_key2field = {
@@ -1602,7 +1607,7 @@ class AnkiDataFrame(pd.DataFrame):
                 raise ValueError(
                     "Inconsistent number of "
                     "fields: {}".format(", ".join(map(str, lengths)))
-            )
+                )
             elif len(lengths) == 0:
                 raise ValueError("Are you trying to add zero notes?")
             n_notes = lengths[0]
@@ -1630,7 +1635,8 @@ class AnkiDataFrame(pd.DataFrame):
             if len(nid) != n_notes:
                 raise ValueError(
                     "Number of note IDs doesn't match number of notes to"
-                    " be added: {} instead of {}.".format(len(nid), n_notes))
+                    " be added: {} instead of {}.".format(len(nid), n_notes)
+                )
         else:
             nid = self._get_ids(n=n_notes)
 
@@ -1651,7 +1657,8 @@ class AnkiDataFrame(pd.DataFrame):
                 raise ValueError(
                     "Number of modification dates doesn't match number of "
                     "notes to  be added: {} "
-                    "instead of {}.".format(len(nmod), n_notes))
+                    "instead of {}.".format(len(nmod), n_notes)
+                )
         else:
             nmod = [int(time.time()) for _ in range(n_notes)]
 
@@ -1662,13 +1669,14 @@ class AnkiDataFrame(pd.DataFrame):
                 raise ValueError(
                     "Number of globally unique IDs (guid) doesn't match number "
                     "of notes to  be added: {} "
-                    "instead of {}.".format(len(nguid), n_notes))
+                    "instead of {}.".format(len(nguid), n_notes)
+                )
         else:
             nguid = [generate_guid() for _ in range(n_notes)]
 
-        existing_guids = sorted(list(
-            set(nguid).intersection(self["nguid"].unique())
-        ))
+        existing_guids = sorted(
+            list(set(nguid).intersection(self["nguid"].unique()))
+        )
         if existing_guids:
             raise ValueError(
                 "The following globally unique IDs (guid) are already"
@@ -1680,7 +1688,7 @@ class AnkiDataFrame(pd.DataFrame):
         if duplicate_guids:
             raise ValueError(
                 "The following gloally unique IDs (guid) are not unique: ",
-                ", ".join(map(str, duplicate_guids))
+                ", ".join(map(str, duplicate_guids)),
             )
 
         # --- Usn ---
@@ -1703,7 +1711,7 @@ class AnkiDataFrame(pd.DataFrame):
             "ntags": ntags,
             "nguid": nguid,
             "nmod": nmod,
-            "nusn": nusn
+            "nusn": nusn,
         }
 
         # More difficult: Field columns:
@@ -1711,9 +1719,7 @@ class AnkiDataFrame(pd.DataFrame):
             # Be careful with order!
             # Also need to flip dimensions
             known_columns["nflds"] = np.swapaxes(
-                [field_key2field[field_key] for field_key in field_keys],
-                0,
-                1
+                [field_key2field[field_key] for field_key in field_keys], 0, 1
             ).tolist()
         elif self._fields_format == "columns":
             # First we need to make sure that the df has the columns for our
@@ -1739,19 +1745,30 @@ class AnkiDataFrame(pd.DataFrame):
         add = pd.DataFrame(columns=self.columns, index=nid)
         for key, item in known_columns.items():
             add.loc[:, key] = pd.Series(item, index=nid)
-        add = add.astype({
-            key: value for key, value in _columns.dtype_casts_all.items()
-            if key in self.columns
-        })
+        add = add.astype(
+            {
+                key: value
+                for key, value in _columns.dtype_casts_all.items()
+                if key in self.columns
+            }
+        )
         if not inplace:
             return self.append(add)
         else:
             replace_df_inplace(self, self.append(add))
             return nid
 
-    def add_note(self, nmodel: str, nflds: Union[List[str], Dict[str, str]],
-                 ntags=None, nid=None, nguid=None, nmod=None, nusn=-1,
-                 inplace=False):
+    def add_note(
+        self,
+        nmodel: str,
+        nflds: Union[List[str], Dict[str, str]],
+        ntags=None,
+        nid=None,
+        nguid=None,
+        nmod=None,
+        nusn=-1,
+        inplace=False,
+    ):
         """ Add new note.
 
         .. note::
@@ -1813,7 +1830,7 @@ class AnkiDataFrame(pd.DataFrame):
             nguid=nguid,
             nmod=nmod,
             nusn=nusn,
-            inplace=inplace
+            inplace=inplace,
         )
         if inplace:
             # We get nids back
@@ -1858,8 +1875,9 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             print(h)
 
-    def help_cols(self, column='auto', table='all', ankicolumn='all') \
-            -> pd.DataFrame:
+    def help_cols(
+        self, column="auto", table="all", ankicolumn="all"
+    ) -> pd.DataFrame:
         """
         Show information about the columns and their interpretations. To
         get information about a single column, please use :meth:`.help_col`.
@@ -1885,17 +1903,17 @@ class AnkiDataFrame(pd.DataFrame):
         """
         help_path = pathlib.Path(__file__).parent / "data" / "anki_fields.csv"
         df = pd.read_csv(help_path)
-        if column == 'auto':
+        if column == "auto":
             column = list(self.columns)
-        if table is not 'all':
+        if table is not "all":
             if isinstance(table, str):
                 table = [table]
             df = df[df["Table"].isin(table)]
-        if column is not 'all':
+        if column is not "all":
             if isinstance(column, str):
                 column = [column]
             df = df[df["Column"].isin(column)]
-        if ankicolumn is not 'all':
+        if ankicolumn is not "all":
             if isinstance(ankicolumn, str):
                 ankicolumn = [ankicolumn]
             df = df[df["AnkiColumn"].isin(ankicolumn)]
@@ -1912,16 +1930,18 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             string if ret==True, else None
         """
-        h = "This is the help for the class AnkiDataFrame, a subclass of " \
-            "pandas.DataFrame. \n" \
-            "The full documentation of all class methods " \
-            "unique to AnkiDataFrame can be found on " \
-            "https://ankipandas.readthedocs.io. \n" \
-            "The inherited methods from " \
-            "pandas.DataFrame are documented at https://pandas.pydata.org/" \
-            "pandas-docs/stable/reference/api/pandas.DataFrame.html.\n" \
-            "To get information about the fields currently in this table, " \
+        h = (
+            "This is the help for the class AnkiDataFrame, a subclass of "
+            "pandas.DataFrame. \n"
+            "The full documentation of all class methods "
+            "unique to AnkiDataFrame can be found on "
+            "https://ankipandas.readthedocs.io. \n"
+            "The inherited methods from "
+            "pandas.DataFrame are documented at https://pandas.pydata.org/"
+            "pandas-docs/stable/reference/api/pandas.DataFrame.html.\n"
+            "To get information about the fields currently in this table, "
             "please use the help_cols() method."
+        )
         if ret:
             return h
         else:

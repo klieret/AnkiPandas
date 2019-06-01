@@ -26,8 +26,12 @@ import ankipandas._columns as _columns
 
 class TestAnkiDF(unittest.TestCase):
     def setUp(self):
-        self.db_path = pathlib.Path(__file__).parent / "data" / \
-                       "few_basic_cards" / "collection.anki2"
+        self.db_path = (
+            pathlib.Path(__file__).parent
+            / "data"
+            / "few_basic_cards"
+            / "collection.anki2"
+        )
         self.db = raw.load_db(self.db_path)
 
         self.col = Collection(self.db_path)
@@ -39,7 +43,7 @@ class TestAnkiDF(unittest.TestCase):
         self.table2adf = {
             "notes": self.notes,
             "cards": self.cards,
-            "revs": self.revs
+            "revs": self.revs,
         }
         self.adfs = [self.notes, self.cards, self.revs]
 
@@ -79,7 +83,7 @@ class TestAnkiDF(unittest.TestCase):
         return {
             "notes": self.nnotes(),
             "cards": self.ncards(),
-            "revs": self.nrevs()
+            "revs": self.nrevs(),
         }
 
     def nadfs(self):
@@ -92,52 +96,45 @@ class TestAnkiDF(unittest.TestCase):
         eadfs = {
             "notes": self.col.empty_notes(),
             "cards": self.col.empty_cards(),
-            "revs": self.col.empty_revs()
+            "revs": self.col.empty_revs(),
         }
         for table, eadf in eadfs.items():
             self.assertEqual(len(eadf), 0)
             adf = self.table2adf[table]
             self.assertListEqual(
-                sorted(list(adf.columns)),
-                sorted(list(eadf.columns))
+                sorted(list(adf.columns)), sorted(list(eadf.columns))
             )
 
     def test_tags(self):
         self.assertListEqual(
             list(self.notes.query("index=='1555579337683'")["ntags"].values)[0],
-            ['other_test_tag']
+            ["other_test_tag"],
         )
         self.assertListEqual(
             list(self.notes.query("index=='1555579352896'")["ntags"].values)[0],
-            ['some_test_tag']
+            ["some_test_tag"],
         )
 
     def test_cards(self):
         cards = self.cards
         self.assertGreater(len(cards), 11)
         self.assertEqual(
-            list(sorted(cards.columns)),
-            sorted(our_columns["cards"])
+            list(sorted(cards.columns)), sorted(our_columns["cards"])
         )
 
     def test_notes(self):
         notes = self.notes
         self.assertGreater(len(notes), 6)
         self.assertEqual(
-            list(sorted(notes.columns)),
-            sorted(our_columns["notes"])
+            list(sorted(notes.columns)), sorted(our_columns["notes"])
         )
 
     def test_get_revs(self):
         revs = self.revs
         self.assertEqual(
-            list(sorted(revs.columns)),
-            sorted(our_columns["revs"])
+            list(sorted(revs.columns)), sorted(our_columns["revs"])
         )
-        self.assertGreater(
-            len(revs),
-            4
-        )
+        self.assertGreater(len(revs), 4)
 
     # Test merging
     # ==========================================================================
@@ -146,19 +143,21 @@ class TestAnkiDF(unittest.TestCase):
         merged = self.ncards().merge_notes()
         self.assertListEqual(
             sorted(list(merged.columns)),
-            sorted(list(
-                set(our_columns["cards"]) | set(our_columns["notes"])
-            ))
+            sorted(list(set(our_columns["cards"]) | set(our_columns["notes"]))),
         )
 
     def test_merge_notes_revs(self):
         merged = self.nrevs().merge_notes()
         self.assertListEqual(
             sorted(list(merged.columns)),
-            sorted(list(
-                # Note: 'nid' is not a notes column.
-                set(our_columns["revs"]) | set(our_columns["notes"]) | {"nid"}
-            ))
+            sorted(
+                list(
+                    # Note: 'nid' is not a notes column.
+                    set(our_columns["revs"])
+                    | set(our_columns["notes"])
+                    | {"nid"}
+                )
+            ),
         )
 
     def test_merge_notes_raises(self):
@@ -169,9 +168,7 @@ class TestAnkiDF(unittest.TestCase):
         merged = self.nrevs().merge_cards()
         self.assertListEqual(
             sorted(list(merged.columns)),
-            sorted(list(
-                set(our_columns["revs"]) | set(our_columns["cards"])
-            ))
+            sorted(list(set(our_columns["revs"]) | set(our_columns["cards"]))),
         )
 
     def test_merge_cards_raises(self):
@@ -187,46 +184,28 @@ class TestAnkiDF(unittest.TestCase):
     # --------------------------------------------------------------------------
 
     def test_nids_notes(self):
+        self.assertListEqual(list(self.notes.index), list(self.notes.nid))
         self.assertListEqual(
             list(self.notes.index),
-            list(self.notes.nid)
+            list(raw.get_table(self.db, "notes")["id"].unique()),
         )
-        self.assertListEqual(
-            list(self.notes.index),
-            list(raw.get_table(self.db, "notes")["id"].unique())
-        )
-        self.assertEqual(
-            len(self.notes.nid.unique()),
-            len(self.notes.nid)
-        )
+        self.assertEqual(len(self.notes.nid.unique()), len(self.notes.nid))
 
     def test_cids_cards(self):
+        self.assertListEqual(list(self.cards.index), list(self.cards.cid))
         self.assertListEqual(
             list(self.cards.index),
-            list(self.cards.cid)
+            list(raw.get_table(self.db, "cards")["id"].unique()),
         )
-        self.assertListEqual(
-            list(self.cards.index),
-            list(raw.get_table(self.db, "cards")["id"].unique())
-        )
-        self.assertEqual(
-            len(self.cards.cid.unique()),
-            len(self.cards.cid)
-        )
+        self.assertEqual(len(self.cards.cid.unique()), len(self.cards.cid))
 
     def test_rids_revs(self):
+        self.assertListEqual(list(self.revs.index), list(self.revs.rid))
         self.assertListEqual(
             list(self.revs.index),
-            list(self.revs.rid)
+            list(raw.get_table(self.db, "revs")["id"].unique()),
         )
-        self.assertListEqual(
-            list(self.revs.index),
-            list(raw.get_table(self.db, "revs")["id"].unique())
-        )
-        self.assertEqual(
-            len(self.revs.rid.unique()),
-            len(self.revs.rid)
-        )
+        self.assertEqual(len(self.revs.rid.unique()), len(self.revs.rid))
 
     # Slightly more elaborate cases
     # --------------------------------------------------------------------------
@@ -234,7 +213,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_nids_cards(self):
         self.assertListEqual(
             sorted(list(self.cards.nid.unique())),
-            sorted(list(self.notes.nid.unique()))
+            sorted(list(self.notes.nid.unique())),
         )
 
     def test_nids_revs(self):
@@ -264,7 +243,7 @@ class TestAnkiDF(unittest.TestCase):
         mids2s = {
             "notes": set(self.notes.mid),
             "cards": set(self.cards.mid),
-            "revs": set(self.revs.mid)
+            "revs": set(self.revs.mid),
         }
         mids = set(raw.get_mid2model(self.db).keys())
         for table, mids2 in mids2s.items():
@@ -272,10 +251,7 @@ class TestAnkiDF(unittest.TestCase):
                 self.assertTrue(mids2.issubset(mids))
 
     def test_dids(self):
-        did2s = {
-            "cards": set(self.cards.did),
-            "revs": set(self.revs.did)
-        }
+        did2s = {"cards": set(self.cards.did), "revs": set(self.revs.did)}
         dids = set(raw.get_did2deck(self.db).keys())
         for table, dids2 in did2s.items():
             with self.subTest(table=table):
@@ -289,14 +265,8 @@ class TestAnkiDF(unittest.TestCase):
         cols = our_columns["notes"].copy()
         cols.remove("nflds")
         prefix = notes.fields_as_columns_prefix
-        new_cols = [
-            prefix + item
-            for item in ["Front", "Back"]
-        ]
-        self.assertEqual(
-            sorted(list(notes.columns)),
-            sorted(cols + new_cols)
-        )
+        new_cols = [prefix + item for item in ["Front", "Back"]]
+        self.assertEqual(sorted(list(notes.columns)), sorted(cols + new_cols))
 
     def test_fields_as_list(self):
         # Add fields as column, remove original 'flds' column, then
@@ -305,13 +275,9 @@ class TestAnkiDF(unittest.TestCase):
         notes = self.nnotes()
         flds = copy.copy(notes["nflds"].values)
         notes = notes.fields_as_columns().fields_as_list()
-        self.assertEqual(
-            list(flds),
-            list(notes["nflds"].values)
-        )
+        self.assertEqual(list(flds), list(notes["nflds"].values))
         self.assertListEqual(
-            sorted(list(notes.columns)),
-            sorted(our_columns["notes"])
+            sorted(list(notes.columns)), sorted(our_columns["notes"])
         )
 
     # Convenience
@@ -319,17 +285,12 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_list_decks(self):
         decks = self.cards.list_decks()
-        self.assertTrue(
-            set(decks).issuperset({"Testing", "EnglishGerman"})
-        )
+        self.assertTrue(set(decks).issuperset({"Testing", "EnglishGerman"}))
 
     def test_list_models(self):
         models = self.notes.list_models()
         self.assertTrue(
-            set(models).issuperset({
-                'Basic',
-                'Basic (and reversed card)'
-            })
+            set(models).issuperset({"Basic", "Basic (and reversed card)"})
         )
 
     # Properties
@@ -369,101 +330,63 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_list_tags(self):
         tags = self.notes.list_tags()
-        self.assertTrue(
-            set(tags).issuperset(["adjective", "noun"])
-        )
+        self.assertTrue(set(tags).issuperset(["adjective", "noun"]))
 
     def test_remove_tags(self):
         notes = self.nnotes()
         notes = notes.remove_tag(None)
-        self.assertEqual(
-            list(set(map(tuple, notes["ntags"]))),
-            [()]
-        )
+        self.assertEqual(list(set(map(tuple, notes["ntags"]))), [()])
 
     def test_add_tags(self):
         notes = self.nnotes().remove_tag(None).add_tag("1145")
-        self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))),
-            [('1145', )]
-        )
+        self.assertListEqual(list(set(map(tuple, notes["ntags"]))), [("1145",)])
         notes.add_tag("abc", inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))),
-            [('1145', "abc")]
+            list(set(map(tuple, notes["ntags"]))), [("1145", "abc")]
         )
         notes.add_tag(["abc", "def"], inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))),
-            [('1145', "abc", "def")]
+            list(set(map(tuple, notes["ntags"]))), [("1145", "abc", "def")]
         )
         notes.add_tag([], inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))),
-            [('1145', "abc", "def")]
+            list(set(map(tuple, notes["ntags"]))), [("1145", "abc", "def")]
         )
 
     def test_has_tag(self):
         notes = self.nnotes().remove_tag(None).add_tag("1145")
+        self.assertListEqual(list(notes.has_tag("1145").unique()), [True])
+        self.assertListEqual(list(notes.has_tag("asdf").unique()), [False])
+        self.assertListEqual(list(notes.has_tag().unique()), [True])
         self.assertListEqual(
-            list(notes.has_tag("1145").unique()),
-            [True]
-        )
-        self.assertListEqual(
-            list(notes.has_tag("asdf").unique()),
-            [False]
-        )
-        self.assertListEqual(
-            list(notes.has_tag().unique()),
-            [True]
-        )
-        self.assertListEqual(
-            list(notes.has_tag(["asdf", "1145"]).unique()),
-            [True]
+            list(notes.has_tag(["asdf", "1145"]).unique()), [True]
         )
 
     def test_has_tag_natural(self):
         notes = self.notes
         self.assertListEqual(
             sorted(list(notes.has_tag(["some_test_tag"]).unique())),
-            [False, True]
+            [False, True],
         )
 
     def test_has_tags(self):
         notes = self.nnotes().remove_tag(None).add_tag("1145")
+        self.assertListEqual(list(notes.has_tags("1145").unique()), [True])
+        self.assertListEqual(list(notes.has_tags("asdf").unique()), [False])
+        self.assertListEqual(list(notes.has_tags().unique()), [True])
         self.assertListEqual(
-            list(notes.has_tags("1145").unique()),
-            [True]
-        )
-        self.assertListEqual(
-            list(notes.has_tags("asdf").unique()),
-            [False]
-        )
-        self.assertListEqual(
-            list(notes.has_tags().unique()),
-            [True]
-        )
-        self.assertListEqual(
-            list(notes.has_tags(["asdf", "1145"]).unique()),
-            [False]
+            list(notes.has_tags(["asdf", "1145"]).unique()), [False]
         )
         notes = notes.add_tag("asdf")
         self.assertListEqual(
-            list(notes.has_tags(["asdf", "1145"]).unique()),
-            [True]
+            list(notes.has_tags(["asdf", "1145"]).unique()), [True]
         )
 
     def test_remove_tag(self):
         notes = self.nnotes().add_tag(["1145", "asdf"])
         notes.remove_tag("1145", inplace=True)
-        self.assertListEqual(
-            list(notes.has_tag(["1145"]).unique()),
-            [False]
-        )
-        self.assertListEqual(
-            list(notes.has_tag(["asdf"]).unique()),
-            [True]
-        )
+        self.assertListEqual(list(notes.has_tag(["1145"]).unique()), [False])
+        self.assertListEqual(list(notes.has_tag(["asdf"]).unique()), [True])
 
     # Changes
     # ==========================================================================
@@ -472,30 +395,12 @@ class TestAnkiDF(unittest.TestCase):
         for table in ["cards", "revs", "notes"]:
             with self.subTest(table=table):
                 adf = self.table2adf[table]
-                self.assertEqual(
-                    np.sum(~adf.was_modified()),
-                    len(adf)
-                )
-                self.assertEqual(
-                    np.sum(~adf.was_added()),
-                    len(adf)
-                )
-                self.assertEqual(
-                    len(adf.was_deleted()),
-                    0
-                )
-                self.assertEqual(
-                    np.sum(~adf.was_modified(adf)),
-                    len(adf)
-                )
-                self.assertEqual(
-                    np.sum(~adf.was_added(adf)),
-                    len(adf)
-                )
-                self.assertEqual(
-                    len(adf.was_deleted(adf)),
-                    0
-                )
+                self.assertEqual(np.sum(~adf.was_modified()), len(adf))
+                self.assertEqual(np.sum(~adf.was_added()), len(adf))
+                self.assertEqual(len(adf.was_deleted()), 0)
+                self.assertEqual(np.sum(~adf.was_modified(adf)), len(adf))
+                self.assertEqual(np.sum(~adf.was_added(adf)), len(adf))
+                self.assertEqual(len(adf.was_deleted(adf)), 0)
 
     def test_show_modification_empty(self):
         for table in ["cards", "revs", "notes"]:
@@ -505,30 +410,12 @@ class TestAnkiDF(unittest.TestCase):
                 adf_old = adf.copy()
                 n = len(adf)
                 adf = adf.drop(adf.index)
-                self.assertEqual(
-                    np.sum(~adf.was_modified()),
-                    0
-                )
-                self.assertEqual(
-                    np.sum(~adf.was_added()),
-                    0
-                )
-                self.assertEqual(
-                    len(adf.was_deleted()),
-                    n
-                )
-                self.assertEqual(
-                    np.sum(~adf.was_modified(adf_old)),
-                    0
-                )
-                self.assertEqual(
-                    np.sum(~adf.was_added(adf_old)),
-                    0
-                )
-                self.assertEqual(
-                    len(adf.was_deleted(adf_old)),
-                    n
-                )
+                self.assertEqual(np.sum(~adf.was_modified()), 0)
+                self.assertEqual(np.sum(~adf.was_added()), 0)
+                self.assertEqual(len(adf.was_deleted()), n)
+                self.assertEqual(np.sum(~adf.was_modified(adf_old)), 0)
+                self.assertEqual(np.sum(~adf.was_added(adf_old)), 0)
+                self.assertEqual(len(adf.was_deleted(adf_old)), n)
 
     def test_show_modification_all_modified(self):
         for table in ["cards", "revs", "notes"]:
@@ -537,58 +424,36 @@ class TestAnkiDF(unittest.TestCase):
                 adf["new_col"] = "blargh"
                 adf_old = adf.copy()
                 adf[adf.columns[2]] = "changed!"
-                self.assertEqual(
-                    np.sum(~adf.was_modified()),
-                    0
-                )
-                self.assertEqual(
-                    np.sum(adf.was_added()),
-                    0
-                )
-                self.assertEqual(
-                    len(adf.was_deleted()),
-                    0
-                )
+                self.assertEqual(np.sum(~adf.was_modified()), 0)
+                self.assertEqual(np.sum(adf.was_added()), 0)
+                self.assertEqual(len(adf.was_deleted()), 0)
                 # ----
+                self.assertEqual(len(adf.modified_columns(only=True)), len(adf))
                 self.assertEqual(
-                    len(adf.modified_columns(only=True)),
-                    len(adf)
-                )
-                self.assertEqual(
-                    len(adf.modified_columns(only=False)),
-                    len(adf)
+                    len(adf.modified_columns(only=False)), len(adf)
                 )
                 self.assertEqual(
                     list(adf.modified_columns().loc[adf.index[0]]).index(True),
-                    2
+                    2,
                 )
                 # ----
-                self.assertEqual(
-                    np.sum(~adf.was_modified(adf_old)),
-                    0
-                )
-                self.assertEqual(
-                    np.sum(adf.was_added(adf_old)),
-                    0
-                )
-                self.assertEqual(
-                    len(adf.was_deleted(adf_old)),
-                    0
-                )
+                self.assertEqual(np.sum(~adf.was_modified(adf_old)), 0)
+                self.assertEqual(np.sum(adf.was_added(adf_old)), 0)
+                self.assertEqual(len(adf.was_deleted(adf_old)), 0)
                 # ----
                 self.assertEqual(
                     len(adf.modified_columns(only=True, other=adf_old)),
-                    len(adf)
+                    len(adf),
                 )
                 self.assertEqual(
                     len(adf.modified_columns(only=False, other=adf_old)),
-                    len(adf)
+                    len(adf),
                 )
                 self.assertEqual(
                     list(
                         adf.modified_columns(other=adf_old).loc[adf.index[0]]
                     ).index(True),
-                    2
+                    2,
                 )
 
     def test_show_modification_some_modified(self):
@@ -597,66 +462,37 @@ class TestAnkiDF(unittest.TestCase):
                 adf = self.ntable(table)
                 adf_old = adf.copy()
                 adf.loc[adf.index[0], [adf.columns[2]]] = "changed!"
-                self.assertEqual(
-                    np.sum(adf.was_modified()),
-                    1
-                )
-                self.assertEqual(
-                    adf.was_modified().tolist()[0],
-                    True
-                )
-                self.assertEqual(
-                    np.sum(adf.was_added()),
-                    0
-                )
-                self.assertEqual(
-                    len(adf.was_deleted()),
-                    0
-                )
+                self.assertEqual(np.sum(adf.was_modified()), 1)
+                self.assertEqual(adf.was_modified().tolist()[0], True)
+                self.assertEqual(np.sum(adf.was_added()), 0)
+                self.assertEqual(len(adf.was_deleted()), 0)
                 # ----
+                self.assertEqual(len(adf.modified_columns(only=True)), 1)
                 self.assertEqual(
-                    len(adf.modified_columns(only=True)),
-                    1
-                )
-                self.assertEqual(
-                    len(adf.modified_columns(only=False)),
-                    len(adf)
+                    len(adf.modified_columns(only=False)), len(adf)
                 )
                 self.assertEqual(
                     list(adf.modified_columns().loc[adf.index[0]]).index(True),
-                    2
+                    2,
                 )
                 # ----
-                self.assertEqual(
-                    np.sum(adf.was_modified(adf_old)),
-                    1
-                )
-                self.assertEqual(
-                    adf.was_modified(adf_old).tolist()[0],
-                    True
-                )
-                self.assertEqual(
-                    np.sum(adf.was_added(adf_old)),
-                    0
-                )
-                self.assertEqual(
-                    len(adf.was_deleted(adf_old)),
-                    0
-                )
+                self.assertEqual(np.sum(adf.was_modified(adf_old)), 1)
+                self.assertEqual(adf.was_modified(adf_old).tolist()[0], True)
+                self.assertEqual(np.sum(adf.was_added(adf_old)), 0)
+                self.assertEqual(len(adf.was_deleted(adf_old)), 0)
                 # ----
                 self.assertEqual(
-                    len(adf.modified_columns(only=True, other=adf_old)),
-                    1
+                    len(adf.modified_columns(only=True, other=adf_old)), 1
                 )
                 self.assertEqual(
                     len(adf.modified_columns(only=False, other=adf_old)),
-                    len(adf)
+                    len(adf),
                 )
                 self.assertEqual(
                     list(
                         adf.modified_columns(other=adf_old).loc[adf.index[0]]
                     ).index(True),
-                    2
+                    2,
                 )
 
     # Formats
@@ -699,10 +535,9 @@ class TestAnkiDF(unittest.TestCase):
                 adf._set_usn()
                 self.assertEqual(
                     adf.loc[
-                        adf.index[0],
-                        _columns.columns_anki2ours[table]["usn"]
+                        adf.index[0], _columns.columns_anki2ours[table]["usn"]
                     ],
-                    -1
+                    -1,
                 )
 
     def test_set_mod(self):
@@ -713,22 +548,19 @@ class TestAnkiDF(unittest.TestCase):
                 adf.loc[adf.index[0], adf.columns[0]] = "definitely changed"
                 adf._set_mod()
                 val1 = adf.loc[
-                   adf.index[0], _columns.columns_anki2ours[table]["mod"]
+                    adf.index[0], _columns.columns_anki2ours[table]["mod"]
                 ]
                 val_rest_1 = adf.loc[
-                   adf.index[1:], _columns.columns_anki2ours[table]["mod"]
+                    adf.index[1:], _columns.columns_anki2ours[table]["mod"]
                 ]
                 val2 = adf_old.loc[
-                   adf.index[0], _columns.columns_anki2ours[table]["mod"]
+                    adf.index[0], _columns.columns_anki2ours[table]["mod"]
                 ]
                 val_rest_2 = adf.loc[
-                   adf.index[1:], _columns.columns_anki2ours[table]["mod"]
+                    adf.index[1:], _columns.columns_anki2ours[table]["mod"]
                 ]
                 self.assertFalse(val1 == val2)
-                self.assertListEqual(
-                    list(val_rest_1),
-                    list(val_rest_2)
-                )
+                self.assertListEqual(list(val_rest_1), list(val_rest_2))
 
     # New
     # ==========================================================================
@@ -750,7 +582,7 @@ class TestAnkiDF(unittest.TestCase):
             cfactor=card["cfactor"],
             clapses=card["clapses"],
             cleft=card["cleft"],
-            cdue=card["cdue"]
+            cdue=card["cdue"],
         )
 
     def _test_new_card_default_values(self, cards, **kwargs):
@@ -845,7 +677,7 @@ class TestAnkiDF(unittest.TestCase):
             cfactor=17,
             clapses=89,
             cleft=15,
-            cdue=178
+            cdue=178,
         )
         init_dict2 = dict(
             nid=nid2,
@@ -859,7 +691,7 @@ class TestAnkiDF(unittest.TestCase):
             cfactor=117,
             clapses=189,
             cleft=115,
-            cdue=1178
+            cdue=1178,
         )
         init_dict_combined = dict(
             nid=[nid1, nid2],
@@ -873,7 +705,7 @@ class TestAnkiDF(unittest.TestCase):
             cfactor=[17, 117],
             clapses=[89, 189],
             cleft=[15, 115],
-            cdue=[178, 1178]
+            cdue=[178, 1178],
         )
 
         cid1 = empty.add_card(**init_dict1, inplace=True)[0]
@@ -882,8 +714,7 @@ class TestAnkiDF(unittest.TestCase):
         card2 = empty.loc[cid2]
 
         cid1, cid2 = empty_combined.add_cards(
-            **init_dict_combined,
-            inplace=True
+            **init_dict_combined, inplace=True
         )
         card1c = empty_combined.loc[cid1]
         card2c = empty_combined.loc[cid2]
@@ -917,7 +748,7 @@ class TestAnkiDF(unittest.TestCase):
             cfactor=17,
             clapses=89,
             cleft=15,
-            cdue=178
+            cdue=178,
         )
         init_dict1 = copy.deepcopy(init_dict2)
         init_dict1["nid"] = nid
@@ -935,23 +766,15 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_new_notes_raises_inconsistent(self):
         with self.assertRaises(ValueError):
-            self.nnotes().add_notes(
-                "Basic", [["1", "2"]], ntags=[["1"], ["2"]]
-            )
+            self.nnotes().add_notes("Basic", [["1", "2"]], ntags=[["1"], ["2"]])
         with self.assertRaises(ValueError):
-            self.nnotes().add_notes(
-                "Basic", [["1", "2"]], nid=[123, 124]
-            )
+            self.nnotes().add_notes("Basic", [["1", "2"]], nid=[123, 124])
         with self.assertRaises(ValueError):
-            self.nnotes().add_notes(
-                "Basic", [["1", "2"]], nguid=[123, 124]
-            )
+            self.nnotes().add_notes("Basic", [["1", "2"]], nguid=[123, 124])
 
     def test_new_notes_raises_nid_clash(self):
         with self.assertRaises(ValueError):
-            self.nnotes().add_note(
-                "Basic", ["11", "12"], nid=10
-            ).add_note(
+            self.nnotes().add_note("Basic", ["11", "12"], nid=10).add_note(
                 "Basic", ["21", "22"], nid=10
             )
         with self.assertRaises(ValueError):
@@ -965,9 +788,7 @@ class TestAnkiDF(unittest.TestCase):
                 "Basic", [["11", "12"], ["21", "22"]], nguid=[10, 10]
             )
         with self.assertRaises(ValueError):
-            self.nnotes().add_note(
-                "Basic", ["11", "12"], nguid=10
-            ).add_note(
+            self.nnotes().add_note("Basic", ["11", "12"], nguid=10).add_note(
                 "Basic", ["21", "22"], nguid=10
             )
 
@@ -981,7 +802,7 @@ class TestAnkiDF(unittest.TestCase):
             nmod=[124, 1235],
             nusn=[42, 17],
             nid=[123, 125],
-            inplace=True
+            inplace=True,
         )
 
         empty2 = self.nenotes().fields_as_columns()
@@ -993,12 +814,11 @@ class TestAnkiDF(unittest.TestCase):
             nmod=[124, 1235],
             nusn=[42, 17],
             nid=[123, 125],
-            inplace=True
+            inplace=True,
         )
 
         self.assertDictEqual(
-            empty.fields_as_columns().to_dict(),
-            empty2.to_dict()
+            empty.fields_as_columns().to_dict(), empty2.to_dict()
         )
 
     @staticmethod
@@ -1009,7 +829,7 @@ class TestAnkiDF(unittest.TestCase):
             "ntags": notes["ntags"],
             "nguid": notes["nguid"],
             "nmod": notes["nmod"],
-            "nusn": notes["nusn"]
+            "nusn": notes["nusn"],
         }
 
     def test_new_note_empty_fully_specified(self):
@@ -1052,7 +872,7 @@ class TestAnkiDF(unittest.TestCase):
             nmod=[124, 1235],
             nusn=[42, 17],
             nid=[123, 125],
-            inplace=True
+            inplace=True,
         )
         self.assertTrue(empty.equals(empty2))
 
@@ -1066,10 +886,7 @@ class TestAnkiDF(unittest.TestCase):
     def test_new_note_default_values(self):
         empty = self.nenotes()
 
-        init_dict = dict(
-            nmodel="Basic",
-            nflds=["field1", "field2"],
-        )
+        init_dict = dict(nmodel="Basic", nflds=["field1", "field2"])
         nid = empty.add_note(nid=123, **init_dict, inplace=True)
         self.assertEqual(nid, 123)
         note = empty.loc[nid].to_dict()
@@ -1088,26 +905,14 @@ class TestAnkiDF(unittest.TestCase):
         empty2 = self.nenotes()
         empty3 = self.nenotes()
 
-        empty1.add_notes(
-            "Basic",
-            [["11", "12"], ["21", "22"]],
-            inplace=True
-        )
+        empty1.add_notes("Basic", [["11", "12"], ["21", "22"]], inplace=True)
         empty2.add_notes(
             "Basic",
-            [
-                {"Front": "11", "Back": "12"},
-                {"Front": "21", "Back": "22"},
-            ],
-            inplace=True
+            [{"Front": "11", "Back": "12"}, {"Front": "21", "Back": "22"}],
+            inplace=True,
         )
         empty3.add_notes(
-            "Basic",
-            {
-                "Front": ["11", "21"],
-                "Back": ["12", "22"]
-            },
-            inplace=True
+            "Basic", {"Front": ["11", "21"], "Back": ["12", "22"]}, inplace=True
         )
         self.assertListEqual(empty1["nflds"].tolist(), empty2["nflds"].tolist())
         self.assertListEqual(empty2["nflds"].tolist(), empty3["nflds"].tolist())
@@ -1117,26 +922,14 @@ class TestAnkiDF(unittest.TestCase):
         empty2 = self.nenotes().fields_as_columns()
         empty3 = self.nenotes().fields_as_columns()
 
-        empty1.add_notes(
-            "Basic",
-            [["11", "12"], ["21", "22"]],
-            inplace=True
-        )
+        empty1.add_notes("Basic", [["11", "12"], ["21", "22"]], inplace=True)
         empty2.add_notes(
             "Basic",
-            [
-                {"Front": "11", "Back": "12"},
-                {"Front": "21", "Back": "22"},
-            ],
-            inplace=True
+            [{"Front": "11", "Back": "12"}, {"Front": "21", "Back": "22"}],
+            inplace=True,
         )
         empty3.add_notes(
-            "Basic",
-            {
-                "Front": ["11", "21"],
-                "Back": ["12", "22"]
-            },
-            inplace=True
+            "Basic", {"Front": ["11", "21"], "Back": ["12", "22"]}, inplace=True
         )
 
         p = empty1.fields_as_columns_prefix
@@ -1170,11 +963,11 @@ class TestAnkiDF(unittest.TestCase):
                 df = adf.help_cols()
                 self.assertListEqual(
                     list(df.columns),
-                    ["AnkiColumn", "Table", "Description", "Native", "Default"]
+                    ["AnkiColumn", "Table", "Description", "Native", "Default"],
                 )
                 self.assertListEqual(
                     sorted(adf.columns),
-                    sorted(list(set(df.index)))  # nid, cid appear twice
+                    sorted(list(set(df.index))),  # nid, cid appear twice
                 )
 
     def test_help(self):

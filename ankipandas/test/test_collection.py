@@ -12,8 +12,12 @@ from ankipandas.collection import Collection
 
 class TestCollection(unittest.TestCase):
     def setUp(self):
-        self.db_path = pathlib.Path(__file__).parent / "data" / \
-                       "few_basic_cards" / "collection.anki2"
+        self.db_path = (
+            pathlib.Path(__file__).parent
+            / "data"
+            / "few_basic_cards"
+            / "collection.anki2"
+        )
 
         self.col = Collection(self.db_path)
         self.notes = self.col.notes
