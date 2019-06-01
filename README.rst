@@ -45,16 +45,17 @@ So what could be better than to bring both together?
 With ``AnkiPandas`` you can use ``pandas`` to easily analyze or manipulate your
 Anki flashcards.
 
-Using ``pandas`` allows you to easily
+**Features**:
 
-* **Select**: Easily select arbitrary subsets of your cards, notes or reviews
+* **Select**: Easily select arbitrary subsets of your cards, notes or reviews using ``pandas``
   (`one of many introductions <https://medium.com/dunder-data/6fcd0170be9c>`_,
   `official documentation <https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html>`_)
-* **Visualize**: Use powerful `built in tools`_ or switch to the even more versatile
-  `seaborn`_ (statistical analysis) or `matplotlib`_
+* **Visualize**: Use pandas' powerful `built in tools`_ or switch to the even more versatile
+  `seaborn`_ (statistical analysis) or `matplotlib`_ libraries
 * **Manipulate**: Apply fast bulk operations to the table (e.g. add tags, change decks, set field contents, suspend cards, ...)
   or iterate over the table and perform these manipulations step by step
-* **Import and Export**: Pandas can export and import to csv, MS Excel, HTML, JSON, ...
+* **Add**: Add new notes and cards
+* **Import and Export**: Pandas can export to (and import from) csv, MS Excel, HTML, JSON, ...
   (`io documentation`_)
 
 .. _built in tools: https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html
