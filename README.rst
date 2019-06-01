@@ -154,7 +154,8 @@ Show the number of leeches per deck as pie chart:
 
 .. code:: python
 
-    selection = col.cards[cards.has_tag("leech")]
+    cards = col.cards.merge_notes()
+    selection = cards[cards.has_tag("leech")]
     selection["cdeck"].value_counts().plot.pie()
 
 Find all notes of model ``MnemoticModel`` with empty ``Mnemotic`` field:
