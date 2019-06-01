@@ -30,6 +30,14 @@ Which deck has the longest average retention rates?
 Repetitions vs type
 -------------------
 
+Minimal:
+
+.. code-block:: python
+
+    col.cards.hist("crepts", by="ctype")
+
+Prettier:
+
 .. literalinclude:: examples/examples/repetitions_per_type.py
     :linenos:
 
@@ -37,6 +45,14 @@ Repetitions vs type
 
 Repetitions vs deck
 -------------------
+
+One liner:
+
+.. code-block:: python
+
+    col.cards.hist(column="creps", by="cdeck")
+
+Prettier:
 
 .. literalinclude:: examples/examples/repetitions_per_deck.py
     :linenos:
