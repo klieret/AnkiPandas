@@ -67,7 +67,7 @@ Anki flashcards.
 .. _seaborn: https://seaborn.pydata.org/
 .. _io documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html
 
-**Pros**
+**Pros**:
 
 * **Easy installation**: Install via python package manager (independent of your Anki installation)
 * **Simple**: Just one line of code to get started
@@ -175,7 +175,7 @@ Add the ``difficult-japanese`` and ``marked`` tag to all notes that contain the 
     selection = col.notes.has_tags(["Japanese", "leech"])
     selection = selection.add_tag(["difficult-japanese", "marked"])
     col.notes.update(selection)
-    col.write()  # Overwrites your database after creating a backup!
+    col.write(modify=True)  # Overwrites your database after creating a backup!
 
 Set the ``language`` field to ``English`` for all notes of model ``LanguageModel`` that are tagged with ``English``:
 
@@ -184,7 +184,7 @@ Set the ``language`` field to ``English`` for all notes of model ``LanguageModel
     selection = col.notes.has_tag(["English"]).query("model=='LanguageModel'").fields_as_columns()
     selection["language"] = "English"
     col.notes.update(selection)
-    col.write()
+    col.write(modify=True)
 
 Move all cards tagged ``leech`` to the deck ``Leeches Only``:
 
@@ -193,7 +193,7 @@ Move all cards tagged ``leech`` to the deck ``Leeches Only``:
     selection = col.cards.has_tag("leech")
     selection["cdeck"] = "Leeches Only"
     col.cards.update(selection)
-    col.write()
+    col.write(modify=True)
 
 Troubleshooting
 ---------------
