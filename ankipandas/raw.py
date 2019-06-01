@@ -201,9 +201,6 @@ def set_table(db: sqlite3.Connection, df: pd.DataFrame, table: str,
 # todo: Using decorators here causes the function signatures to be messed up
 #  with sphinx but oh well.
 
-# todo: docs
-
-
 @lru_cache(CACHE_SIZE)
 def get_ids(db: sqlite3.Connection, table: str) -> List[int]:
     """ Get list of IDs, e.g. note IDs etc.

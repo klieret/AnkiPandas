@@ -220,7 +220,6 @@ class Collection(object):
                         )
 
                 mode = "replace"
-                # todo: introduce additional cross checks!
                 if modify and not add and not delete:
                     mode = "update"
                 if add and not modify and not delete:

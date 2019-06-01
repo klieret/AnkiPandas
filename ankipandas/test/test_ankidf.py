@@ -130,10 +130,13 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_get_revs(self):
         revs = self.revs
-        # todo assert length
         self.assertEqual(
             list(sorted(revs.columns)),
             sorted(our_columns["revs"])
+        )
+        self.assertGreater(
+            len(revs),
+            4
         )
 
     # Test merging
@@ -294,11 +297,6 @@ class TestAnkiDF(unittest.TestCase):
             sorted(list(notes.columns)),
             sorted(cols + new_cols)
         )
-        # fixme: put pack
-        # self.assertEqual(
-        #     list(notes.query("model=='Basic'")[prefix + "Front"].unique()),
-        #     ["Basic: Front"]
-        # )
 
     def test_fields_as_list(self):
         # Add fields as column, remove original 'flds' column, then
@@ -692,10 +690,11 @@ class TestAnkiDF(unittest.TestCase):
         for table in ["notes", "revs", "cards"]:
             with self.subTest(table=table):
                 adf = self.ntable(table)
+                print(adf.columns)
+                adf[table[0] + "usn"] = 999
                 adf_old = adf.copy()
                 adf.loc[adf.index[0], adf_old.columns[0]] = "definitely changed"
                 adf._set_usn()
-                # fixme: this is probably already true before
                 self.assertEqual(
                     adf.loc[
                         adf.index[0],

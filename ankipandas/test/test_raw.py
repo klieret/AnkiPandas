@@ -23,8 +23,9 @@ class TestRawRead(unittest.TestCase):
         close_db(self.db)
 
     def test_get_deck_info(self):
-        get_deck_info(self.db)
-        # todo
+        info = get_deck_info(self.db)
+        self.assertGreaterEqual(len(info), 2)
+        self.assertIsInstance(info, dict)
 
     def test_get_deck_names(self):
         names = get_did2deck(self.db)
@@ -33,8 +34,9 @@ class TestRawRead(unittest.TestCase):
         )
 
     def test_get_model_info(self):
-        get_model_info(self.db)
-        # todo
+        minfo = get_model_info(self.db)
+        self.assertIsInstance(minfo, dict)
+        self.assertGreaterEqual(len(minfo), 2)
 
     def test_get_model_names(self):
         names = get_mid2model(self.db)

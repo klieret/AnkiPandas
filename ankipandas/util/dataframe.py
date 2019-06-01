@@ -107,7 +107,6 @@ def merge_dfs(df: pd.DataFrame, df_add: pd.DataFrame, id_df: str,
             (drop_columns and id_add in drop_columns):
         df_merge.drop(id_add, axis=1, inplace=True)
 
-    # todo: make optional
     # Make sure we don't have two ID columns
     new_id_add_col = id_add
     if id_add in rename_dict:

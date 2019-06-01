@@ -1177,12 +1177,9 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             raise ValueError("Invalid output setting: {}".format(output))
 
-
     # Append
     # ==========================================================================
 
-    # todo: docstring (note: Always returns list!)
-    # fixme: Needs microseconds?
     def _get_id(self, others=()) -> int:
         """ Generate ID from timestamp and increment if it is already in use.
 
