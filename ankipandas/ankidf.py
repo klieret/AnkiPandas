@@ -202,7 +202,6 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def nid(self):
         """ Note ID as :class:`pandas.Series` of integers. """
-        self._check_our_format()
         if self._anki_table == "notes":
             return self.index
         elif self._anki_table == "cards":
@@ -235,7 +234,6 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def cid(self):
         """ Card ID as :class:`pandas.Series` of integers. """
-        self._check_our_format()
         if self._anki_table == "cards":
             return self.index
         if self._anki_table == "revs":
@@ -302,7 +300,6 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def mid(self):
         """ Model ID as :class:`pandas.Series` of integers. """
-        self._check_our_format()
         if self._anki_table in ["notes"]:
             if "nmodel" not in self.columns:
                 raise ValueError(
@@ -332,7 +329,6 @@ class AnkiDataFrame(pd.DataFrame):
     @property
     def did(self):
         """ Deck ID as :class:`pandas.Series` of integers. """
-        self._check_our_format()
         if self._anki_table == "cards":
             if "cdeck" not in self.columns:
                 raise ValueError(
@@ -365,7 +361,6 @@ class AnkiDataFrame(pd.DataFrame):
         """ Original deck ID for cards in filtered deck as
         :class:`pandas.Series` of integers.
         """
-        self._check_our_format()
         if self._anki_table == "cards":
             if "odeck" not in self.columns:
                 raise ValueError(
@@ -487,7 +482,7 @@ class AnkiDataFrame(pd.DataFrame):
     # Toggle format
     # ==========================================================================
 
-    def fields_as_columns(self, inplace=False):
+    def fields_as_columns(self, inplace=False, force=False):
         """
         In the 'notes' table, the field contents of the notes is contained in
         one column ('flds') by default. With this method, this column can be
@@ -495,11 +490,13 @@ class AnkiDataFrame(pd.DataFrame):
 
         Args:
             inplace: If False, return new dataframe, else update old one
+            force: Internal use
 
         Returns:
             New :class:`pandas.DataFrame` if inplace==True, else None
         """
-        self._check_our_format()
+        if not force:
+            self._check_our_format()
         if not inplace:
             df = self.copy(True)
             df.fields_as_columns(inplace=True)
@@ -514,7 +511,7 @@ class AnkiDataFrame(pd.DataFrame):
                 " Returning without doing anything."
             )
             return
-        elif self._fields_format == "in_progress":
+        elif self._fields_format == "in_progress" and not force:
             raise ValueError(
                 "It looks like the last call to fields_as_list or"
                 "fields_as_columns was not successful, so you better start "
@@ -549,18 +546,20 @@ class AnkiDataFrame(pd.DataFrame):
         self.drop("nflds", axis=1, inplace=True)
         self._fields_format = "columns"
 
-    def fields_as_list(self, inplace=False):
+    def fields_as_list(self, inplace=False, force=False):
         """
         This reverts :meth:`.fields_as_columns`, all columns that represented
         field contents are now merged into one column 'nflds'.
 
         Args:
             inplace: If False, return new dataframe, else update old one
+            force: Internal use
 
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
-        self._check_our_format()
+        if not force:
+            self._check_our_format()
         if not inplace:
             df = self.copy(True)
             df.fields_as_list(inplace=True)
@@ -571,7 +570,7 @@ class AnkiDataFrame(pd.DataFrame):
                 "Fields are already as list. Returning without doing anything."
             )
             return
-        elif self._fields_format == "in_progress":
+        elif self._fields_format == "in_progress" and not force:
             raise ValueError(
                 "It looks like the last call to fields_as_list or"
                 "fields_as_columns was not successful, so you better start "
@@ -1069,7 +1068,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         if table == "notes":
             if not self._fields_format == "list":
-                self.fields_as_columns(inplace=True)
+                self.fields_as_list(inplace=True, force=True)
             # Check if success
             if not self._fields_format == "list":
                 raise ValueError(
