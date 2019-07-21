@@ -192,7 +192,7 @@ class Collection(object):
         if not modify and not add and not delete:
             log.warning(
                 "Please set modify=True, add=True or delete=True, you're"
-                "literally not allowing me any modification at all."
+                " literally not allowing me any modification at all."
             )
             return None
 
@@ -200,6 +200,7 @@ class Collection(object):
             self.path, backup_folder=backup_folder
         )
         log.info("Backup created at {}.".format(backup_path.resolve()))
+        prepared = {}
         for key, value in self.__items.items():
             if value is None:
                 log.debug("Write: Skipping {}, because it's None.".format(key))
@@ -234,8 +235,15 @@ class Collection(object):
                     mode = "append"
                 value._check_table_integrity()
                 raw_table = value.raw()
-                log.debug("Now writing table {}".format(key))
-                raw.set_table(self.db, raw_table, table=key, mode=mode)
+                prepared[key] = {"raw": raw_table, "mode": mode}
+        # Actually setting values here, after all conversion tasks have been
+        # carried out. That way if any of them fails, we don't have a
+        # partially written collection.
+        log.debug("Now actually writing to database.")
+        for table, values in prepared.items():
+            raw.set_table(
+                self.db, values["raw"], table=table, mode=values["mode"]
+            )
         info = raw.get_info(self.db)
         info["mod"] = int(time.time() * 1000)  # Modification time stamp
         info["usn"] = -1  # Signals update needed
