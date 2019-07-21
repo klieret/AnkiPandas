@@ -598,7 +598,7 @@ class AnkiDataFrame(pd.DataFrame):
             # might still use them
             to_drop.extend(fields)
         self.drop(to_drop, axis=1, inplace=True)
-        self._fields_format = "fields"
+        self._fields_format = "list"
 
     # Quick access
     # ==========================================================================
