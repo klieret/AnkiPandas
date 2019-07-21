@@ -195,6 +195,7 @@ class Collection(object):
                 "literally not allowing me any modification at all."
             )
             return None
+
         backup_path = ankipandas.paths.backup_db(
             self.path, backup_folder=backup_folder
         )
@@ -231,7 +232,10 @@ class Collection(object):
                     mode = "update"
                 if add and not modify and not delete:
                     mode = "append"
-                raw.set_table(self.db, value.raw(), table=key, mode=mode)
+                value._check_table_integrity()
+                raw_table = value.raw()
+                log.debug("Now writing table {}".format(key))
+                raw.set_table(self.db, raw_table, table=key, mode=mode)
         info = raw.get_info(self.db)
         info["mod"] = int(time.time() * 1000)  # Modification time stamp
         info["usn"] = -1  # Signals update needed

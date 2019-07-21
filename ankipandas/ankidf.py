@@ -143,7 +143,20 @@ class AnkiDataFrame(pd.DataFrame):
         for col, typ in _columns.dtype_casts2[self._anki_table].items():
             self[col] = self[col].astype(typ)
 
+    # Checks
     # ==========================================================================
+
+    def _check_table_integrity(self):
+        duplicates = self.index[self.index.duplicated()].tolist()
+        if duplicates:
+            log.critical(
+                "Duplicated indizes in table {} discovered, so something "
+                "definitely went wrong. Please don't ignore this warning. "
+                "These indizes appear more "
+                "than once: {}".format(
+                    self._anki_table, ", ".join(map(str, duplicates))
+                )
+            )
 
     def _invalid_table(self):
         raise ValueError("Invalid table: {}.".format(self._anki_table))
@@ -931,6 +944,7 @@ class AnkiDataFrame(pd.DataFrame):
         Returns:
             New :class:`AnkiDataFrame` if inplace==True, else None
         """
+
         if not inplace:
             df = self.copy(True)
             df.normalize(inplace=True, force=force)
@@ -975,7 +989,16 @@ class AnkiDataFrame(pd.DataFrame):
         # IDs
         # ---
 
-        self.set_index(_columns.table2index[table], inplace=True)
+        id_field = _columns.table2index[table]
+        duplicate_ids = self[id_field][self[id_field].duplicated()].tolist()
+        if duplicate_ids:
+            log.critical(
+                "The following IDs occurr "
+                "more than once: {}. Please do not use this dataframe.".format(
+                    ", ".join(map(str, duplicate_ids))
+                )
+            )
+        self.set_index(id_field, inplace=True)
 
         if table == "cards":
             self["cdeck"] = self["did"].map(raw.get_did2deck(self.db))
@@ -1005,6 +1028,8 @@ class AnkiDataFrame(pd.DataFrame):
 
         drop_columns = set(self.columns) - set(_columns.our_columns[table])
         self.drop(drop_columns, axis=1, inplace=True)
+
+        self._check_table_integrity()
 
         self._df_format = "ours"
 
@@ -1141,6 +1166,8 @@ class AnkiDataFrame(pd.DataFrame):
         self.drop(self.columns, axis=1, inplace=True)
         for col in new.columns:
             self[col] = new[col]
+
+        self._check_table_integrity()
 
         self._df_format = "anki"
 
