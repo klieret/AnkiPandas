@@ -14,7 +14,7 @@ from ankipandas.util.log import log
 
 
 class Collection(object):
-    def __init__(self, path, user=None):
+    def __init__(self, path=None, user=None):
         """ Initialize :class:`~ankipandas.collection.Collection` object.
 
         Args:
@@ -49,6 +49,8 @@ class Collection(object):
 
         #: Path to currently loaded database
         self.path = path  # type: Path
+
+        log.info("Loaded db from {}".format(self.path))
 
         #: Opened Anki database (:class:`sqlite3.Connection`)
         self.db = raw.load_db(self.path)  # type: sqlite3.Connection
