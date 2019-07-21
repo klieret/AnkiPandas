@@ -160,7 +160,7 @@ def find_db(
     if len(found) >= 2:
         raise ValueError(
             "Found more than one database belonging to user {} at {}".format(
-                user, ", ".join(found)
+                user, ", ".join(map(str, found))
             )
         )
     found = found[0]
