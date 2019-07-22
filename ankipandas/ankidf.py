@@ -886,7 +886,7 @@ class AnkiDataFrame(pd.DataFrame):
         new_indices = set(self.index) - other_ids
         return self.index.isin(new_indices)
 
-    def was_deleted(self, other: pd.DataFrame = None, _force=False):
+    def was_deleted(self, other: pd.DataFrame = None, _force=False) -> List:
         """ Compare with original table, return deleted indizes.
 
         Args:
@@ -1195,7 +1195,7 @@ class AnkiDataFrame(pd.DataFrame):
             "n": len(self),
             "n_modified": sum(self.was_modified(na=False)),
             "n_added": sum(self.was_added()),
-            "n_deleted": sum(self.was_deleted()),
+            "n_deleted": len(self.was_deleted()),
         }
         as_dict["has_changed"] = (
             as_dict["n_modified"] or as_dict["n_added"] or as_dict["n_deleted"]

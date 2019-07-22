@@ -164,7 +164,7 @@ class Collection(object):
                 continue
             if key in ["notes", "cards", "revs"]:
                 if not delete:
-                    ndeleted = sum(value.was_deleted())
+                    ndeleted = len(value.was_deleted())
                     if ndeleted:
                         raise ValueError(
                             "You specified delete=False, but {} rows of item "
