@@ -3,7 +3,7 @@
 # std
 from pathlib import Path, PurePath
 import sqlite3
-from typing import Optional, Dict, Union
+from typing import Optional, Dict, Union, Any
 import time
 
 # ours
@@ -154,6 +154,63 @@ class Collection(object):
         else:
             raise ValueError("Invalid output setting: {}".format(output))
 
+    def _prepare_write_data(
+        self, modify=False, add=False, delete=False
+    ) -> Dict[str, Any]:
+        prepared = {}
+        for key, value in self.__items.items():
+            if value is None:
+                log.debug("Write: Skipping {}, because it's None.".format(key))
+                continue
+            if key in ["notes", "cards", "revs"]:
+                if not delete:
+                    ndeleted = sum(value.was_deleted())
+                    if ndeleted:
+                        raise ValueError(
+                            "You specified delete=False, but {} rows of item "
+                            "{} would be deleted.".format(ndeleted, key)
+                        )
+                if not modify:
+                    nmodified = sum(value.was_modified(na=False))
+                    if nmodified:
+                        raise ValueError(
+                            "You specified modify=False, but {} rows of item "
+                            "{} would be modified.".format(nmodified, key)
+                        )
+                if not add:
+                    nadded = sum(value.was_added())
+                    if nadded:
+                        raise ValueError(
+                            "You specified add=False, but {} rows of item "
+                            "{} would be modified.".format(nadded, key)
+                        )
+
+                mode = "replace"
+                if modify and not add and not delete:
+                    mode = "update"
+                if add and not modify and not delete:
+                    mode = "append"
+                value._check_table_integrity()
+                raw_table = value.raw()
+                prepared[key] = {"raw": raw_table, "mode": mode}
+
+        return prepared
+
+    def _get_and_update_info(self) -> Dict[str, Any]:
+        info = raw.get_info(self.db)
+        info["mod"] = int(time.time() * 1000)  # Modification time stamp
+        info["usn"] = -1  # Signals update needed
+        if self.__items["notes"] is not None:
+            missing_tags = list(
+                set(info["tags"].keys())
+                - set(self.__items["notes"].list_tags())
+            )
+            for tag in missing_tags:
+                # I'm assuming that this is the usn (update sequence number)
+                # of the tags
+                info["tags"][tag] = -1
+        return info
+
     def write(
         self,
         modify=False,
@@ -196,64 +253,48 @@ class Collection(object):
             )
             return None
 
+        try:
+            prepared = self._prepare_write_data(
+                modify=modify, add=add, delete=delete
+            )
+
+            info = self._get_and_update_info()
+        except Exception as e:
+            log.critical(
+                "Something went wrong preparing the data for writing. "
+                "However, no data has been written out, so your"
+                "database is save!"
+            )
+            raise e
+        else:
+            log.debug("Successfully prepared data for writing.")
+
         backup_path = ankipandas.paths.backup_db(
             self.path, backup_folder=backup_folder
         )
         log.info("Backup created at {}.".format(backup_path.resolve()))
-        prepared = {}
-        for key, value in self.__items.items():
-            if value is None:
-                log.debug("Write: Skipping {}, because it's None.".format(key))
-                continue
-            if key in ["notes", "cards", "revs"]:
-                if not delete:
-                    ndeleted = sum(value.was_deleted())
-                    if ndeleted:
-                        raise ValueError(
-                            "You specified delete=False, but {} rows of item "
-                            "{} would be deleted.".format(ndeleted, key)
-                        )
-                if not modify:
-                    nmodified = sum(value.was_modified(na=False))
-                    if nmodified:
-                        raise ValueError(
-                            "You specified modify=False, but {} rows of item "
-                            "{} would be modified.".format(nmodified, key)
-                        )
-                if not add:
-                    nadded = sum(value.was_added())
-                    if nadded:
-                        raise ValueError(
-                            "You specified add=False, but {} rows of item "
-                            "{} would be modified.".format(nadded, key)
-                        )
 
-                mode = "replace"
-                if modify and not add and not delete:
-                    mode = "update"
-                if add and not modify and not delete:
-                    mode = "append"
-                value._check_table_integrity()
-                raw_table = value.raw()
-                prepared[key] = {"raw": raw_table, "mode": mode}
         # Actually setting values here, after all conversion tasks have been
         # carried out. That way if any of them fails, we don't have a
         # partially written collection.
         log.debug("Now actually writing to database.")
-        for table, values in prepared.items():
-            raw.set_table(
-                self.db, values["raw"], table=table, mode=values["mode"]
+        try:
+            for table, values in prepared.items():
+                raw.set_table(
+                    self.db, values["raw"], table=table, mode=values["mode"]
+                )
+            raw.set_info(self.db, info)
+        except Exception as e:
+            log.critical(
+                "Error while writing data to database at {path}"
+                "This means that your database might have become corrupted. "
+                "It's STRONGLY adviced that you manually restore the database "
+                "by replacing it with the backup from {backup_path} and restart"
+                " from scratch. "
+                "Please also open a bug report at "
+                "https://github.com/klieret/AnkiPandas/issues/, as errors "
+                "during the actual writing process should never occurr!".format(
+                    path=self.path.resolve(), backup_path=backup_path.resolve()
+                )
             )
-        info = raw.get_info(self.db)
-        info["mod"] = int(time.time() * 1000)  # Modification time stamp
-        info["usn"] = -1  # Signals update needed
-        if self.__items["notes"] is not None:
-            missing_tags = list(
-                set(info["tags"].keys())
-                - set(self.__items["notes"].list_tags())
-            )
-            for tag in missing_tags:
-                # I'm assuming that this is the usn (update sequence number)
-                # of the tags
-                info["tags"][tag] = -1
-        raw.set_info(self.db, info)
+            raise e
