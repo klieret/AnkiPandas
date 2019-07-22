@@ -808,18 +808,24 @@ class AnkiDataFrame(pd.DataFrame):
             self._check_our_format()
 
         if other is None:
-            other = self.col._get_original_item(self._anki_table)
+            other = self.col._get_original_item(
+                self._anki_table
+            )  # type: AnkiDataFrame
+
+        self_sf = self
+        if self._fields_format == "columns":
+            self_sf = self.fields_as_list(inplace=False)
 
         other_nids = set(other.index)
-        inters = set(self.index).intersection(other_nids)
-        result = pd.Series(na, index=self.index)
+        inters = set(self_sf.index).intersection(other_nids)
+        result = pd.Series(na, index=self_sf.index)
         new_bools = np.any(
-            other.loc[other.index.isin(inters), list(self.columns)].values
-            != self[self.index.isin(inters)].values,
+            other.loc[other.index.isin(inters), list(self_sf.columns)].values
+            != self_sf[self_sf.index.isin(inters)].values,
             axis=1,
         )
-        result.loc[self.index.isin(inters)] = pd.Series(
-            new_bools, index=result[self.index.isin(inters)].index
+        result.loc[self_sf.index.isin(inters)] = pd.Series(
+            new_bools, index=result[self_sf.index.isin(inters)].index
         )
         return result
 

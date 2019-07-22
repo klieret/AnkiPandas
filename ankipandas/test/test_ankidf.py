@@ -412,11 +412,16 @@ class TestAnkiDF(unittest.TestCase):
                 self.assertEqual(len(adf.was_deleted(adf)), 0)
 
     def test_show_modification_empty(self):
-        for table in ["cards", "revs", "notes"]:
+        for table in ["cards", "revs", "notes", "notes_cols"]:
             with self.subTest(table=table):
-                adf = self.ntable(table)
-                adf["new_col"] = "blargh"
+                if table == "notes_cols":
+                    adf = self.ntable("notes")
+                else:
+                    adf = self.ntable(table)
                 adf_old = adf.copy()
+                if table == "notes_cols":
+                    adf.fields_as_columns(inplace=True)
+                adf["new_col"] = "blargh"
                 n = len(adf)
                 adf = adf.drop(adf.index)
                 self.assertEqual(np.sum(~adf.was_modified()), 0)
@@ -427,11 +432,15 @@ class TestAnkiDF(unittest.TestCase):
                 self.assertEqual(len(adf.was_deleted(adf_old)), n)
 
     def test_show_modification_all_modified(self):
-        for table in ["cards", "revs", "notes"]:
+        for table in ["cards", "revs", "notes", "notes_cols"]:
             with self.subTest(table=table):
-                adf = self.ntable(table)
-                adf["new_col"] = "blargh"
+                if table == "notes_cols":
+                    adf = self.ntable("notes")
+                else:
+                    adf = self.ntable(table)
                 adf_old = adf.copy()
+                if table == "notes_cols":
+                    adf.fields_as_columns(inplace=True)
                 adf[adf.columns[2]] = "changed!"
                 self.assertEqual(np.sum(~adf.was_modified()), 0)
                 self.assertEqual(np.sum(adf.was_added()), 0)
@@ -466,10 +475,15 @@ class TestAnkiDF(unittest.TestCase):
                 )
 
     def test_show_modification_some_modified(self):
-        for table in ["cards", "revs", "notes"]:
+        for table in ["cards", "revs", "notes", "notes_cols"]:
             with self.subTest(table=table):
-                adf = self.ntable(table)
+                if table == "notes_cols":
+                    adf = self.ntable("notes")
+                else:
+                    adf = self.ntable(table)
                 adf_old = adf.copy()
+                if table == "notes_cols":
+                    adf.fields_as_columns(inplace=True)
                 adf.loc[adf.index[0], [adf.columns[2]]] = "changed!"
                 self.assertEqual(np.sum(adf.was_modified()), 1)
                 self.assertEqual(adf.was_modified().tolist()[0], True)
