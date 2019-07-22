@@ -515,9 +515,6 @@ class AnkiDataFrame(pd.DataFrame):
             df.fields_as_columns(inplace=True)
             return df
 
-        if "nflds" not in self.columns:
-            raise ValueError("Could not find fields column 'nflds'.")
-
         if self._fields_format == "columns":
             log.warning(
                 "Fields are already as columns."
@@ -536,6 +533,9 @@ class AnkiDataFrame(pd.DataFrame):
             raise ValueError(
                 "Unknown _fields_format: {}".format(self._fields_format)
             )
+
+        if "nflds" not in self.columns:
+            raise ValueError("Could not find fields column 'nflds'.")
 
         self._fields_format = "in_progress"
         # fixme: What if one field column is one that is already in use?

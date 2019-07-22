@@ -266,6 +266,12 @@ class TestAnkiDF(unittest.TestCase):
         new_cols = [prefix + item for item in ["Front", "Back"]]
         self.assertEqual(sorted(list(notes.columns)), sorted(cols + new_cols))
 
+    def test_fields_as_columns_x2(self):
+        notes = self.nnotes()
+        notes = notes.fields_as_columns()
+        notes2 = notes.fields_as_columns()
+        self.assertTrue(notes.equals(notes2))
+
     def test_fields_as_list(self):
         # Add fields as column, remove original 'flds' column, then
         # add it back from the field columns and see if things still check
@@ -277,6 +283,11 @@ class TestAnkiDF(unittest.TestCase):
         self.assertListEqual(
             sorted(list(notes.columns)), sorted(our_columns["notes"])
         )
+
+    def test_fields_as_list_x2(self):
+        notes = self.nnotes()
+        notes2 = notes.fields_as_list()
+        self.assertTrue(notes.equals(notes2))
 
     # Convenience
     # ==========================================================================
