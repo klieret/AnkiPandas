@@ -8,8 +8,6 @@ import tempfile
 
 # ours
 from ankipandas.raw import *
-from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas._columns import our_columns
 from ankipandas.util.dataframe import merge_dfs
 
 
@@ -164,6 +162,12 @@ class TestRawWrite(unittest.TestCase):
         self.assertEqual(len(notes), 0)
         self.assertEqual(len(revs), 0)
         self.assertEqual(len(cards), 0)
+
+    def test_set_get_inverse(self):
+        info = get_info(self.db_read)
+        set_info(self.db_write, info)
+        info2 = get_info(self.db_write)
+        self.assertDictEqual(info, info2)
 
 
 class TestMergeDfs(unittest.TestCase):

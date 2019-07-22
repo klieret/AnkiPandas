@@ -25,6 +25,7 @@ from typing import Dict, List, Union
 
 # 3rd
 import pandas as pd
+import numpy as np
 
 # ours
 from ankipandas.util.log import log
@@ -201,6 +202,39 @@ def set_table(
         df=df, df_old=df_old, mode=mode, id_column=id_column
     )
     df_new.to_sql(tables_ours2anki[table], db, if_exists="replace", index=False)
+
+
+class NumpyJSONEncoder(json.JSONEncoder):
+    """ JSON Encoder that support numpy datatypes by converting them to
+    built in datatypes. """
+
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NumpyJSONEncoder, self).default(obj)
+
+
+def set_info(db: sqlite3.Connection, info: dict) -> None:
+    """ Write back extra info to database
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+        info: Output of :func:`get_info`
+
+    Returns:
+        None
+    """
+    info_json_strings = {
+        key: json.dumps(value, cls=NumpyJSONEncoder)
+        for key, value in info.items()
+    }
+    df = pd.DataFrame(info_json_strings, index=[0])
+    df.to_sql("col", db, if_exists="replace", index=False)
 
 
 # Trivially derived getters

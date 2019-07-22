@@ -256,3 +256,4 @@ class Collection(object):
                 # I'm assuming that this is the usn (update sequence number)
                 # of the tags
                 info["tags"][tag] = -1
+        raw.set_info(self.db, info)
