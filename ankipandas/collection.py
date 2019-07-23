@@ -283,7 +283,10 @@ class Collection(object):
                 raw.set_table(
                     self.db, values["raw"], table=table, mode=values["mode"]
                 )
-            raw.set_info(self.db, info)
+            # Actually only needed if we actually modify the info.
+            # This will trigger a complete re-upload, so we want to avoid this
+            # if possible.
+            # raw.set_info(self.db, info)
         except Exception as e:
             log.critical(
                 "Error while writing data to database at {path}"
