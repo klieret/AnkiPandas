@@ -229,9 +229,19 @@ def set_info(db: sqlite3.Connection, info: dict) -> None:
     Returns:
         None
     """
+
+    def encode_value(value):
+        if isinstance(value, (float, np.floating)):
+            return value
+        elif isinstance(value, (int, np.integer)):
+            return value
+        elif isinstance(value, str):
+            return value
+        else:
+            return json.dumps(value, cls=NumpyJSONEncoder)
+
     info_json_strings = {
-        key: json.dumps(value, cls=NumpyJSONEncoder)
-        for key, value in info.items()
+        key: encode_value(value) for key, value in info.items()
     }
     df = pd.DataFrame(info_json_strings, index=[0])
     df.to_sql("col", db, if_exists="replace", index=False)
