@@ -137,8 +137,41 @@ class AnkiDataFrame(pd.DataFrame):
         ret.astype(_columns.dtype_casts2[self._anki_table])
         return ret
 
-    def update(self, *args, **kwargs):
-        super(AnkiDataFrame, self).update(*args, **kwargs)
+    def update(self, other, force=False, **kwargs):
+        if not force and isinstance(other, AnkiDataFrame):
+            if other._df_format != self._df_format:
+                raise ValueError(
+                    "You're trying to update an AnkiDataFrame in format {f1}"
+                    " using another AnkiDataFrame in format {f2}. That doesn't "
+                    "sound like a good idea. However you can still do this "
+                    "using the force=True option.".format(
+                        f1=self._df_format, f2=other._df_format
+                    )
+                )
+            if other._anki_table != self._anki_table:
+                raise ValueError(
+                    "You're trying to update an AnkiDataFrame of table {f1} "
+                    "with an AnkiDataFrame of table {f2}. That doesn't sound"
+                    " like a good idea. However you can still do this using "
+                    "the force=True option.".format(
+                        f1=self._anki_table, f2=other._anki_table
+                    )
+                )
+            if self._anki_table == "notes":
+                if other._fields_format != self._fields_format:
+                    raise ValueError(
+                        "You are trying to update a notes AnkiDataFrame where "
+                        "the fields are in format '{f1}' with a notes "
+                        "AnkiDataFrame where the fields are in format '{f2}'. "
+                        "That doesn't sound like a good idea. However you can "
+                        "still do this using the force=True option. "
+                        "Or you simply ensure that both have the same format"
+                        " using the fields_as_columns() or fields_as_list() "
+                        "method.".format(
+                            f1=self._fields_format, f2=other._fields_format
+                        )
+                    )
+        super(AnkiDataFrame, self).update(other, **kwargs)
         # Fix https://github.com/pandas-dev/pandas/issues/4094
         for col, typ in _columns.dtype_casts2[self._anki_table].items():
             self[col] = self[col].astype(typ)
