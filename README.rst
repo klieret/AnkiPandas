@@ -132,7 +132,7 @@ To make it easier, simply supply (part of) the path to the database and
 installations.
 
 To get information about the interpretation of each column, use
-``notes.help_cols()``.
+``print(col.notes.help_cols())``.
 
 Take a look at the documentation_ to find out more about more about the
 available methods!
