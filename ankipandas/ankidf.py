@@ -27,13 +27,14 @@ class AnkiDataFrame(pd.DataFrame):
     #: Additional attributes of a :class:`AnkiDataFrame` that a normal
     #: :class:`pandas.DataFrame` does not posess. These will be copied in the
     #: constructor.
-    _attributes = (
+    #: See https://pandas.pydata.org/pandas-docs/stable/development/extending.html
+    _metadata = [
         "col",
         "_anki_table",
         "fields_as_columns_prefix",
         "_fields_format",
         "_df_format",
-    )
+    ]
 
     def __init__(self, *args, **kwargs):
         """ Initializes a blank :class:`AnkiDataFrame`.
@@ -73,35 +74,12 @@ class AnkiDataFrame(pd.DataFrame):
         #: Overal structure of the dataframe ``anki``, ``ours``, ``in_progress``
         self._df_format = None  # type: str
 
-        # todo: is this serving any purpose? Coverage shows it never runs.
-        if len(args) == 1 and isinstance(args[0], AnkiDataFrame):
-            self._copy_attrs_from(args[0])
-
     @property
     def _constructor(self):
         """ This needs to be overriden so that any DataFrame operations do not
         return a :class:`pandas.DataFrame` but a :class:`AnkiDataFrame`."""
 
-        def __constructor(*args, **kw):
-            df = self.__class__(*args, **kw)
-            self._copy_attrs_to(df)
-            return df
-
-        return __constructor
-
-    def _copy_attrs_to(self, df):
-        """ Copy all additional attributes of this class to another instance.
-        Also see :attr:`self._attributes`.
-        """
-        for attr in self._attributes:
-            df.__dict__[attr] = getattr(self, attr, None)
-
-    def _copy_attrs_from(self, df):
-        """ Copy all additional attributes of this class from another instance.
-        Also see :attr:`self._attributes`.
-        """
-        for attr in self._attributes:
-            self.__dict__[attr] = getattr(df, attr, None)
+        return AnkiDataFrame
 
     # Constructors
     # ==========================================================================
@@ -133,7 +111,6 @@ class AnkiDataFrame(pd.DataFrame):
 
     def append(self, *args, **kwargs):
         ret = pd.DataFrame.append(self, *args, **kwargs)
-        self._copy_attrs_to(ret)
         ret.astype(_columns.dtype_casts2[self._anki_table])
         return ret
 
