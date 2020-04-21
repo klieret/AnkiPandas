@@ -3,6 +3,7 @@ language: python
 python:
   - "3.5"
   - "3.6"
+  - "3.7"
 
 install:
   # To work around a problem with wilson package we take the git master version of it
@@ -12,7 +13,8 @@ install:
   - "pip3 install pytest-subtests"
   - "pip3 install coveralls"
 
-script: 
+script:
+  - "pip3 freeze"
   - "pytest"
 
 after_success: coveralls
