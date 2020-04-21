@@ -826,6 +826,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     def was_modified(self, other: pd.DataFrame = None, na=True, _force=False):
         """ Compare with original table, show which rows have changed.
+        Will only compare columns existing in both dataframes.
 
         Args:
             other: Compare with this :class:`pandas.DataFrame`.
@@ -849,12 +850,16 @@ class AnkiDataFrame(pd.DataFrame):
         if self._fields_format == "columns":
             self_sf = self.fields_as_list(inplace=False)
 
+        cols = sorted(
+            list(set(self_sf.columns).intersection(set(other.columns)))
+        )
+
         other_nids = set(other.index)
         inters = set(self_sf.index).intersection(other_nids)
         result = pd.Series(na, index=self_sf.index)
         new_bools = np.any(
-            other.loc[other.index.isin(inters), list(self_sf.columns)].values
-            != self_sf[self_sf.index.isin(inters)].values,
+            other.loc[other.index.isin(inters), cols].values
+            != self_sf.loc[self_sf.index.isin(inters), cols].values,
             axis=1,
         )
         result.loc[self_sf.index.isin(inters)] = pd.Series(
@@ -1260,6 +1265,7 @@ class AnkiDataFrame(pd.DataFrame):
             idx += 1
         return idx
 
+    # todo: documentation
     def add_card(
         self,
         nid: int,
@@ -1277,6 +1283,28 @@ class AnkiDataFrame(pd.DataFrame):
         cdue: Optional[int] = None,
         inplace=False,
     ):
+        """
+        Similar to :py:meth:`ankipandas.ankipdf.AnkiDataFrame.add_cards`
+
+        Args:
+            nid:
+            cdeck:
+            cord:
+            cmod:
+            cusn:
+            cqueue:
+            ctype:
+            civl:
+            cfactor:
+            creps:
+            clapses:
+            cleft:
+            cdue:
+            inplace:
+
+        Returns:
+
+        """
         return self.add_cards(
             nid=[nid],
             cdeck=cdeck,
@@ -1838,7 +1866,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         .. note::
 
-            For better performance, it is advisable to use :meth:`add_notes`,
+            For better performance it is advisable to use :meth:`add_notes`
             when adding many notes.
 
         Args:
