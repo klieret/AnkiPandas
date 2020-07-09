@@ -102,7 +102,7 @@ def get_empty_table(table: str) -> pd.DataFrame:
 @lru_cache(CACHE_SIZE)
 def get_info(db: sqlite3.Connection) -> dict:
     """
-    Get all other information from the databse, e.g. information about models,
+    Get all other information from the database, e.g. information about models,
     decks etc.
 
     Args:
@@ -116,7 +116,7 @@ def get_info(db: sqlite3.Connection) -> dict:
     ret = {}
     for col in _df.columns:
         val = _df[col][0]
-        if isinstance(val, str):
+        if isinstance(val, str) and len(val) >= 1:
             ret[col] = json.loads(val)
         else:
             ret[col] = val
