@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-# This script is used to push a new release to pypy and add an appropriate
-# tag to the git repository.
-
 set -e
+
+if [[ ! -z "$(git status --porcelain)" ]]; then
+    echo "UNCLEAN repo! Abort!"
+    exit 234
+fi
 
 # Upload to pypi
 # Note: Need to bump version first!
@@ -28,13 +30,22 @@ rm -rf "dist/"
 version=$(cat ankipandas/version.txt)
 echo "Version is: " $version
 
-# just to be sure we don't forget to commit it
-git add ankipandas/version.txt
+read -p "Is this the correct version (bump before release!) [Yy]? " -n 1 -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 113
+fi
 
 python3 setup.py sdist bdist_wheel
+
+python3 -m twine check "${sourceDir}/dist/*"
+
+read -p "Does this look ok? [Yy] " -n 1 -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 114
+fi
+
 python3 -m twine upload --verbose --repository-url https://upload.pypi.org/legacy/ dist/*
 git tag -a "v${version}" -m "Release version ${version}"
 git push origin "v${version}"
-
-# Cleanup
-bash "${thisDir}/clean.sh"
