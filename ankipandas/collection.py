@@ -18,7 +18,7 @@ class Collection(object):
         """ Initialize :class:`~ankipandas.collection.Collection` object.
 
         Args:
-            path: (Search) path to database see
+            path: (Search) path to database. See
                 :py:func:`~ankipandas.paths.db_path_input` for more
                 information.
             user: Anki user name. See

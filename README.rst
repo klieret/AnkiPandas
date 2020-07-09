@@ -144,6 +144,10 @@ Some basic examples:
 Analysis
 ~~~~~~~~
 
+** More examples can be found in the `analysis documentation`_ **
+
+.. _analysis documentation: https://ankipandas.readthedocs.io/en/latest/examples.html
+
 Show a histogram of the number of reviews (repetitions) of each card for all decks:
 
 .. code:: python
