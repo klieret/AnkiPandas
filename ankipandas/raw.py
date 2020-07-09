@@ -117,7 +117,17 @@ def get_info(db: sqlite3.Connection) -> dict:
     for col in _df.columns:
         val = _df[col][0]
         if isinstance(val, str) and len(val) >= 1:
-            ret[col] = json.loads(val)
+            try:
+                ret[col] = json.loads(val)
+            except json.decoder.JSONDecodeError:
+                msg = (
+                    "AN ERROR OCCURRED WHILE TRYING TO LOAD INFORMATION "
+                    "FROM THE DATABASE. PLEASE COPY THE WHOLE INFORMATION"
+                    "BELOW AND ABOVE AND OPEN A BUG REPORT ON GITHUB!\n\n"
+                )
+                msg += "value to be parsed: {}".format(repr(val))
+                log.critical(msg)
+                raise
         else:
             ret[col] = val
     return ret
