@@ -147,6 +147,32 @@ def get_info(db: sqlite3.Connection) -> dict:
     return read_info(db, "col")
 
 
+@lru_cache(CACHE_SIZE)
+def get_db_version(db: sqlite3.Connection) -> int:
+    """ Get "version" of database structure
+
+    Args:
+        db:
+
+    Returns: 0: all info (also for decks and models) was in the 'col' table
+        1: separate 'notetypes' and 'decks' tables
+
+    """
+    _tables = (
+        db.cursor()
+        .execute(
+            "SELECT name FROM sqlite_master "
+            "WHERE type ='table' AND name NOT LIKE 'sqlite_%';"
+        )
+        .fetchall()
+    )
+    tables = [ret[0] for ret in _tables]
+    if "decks" in tables:
+        return 1
+    else:
+        return 0
+
+
 # Basic Setters
 # ==============================================================================
 
@@ -243,6 +269,7 @@ class NumpyJSONEncoder(json.JSONEncoder):
             return super(NumpyJSONEncoder, self).default(obj)
 
 
+# Currently not used
 def set_info(db: sqlite3.Connection, info: dict) -> None:
     """ Write back extra info to database
 

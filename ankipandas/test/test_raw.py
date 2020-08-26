@@ -225,5 +225,20 @@ class TestMergeDfs(unittest.TestCase):
         self.assertListEqual(sorted(list(df["value"])), [4, 4, 4, 5, 6])
 
 
+class TestGetDbVersion(unittest.TestCase):
+    def setUp(self) -> None:
+        self.db_folder = (
+            pathlib.Path(__file__).parent / "data" / "few_basic_cards"
+        )
+        self.db_v0 = load_db(self.db_folder / "collection.anki2")
+        self.db_v1 = load_db(self.db_folder / "collection_v1.anki2")
+
+    def test_v0(self):
+        assert get_db_version(self.db_v0) == 0
+
+    def test_v1(self):
+        assert get_db_version(self.db_v1) == 1
+
+
 if __name__ == "__main__":
     unittest.main()
