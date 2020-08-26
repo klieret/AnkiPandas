@@ -30,6 +30,7 @@ import numpy as np
 # ours
 from ankipandas.util.log import log
 from ankipandas._columns import tables_ours2anki, anki_columns
+from ankipandas.util.misc import nested_dict
 
 CACHE_SIZE = 32
 
@@ -99,9 +100,27 @@ def get_empty_table(table: str) -> pd.DataFrame:
     return pd.DataFrame(columns=anki_columns[table])
 
 
+def _interpret_json_val(val):
+    if isinstance(val, str) and len(val) >= 1:
+        try:
+            return json.loads(val)
+        except json.decoder.JSONDecodeError:
+            return val
+            # msg = (
+            #     "AN ERROR OCCURRED WHILE TRYING TO LOAD INFORMATION "
+            #     "FROM THE DATABASE. PLEASE COPY THE WHOLE INFORMATION"
+            #     " BELOW AND ABOVE AND OPEN A BUG REPORT ON GITHUB!\n\n"
+            # )
+            # msg += "value to be parsed: {}".format(repr(val))
+            # log.critical(msg)
+            # raise
+    else:
+        return val
+
+
 def read_info(db: sqlite3.Connection, table_name: str):
-    """ Get a table from the database and interpret it as column=key -> json of
-    a nested dictionary mapping.
+    """ Get a table from the database and return nested dictionary mapping of
+    it.
 
     Args:
         db:
@@ -110,25 +129,34 @@ def read_info(db: sqlite3.Connection, table_name: str):
     Returns:
 
     """
+    version = get_db_version(db)
     _df = pd.read_sql_query(f"SELECT * FROM {table_name} ", db)
-    assert len(_df) == 1
-    ret = {}
-    for col in _df.columns:
-        val = _df[col][0]
-        if isinstance(val, str) and len(val) >= 1:
-            try:
-                ret[col] = json.loads(val)
-            except json.decoder.JSONDecodeError:
-                msg = (
-                    "AN ERROR OCCURRED WHILE TRYING TO LOAD INFORMATION "
-                    "FROM THE DATABASE. PLEASE COPY THE WHOLE INFORMATION"
-                    "BELOW AND ABOVE AND OPEN A BUG REPORT ON GITHUB!\n\n"
-                )
-                msg += "value to be parsed: {}".format(repr(val))
-                log.critical(msg)
-                raise
-        else:
-            ret[col] = val
+    if version == 0:
+        assert len(_df) == 1, _df
+        ret = {}
+        for col in _df.columns:
+            ret[col] = _interpret_json_val(_df[col][0])
+    elif version == 1:
+        ret = nested_dict()
+        cols = _df.columns
+        # todo: this is a hack, but oh well:
+        index_cols = 1
+        if len(_df[cols[0]].unique()) != len(_df):
+            index_cols = 2
+        for row in _df.iterrows():
+            row = row[1].to_list()
+            if index_cols == 1:
+                for icol in range(1, len(cols)):
+                    ret[row[0]][cols[icol]] = _interpret_json_val(row[icol])
+            elif index_cols == 2:
+                for icol in range(2, len(cols)):
+                    ret[row[0]][row[1]][cols[icol]] = _interpret_json_val(
+                        row[icol]
+                    )
+            else:
+                raise ValueError
+    else:
+        raise NotImplementedError
     return ret
 
 
@@ -329,7 +357,13 @@ def get_deck_info(db: sqlite3.Connection) -> dict:
     Returns:
         Nested dictionary
     """
-    _dinfo = get_info(db)["decks"]
+    if get_db_version(db) == 0:
+        _dinfo = get_info(db)["decks"]
+    elif get_db_version(db) == 1:
+        _dinfo = read_info(db, "decks")
+    else:
+        raise NotImplementedError
+
     if not _dinfo:
         return {}
     else:
@@ -376,12 +410,16 @@ def get_model_info(db: sqlite3.Connection) -> dict:
     Returns:
         Nested dictionary
     """
-    if not get_info(db)["models"]:
+    if get_db_version(db) == 0:
+        _dinfo = get_info(db)["models"]
+    elif get_db_version(db) == 1:
+        _dinfo = read_info(db, "notetypes")
+    else:
+        raise NotImplementedError
+    if not _dinfo:
         return {}
     else:
-        return {
-            int(key): value for key, value in get_info(db)["models"].items()
-        }
+        return {int(key): value for key, value in _dinfo.items()}
 
 
 @lru_cache(CACHE_SIZE)
@@ -432,10 +470,21 @@ def get_mid2fields(db: sqlite3.Connection) -> Dict[int, List[str]]:
     Returns:
         Dictionary mapping of model ID (mid) to list of field names.
     """
-    minfo = get_model_info(db)
-    return {
-        int(mid): [flds["name"] for flds in minfo[mid]["flds"]] for mid in minfo
-    }
+    if get_db_version(db) == 0:
+        minfo = get_model_info(db)
+        return {
+            int(mid): [flds["name"] for flds in minfo[mid]["flds"]]
+            for mid in minfo
+        }
+    elif get_db_version(db) == 1:
+        finfo = read_info(db, "fields")
+        mid2fields = {
+            int(mid): [finfo[mid][ord]["name"] for ord in finfo[mid]]
+            for mid in finfo
+        }
+        return mid2fields
+    else:
+        raise NotImplementedError
 
 
 @lru_cache(CACHE_SIZE)

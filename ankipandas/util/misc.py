@@ -2,6 +2,7 @@
 
 # std
 from typing import List, Any
+import collections
 
 
 def invert_dict(dct: dict) -> dict:
@@ -33,3 +34,18 @@ def flatten_list_list(lst: List[List[Any]]) -> List[Any]:
         list
     """
     return [item for sublist in lst for item in sublist]
+
+
+def nested_dict():
+    """ This is very clever and stolen from
+    https://stackoverflow.com/questions/16724788/
+    Use it to initialize a dictionary-like object which automatically adds
+    levels.
+    E.g.
+
+    .. code-block:: python
+
+        a = nested_dict()
+        a['test']['this']['is']['working'] = "yaaay"
+    """
+    return collections.defaultdict(nested_dict)

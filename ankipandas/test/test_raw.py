@@ -13,45 +13,66 @@ from ankipandas.util.dataframe import merge_dfs
 
 class TestRawRead(unittest.TestCase):
     def setUp(self):
-        self.db_path = (
-            pathlib.Path(__file__).parent
-            / "data"
-            / "few_basic_cards"
-            / "collection.anki2"
+        self.db_folder = (
+            pathlib.Path(__file__).parent / "data" / "few_basic_cards"
         )
-        self.db = load_db(self.db_path)
+        self.version2db = {
+            0: load_db(self.db_folder / "collection.anki2"),
+            1: load_db(self.db_folder / "collection_v1.anki2"),
+        }
+
+    def test_get_db_version(self):
+        for version in [0, 1]:
+            with self.subTest(version=version):
+                assert get_db_version(self.version2db[version]) == version
 
     def tearDown(self):
-        close_db(self.db)
+        for db in self.version2db.values():
+            close_db(db)
 
     def test_get_deck_info(self):
-        info = get_deck_info(self.db)
-        self.assertGreaterEqual(len(info), 2)
-        self.assertIsInstance(info, dict)
+        for version in [0, 1]:
+            with self.subTest(version=version):
+                info = get_deck_info(self.version2db[version])
+                self.assertGreaterEqual(len(info), 2)
+                self.assertIsInstance(info, dict)
 
     def test_get_deck_names(self):
-        names = get_did2deck(self.db)
-        self.assertTrue(
-            set(names.values()).issuperset({"Testing", "EnglishGerman"})
-        )
+        for version in [0, 1]:
+            with self.subTest(version=version):
+                names = get_did2deck(self.version2db[version])
+                self.assertTrue(
+                    set(names.values()).issuperset({"Testing", "EnglishGerman"})
+                )
 
     def test_get_model_info(self):
-        minfo = get_model_info(self.db)
-        self.assertIsInstance(minfo, dict)
-        self.assertGreaterEqual(len(minfo), 2)
+        for version in [0, 1]:
+            with self.subTest(version=version):
+                minfo = get_model_info(self.version2db[version])
+                self.assertIsInstance(minfo, dict)
+                self.assertGreaterEqual(len(minfo), 2)
 
     def test_get_model_names(self):
-        names = get_mid2model(self.db)
-        self.assertIn("Basic", names.values())
-        self.assertIn("Cloze", names.values())
-        self.assertEqual(len(names), 5)
+        for version in [0, 1]:
+            with self.subTest(version=version):
+                names = get_mid2model(self.version2db[version])
+                self.assertIn("Basic", names.values())
+                self.assertIn("Cloze", names.values())
+                self.assertEqual(len(names), 5)
 
     def test_get_field_names(self):
-        fnames = get_mid2fields(self.db)
-        models = get_mid2model(self.db)
-        fnames = {models[mid]: fnames[mid] for mid in models}
-        self.assertEqual(len(fnames), len(get_mid2model(self.db)))
-        self.assertListEqual(fnames["Basic"], ["Front", "Back"])
+        for version in [0, 1]:
+            with self.subTest(version=version):
+                _fnames = get_mid2fields(self.version2db[version])
+                models = get_mid2model(self.version2db[version])
+                fnames = {models[mid]: _fnames[mid] for mid in models}
+                print("MODELS", models)
+                print("_FNAMES", _fnames)
+                print("FNAMES", fnames)
+                self.assertEqual(
+                    len(fnames), len(get_mid2model(self.version2db[version]))
+                )
+                self.assertListEqual(fnames["Basic"], ["Front", "Back"])
 
 
 class TestRawWrite(unittest.TestCase):
@@ -223,21 +244,6 @@ class TestMergeDfs(unittest.TestCase):
             ["clash_x", "clash_y", "drop", "id_df", "ignore", "value"],
         )
         self.assertListEqual(sorted(list(df["value"])), [4, 4, 4, 5, 6])
-
-
-class TestGetDbVersion(unittest.TestCase):
-    def setUp(self) -> None:
-        self.db_folder = (
-            pathlib.Path(__file__).parent / "data" / "few_basic_cards"
-        )
-        self.db_v0 = load_db(self.db_folder / "collection.anki2")
-        self.db_v1 = load_db(self.db_folder / "collection_v1.anki2")
-
-    def test_v0(self):
-        assert get_db_version(self.db_v0) == 0
-
-    def test_v1(self):
-        assert get_db_version(self.db_v1) == 1
 
 
 if __name__ == "__main__":
