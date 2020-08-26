@@ -99,19 +99,18 @@ def get_empty_table(table: str) -> pd.DataFrame:
     return pd.DataFrame(columns=anki_columns[table])
 
 
-@lru_cache(CACHE_SIZE)
-def get_info(db: sqlite3.Connection) -> dict:
-    """
-    Get all other information from the database, e.g. information about models,
-    decks etc.
+def read_info(db: sqlite3.Connection, table_name: str):
+    """ Get a table from the database and interpret it as column=key -> json of
+    a nested dictionary mapping.
 
     Args:
-        db: Database (:class:`sqlite3.Connection`)
+        db:
+        table_name:
 
     Returns:
-        Nested dictionary.
+
     """
-    _df = pd.read_sql_query("SELECT * FROM col ", db)
+    _df = pd.read_sql_query(f"SELECT * FROM {table_name} ", db)
     assert len(_df) == 1
     ret = {}
     for col in _df.columns:
@@ -131,6 +130,21 @@ def get_info(db: sqlite3.Connection) -> dict:
         else:
             ret[col] = val
     return ret
+
+
+@lru_cache(CACHE_SIZE)
+def get_info(db: sqlite3.Connection) -> dict:
+    """
+    Get all other information from the database, e.g. information about models,
+    decks etc.
+
+    Args:
+        db: Database (:class:`sqlite3.Connection`)
+
+    Returns:
+        Nested dictionary.
+    """
+    return read_info(db, "col")
 
 
 # Basic Setters
@@ -288,7 +302,11 @@ def get_deck_info(db: sqlite3.Connection) -> dict:
     Returns:
         Nested dictionary
     """
-    return get_info(db)["decks"]
+    _dinfo = get_info(db)["decks"]
+    if not _dinfo:
+        return {}
+    else:
+        return _dinfo
 
 
 @lru_cache(CACHE_SIZE)
@@ -331,7 +349,12 @@ def get_model_info(db: sqlite3.Connection) -> dict:
     Returns:
         Nested dictionary
     """
-    return {int(key): value for key, value in get_info(db)["models"].items()}
+    if not get_info(db)["models"]:
+        return {}
+    else:
+        return {
+            int(key): value for key, value in get_info(db)["models"].items()
+        }
 
 
 @lru_cache(CACHE_SIZE)
