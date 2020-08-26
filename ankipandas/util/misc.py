@@ -49,3 +49,12 @@ def nested_dict():
         a['test']['this']['is']['working'] = "yaaay"
     """
     return collections.defaultdict(nested_dict)
+
+
+def defaultdict2dict(defdict: collections.defaultdict):
+    return {
+        key: defaultdict2dict(value)
+        if isinstance(value, collections.defaultdict)
+        else value
+        for key, value in defdict.items()
+    }

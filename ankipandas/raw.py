@@ -30,7 +30,7 @@ import numpy as np
 # ours
 from ankipandas.util.log import log
 from ankipandas._columns import tables_ours2anki, anki_columns
-from ankipandas.util.misc import nested_dict
+from ankipandas.util.misc import nested_dict, defaultdict2dict
 
 CACHE_SIZE = 32
 
@@ -157,7 +157,7 @@ def read_info(db: sqlite3.Connection, table_name: str):
                 raise ValueError
     else:
         raise NotImplementedError
-    return ret
+    return defaultdict2dict(ret)
 
 
 @lru_cache(CACHE_SIZE)
@@ -455,9 +455,14 @@ def get_model2mid(db: sqlite3.Connection) -> Dict[str, int]:
 @lru_cache(CACHE_SIZE)
 def get_mid2sortfield(db: sqlite3.Connection) -> Dict[int, int]:
     """ Mapping of model ID to index of sort field. """
-    minfo = get_model_info(db)
-    _mid2sortfield = {mid: minfo[mid]["sortf"] for mid in minfo}
-    return defaultdict(int, _mid2sortfield)
+    if get_db_version(db) == 0:
+        minfo = get_model_info(db)
+        _mid2sortfield = {mid: minfo[mid]["sortf"] for mid in minfo}
+        return defaultdict(int, _mid2sortfield)
+    else:
+        # fixme: Don't know how to retrieve sort field yet
+        minfo = get_model_info(db)
+        return {mid: 0 for mid in minfo}
 
 
 @lru_cache(CACHE_SIZE)
@@ -483,6 +488,26 @@ def get_mid2fields(db: sqlite3.Connection) -> Dict[int, List[str]]:
             for mid in finfo
         }
         return mid2fields
+    else:
+        raise NotImplementedError
+
+
+@lru_cache(CACHE_SIZE)
+def get_mid2templateords(db: sqlite3.Connection) -> Dict[int, List[int]]:
+    """ Get mapping of model ID to available templates ids
+
+    Args:
+        db:
+
+    Returns:
+
+    """
+    if get_db_version(db) == 0:
+        minfo = get_model_info(db)
+        return {mid: [x["ord"] for x in minfo[mid]["tmpls"]] for mid in minfo}
+    elif get_db_version(db) == 1:
+        tinfo = read_info(db, "templates")
+        return {int(mid): [int(x) for x in tinfo[mid]] for mid in tinfo}
     else:
         raise NotImplementedError
 

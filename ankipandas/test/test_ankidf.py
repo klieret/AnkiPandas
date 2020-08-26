@@ -23,13 +23,14 @@ import ankipandas._columns as _columns
 
 
 class TestAnkiDF(unittest.TestCase):
+    db_path = (
+        pathlib.Path(__file__).parent
+        / "data"
+        / "few_basic_cards"
+        / "collection.anki2"
+    )
+
     def setUp(self):
-        self.db_path = (
-            pathlib.Path(__file__).parent
-            / "data"
-            / "few_basic_cards"
-            / "collection.anki2"
-        )
         self.db = raw.load_db(self.db_path)
 
         self.col = Collection(self.db_path)
@@ -997,6 +998,15 @@ class TestAnkiDF(unittest.TestCase):
         notes = self.notes
         hlp = notes.help(ret=True)
         self.assertTrue(isinstance(hlp, str))
+
+
+class TestAnkiDFv1(TestAnkiDF):
+    db_path = (
+        pathlib.Path(__file__).parent
+        / "data"
+        / "few_basic_cards"
+        / "collection_v1.anki2"
+    )
 
 
 if __name__ == "__main__":

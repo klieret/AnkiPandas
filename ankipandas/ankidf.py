@@ -1400,9 +1400,8 @@ class AnkiDataFrame(pd.DataFrame):
             )
         mid = mids[0]
 
-        minfo = raw.get_model_info(self.db)
-
-        available_ords = list(map(lambda x: x["ord"], minfo[mid]["tmpls"]))
+        # fixme: should use functino from ankipandas.raw
+        available_ords = raw.get_mid2templateords(self.db)[mid]
         if cord is None:
             cord = available_ords
         elif isinstance(cord, int):

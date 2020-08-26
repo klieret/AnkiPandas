@@ -74,6 +74,11 @@ class TestRawRead(unittest.TestCase):
                 )
                 self.assertListEqual(fnames["Basic"], ["Front", "Back"])
 
+    def test_get_mid2sortfield(self):
+        for version in [0, 1]:
+            with self.subTest(version=version):
+                pass
+
 
 class TestRawWrite(unittest.TestCase):
     def setUp(self):
