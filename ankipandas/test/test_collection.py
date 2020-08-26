@@ -11,14 +11,15 @@ from ankipandas.collection import Collection
 
 
 class TestCollection(unittest.TestCase):
-    def setUp(self):
-        self.db_path = (
-            pathlib.Path(__file__).parent
-            / "data"
-            / "few_basic_cards"
-            / "collection.anki2"
-        )
 
+    db_path = (
+        pathlib.Path(__file__).parent
+        / "data"
+        / "few_basic_cards"
+        / "collection.anki2"
+    )
+
+    def setUp(self):
         self.col = Collection(self.db_path)
         self.notes = self.col.notes
         self.cards = self.col.cards
@@ -118,6 +119,15 @@ class TestCollection(unittest.TestCase):
                     self.assertTrue(
                         "would be modified" in str(context.exception)
                     )
+
+
+class TestCollectionV1(TestCollection):
+    db_path = (
+        pathlib.Path(__file__).parent
+        / "data"
+        / "few_basic_cards"
+        / "collection_v1.anki2"
+    )
 
 
 if __name__ == "__main__":

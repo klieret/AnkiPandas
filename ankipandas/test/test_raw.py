@@ -74,20 +74,16 @@ class TestRawRead(unittest.TestCase):
                 )
                 self.assertListEqual(fnames["Basic"], ["Front", "Back"])
 
-    def test_get_mid2sortfield(self):
-        for version in [0, 1]:
-            with self.subTest(version=version):
-                pass
-
 
 class TestRawWrite(unittest.TestCase):
+    db_read_path = (
+        pathlib.Path(__file__).parent
+        / "data"
+        / "few_basic_cards"
+        / "collection.anki2"
+    )
+
     def setUp(self):
-        self.db_read_path = (
-            pathlib.Path(__file__).parent
-            / "data"
-            / "few_basic_cards"
-            / "collection.anki2"
-        )
         self.db_read = load_db(self.db_read_path)
         self.db_write_dir = tempfile.TemporaryDirectory()
         self.db_write_path = (
@@ -194,6 +190,15 @@ class TestRawWrite(unittest.TestCase):
         set_info(self.db_write, info)
         info2 = get_info(self.db_write)
         self.assertDictEqual(info, info2)
+
+
+class TestRawWriteV1(unittest.TestCase):
+    db_read_path = (
+        pathlib.Path(__file__).parent
+        / "data"
+        / "few_basic_cards"
+        / "collection_v1.anki2"
+    )
 
 
 class TestMergeDfs(unittest.TestCase):
