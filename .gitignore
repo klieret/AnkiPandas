@@ -9,6 +9,8 @@ examples/jupyter_notebooks/tests.ipynb
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
 
+*.ipynb
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -135,4 +137,3 @@ dmypy.json
 .pyre/
 
 # End of https://www.gitignore.io/api/python
-
