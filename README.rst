@@ -144,7 +144,7 @@ Some basic examples:
 Analysis
 ~~~~~~~~
 
-** More examples can be found in the `analysis documentation`_ **
+**More examples can be found in the `analysis documentation`_**
 
 .. _analysis documentation: https://ankipandas.readthedocs.io/en/latest/examples.html
 
