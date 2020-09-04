@@ -187,7 +187,7 @@ Set the ``language`` field to ``English`` for all notes of model ``LanguageModel
 .. code:: python
 
     selection = col.notes.has_tag(["English"]).query("model=='LanguageModel'").copy()
-    col.fields_as_columns(inplace=True)
+    selection.fields_as_columns(inplace=True)
     selection["language"] = "English"
     col.notes.update(selection)
     col.write(modify=True)
