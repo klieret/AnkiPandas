@@ -144,7 +144,7 @@ Some basic examples:
 Analysis
 ~~~~~~~~
 
-**More examples can be found in the `analysis documentation`_**
+**More examples**: `Analysis documentation`_
 
 .. _analysis documentation: https://ankipandas.readthedocs.io/en/latest/examples.html
 
@@ -187,7 +187,7 @@ Set the ``language`` field to ``English`` for all notes of model ``LanguageModel
 .. code:: python
 
     selection = col.notes.has_tag(["English"]).query("model=='LanguageModel'").copy()
-    fields_as_columns(inplace=True)
+    col.fields_as_columns(inplace=True)
     selection["language"] = "English"
     col.notes.update(selection)
     col.write(modify=True)
