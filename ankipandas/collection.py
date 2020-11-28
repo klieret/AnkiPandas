@@ -200,15 +200,24 @@ class Collection(object):
         info = raw.get_info(self.db)
         info["mod"] = int(time.time() * 1000)  # Modification time stamp
         info["usn"] = -1  # Signals update needed
+        # fixme: this currently doesn't work. In the new db structure there's
+        #   a tags table instead of a field, but it doesn't seem to be
+        #   used.
         if self.__items["notes"] is not None:
-            missing_tags = list(
-                set(info["tags"].keys())
-                - set(self.__items["notes"].list_tags())
+            log.warning(
+                "Currently AnkiPandas might not be able to tell Anki to"
+                " sync its tags. So if you added any new tags, you "
+                "might have to manually tell Anki to sync everything "
+                "if you want to see and use them in AnkiDroid."
             )
-            for tag in missing_tags:
-                # I'm assuming that this is the usn (update sequence number)
-                # of the tags
-                info["tags"][tag] = -1
+        #     missing_tags = list(
+        #         set(info["tags"].keys())
+        #         - set(self.__items["notes"].list_tags())
+        #     )
+        #     for tag in missing_tags:
+        #         # I'm assuming that this is the usn (update sequence number)
+        #         # of the tags
+        #         info["tags"][tag] = -1
         return info
 
     def write(
@@ -258,11 +267,11 @@ class Collection(object):
                 modify=modify, add=add, delete=delete
             )
 
-            info = self._get_and_update_info()
+            self._get_and_update_info()
         except Exception as e:
             log.critical(
                 "Something went wrong preparing the data for writing. "
-                "However, no data has been written out, so your"
+                "However, no data has been written out, so your "
                 "database is save!"
             )
             raise e
