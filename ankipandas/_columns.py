@@ -6,6 +6,7 @@ from pathlib import Path
 
 # 3rd
 import pandas as pd
+import numpy as np
 
 # todo: Docstrings, cleanup
 
@@ -18,6 +19,8 @@ tables_anki2ours = invert_dict(tables_ours2anki)
 fields_file = Path(__file__).parent / "data" / "anki_fields.csv"
 fields_df = pd.read_csv(fields_file)
 
+#: Maps table type to name of the index. E.g. the index of the notes is called
+#: nid.
 table2index = {"cards": "cid", "notes": "nid", "revs": "rid"}
 
 our_tables = sorted(list(tables_ours2anki.keys()))
@@ -125,28 +128,32 @@ dtype_casts_back = {"notes": {}, "cards": {}, "revs": {}}
 
 # Avoiding problem with ints to floats such as here:
 # https://github.com/pandas-dev/pandas/issues/4094
+# Also be careful with platform dependent length of the int type, else this
+# causes this error https://stackoverflow.com/questions/38314118/
+# on Windows machines as stated by CalculusAce in
+# https://github.com/klieret/AnkiPandas/issues/41
 dtype_casts2 = {
     "cards": {
-        "cord": int,
-        "cmod": int,
-        "cusn": int,
-        "cdue": int,
-        "civl": int,
-        "cfactor": int,
-        "creps": int,
-        "clapses": int,
-        "cleft": int,
-        "codue": int,
+        "cord": np.int64,
+        "cmod": np.int64,
+        "cusn": np.int64,
+        "cdue": np.int64,
+        "civl": np.int64,
+        "cfactor": np.int64,
+        "creps": np.int64,
+        "clapses": np.int64,
+        "cleft": np.int64,
+        "codue": np.int64,
     },
-    "notes": {"nmod": int, "nusn": int},
+    "notes": {"nmod": np.int64, "nusn": np.int64},
     "revs": {
-        "cid": int,
-        "rusn": int,
-        "rease": int,
-        "ivl": int,
-        "lastivl": int,
-        "rfactor": int,
-        "rtime": int,
+        "cid": np.int64,
+        "rusn": np.int64,
+        "rease": np.int64,
+        "ivl": np.int64,
+        "lastivl": np.int64,
+        "rfactor": np.int64,
+        "rtime": np.int64,
     },
 }
 dtype_casts_all = copy.deepcopy(dtype_casts2["cards"])
