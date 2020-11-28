@@ -585,7 +585,7 @@ class AnkiDataFrame(pd.DataFrame):
             self._check_our_format()
         if not inplace:
             df = self.copy(True)
-            df.fields_as_list(inplace=True)
+            df.fields_as_list(inplace=True, force=force)
             return df
 
         if self._fields_format == "list":
@@ -825,7 +825,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         self_sf = self
         if self._fields_format == "columns":
-            self_sf = self.fields_as_list(inplace=False)
+            self_sf = self.fields_as_list(inplace=False, force=_force)
 
         cols = sorted(
             list(set(self_sf.columns).intersection(set(other.columns)))
