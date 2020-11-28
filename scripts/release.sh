@@ -36,6 +36,12 @@ then
     exit 113
 fi
 
+read -p "Did you push your latest changes (including the version bump?) [Yy]? " -n 1 -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 114
+fi
+
 python3 setup.py sdist bdist_wheel
 
 python3 -m twine check "${sourceDir}/dist/*"
