@@ -444,7 +444,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
         elif self._anki_table == "revs":
             self["nid"] = self.nid
-        return ankipandas.util.dataframe.merge_dfs(
+        ret = ankipandas.util.dataframe.merge_dfs(
             df=self,
             df_add=self.col.notes,
             id_df="nid",
@@ -455,6 +455,9 @@ class AnkiDataFrame(pd.DataFrame):
             columns=columns,
             drop_columns=drop_columns,
         )
+        for md in self._metadata:
+            setattr(ret, md, getattr(self, md))
+        return ret
 
     def merge_cards(
         self,
@@ -490,7 +493,7 @@ class AnkiDataFrame(pd.DataFrame):
                 "notes table."
             )
         self._check_our_format()
-        return ankipandas.util.dataframe.merge_dfs(
+        ret = ankipandas.util.dataframe.merge_dfs(
             df=self,
             df_add=self.col.cards,
             id_df="cid",
@@ -501,6 +504,9 @@ class AnkiDataFrame(pd.DataFrame):
             prepend=prepend,
             prepend_clash_only=prepend_clash_only,
         )
+        for md in self._metadata:
+            setattr(ret, md, getattr(self, md))
+        return ret
 
     # Toggle format
     # ==========================================================================
