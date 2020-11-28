@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.7 -- 2020-11-28
+
+### Fixed
+
+- `merge_cards` and `merge_notes` didn't update metadata of return value, resulting in errors like
+  `Unknown value of _df_format`. Issue #42
+- `force` values weren't passed on, resulting in AnkiPandas refusing to do anything
+  when writing out
+- On Windows the int size is 32 bit even on 64 bit computers, resulting in issues with
+  large values of ids. Issue #41
+
+
 ## 0.3.6 - 2020-08-26
 
 ### Fixed
