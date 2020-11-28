@@ -31,6 +31,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "p4nix",
+      "name": "p4nix",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/7038116?v=4",
+      "profile": "https://github.com/p4nix",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
