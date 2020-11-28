@@ -22,6 +22,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "brownbat",
+      "name": "Thomas Brownback",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/26754?v=4",
+      "profile": "http://thomasbrownback.com/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
