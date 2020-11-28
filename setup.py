@@ -30,7 +30,7 @@ this_dir = Path(__file__).resolve().parent
 
 packages = setuptools.find_packages()
 
-with (this_dir / "README.rst").open() as fh:
+with (this_dir / "README.md").open() as fh:
     long_description = fh.read()
 
 with (this_dir / "ankipandas" / "version.txt").open() as vf:
@@ -60,7 +60,7 @@ setup(
     keywords=keywords,
     description=description,
     long_description=long_description,
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/markdown",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
