@@ -1980,15 +1980,15 @@ class AnkiDataFrame(pd.DataFrame):
         df = pd.read_csv(help_path)
         if column == "auto":
             column = list(self.columns)
-        if table is not "all":
+        if table != "all":
             if isinstance(table, str):
                 table = [table]
             df = df[df["Table"].isin(table)]
-        if column is not "all":
+        if column != "all":
             if isinstance(column, str):
                 column = [column]
             df = df[df["Column"].isin(column)]
-        if ankicolumn is not "all":
+        if ankicolumn != "all":
             if isinstance(ankicolumn, str):
                 ankicolumn = [ankicolumn]
             df = df[df["AnkiColumn"].isin(ankicolumn)]
