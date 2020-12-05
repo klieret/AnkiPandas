@@ -4,14 +4,14 @@
 import collections
 import unittest
 import tempfile
-from typing import List, Any
+from typing import List
+from pathlib import Path
 
 # 3rd
 from randomfiletree import sample_random_elements, iterative_gaussian_tree
 
 # ours
 import ankipandas.paths as paths
-from ankipandas._columns import *
 from ankipandas.util.misc import flatten_list_list
 
 

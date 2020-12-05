@@ -5,9 +5,26 @@ import copy
 import unittest
 import shutil
 import tempfile
+import pathlib
+
+# 3rd
+import pandas as pd
 
 # ours
-from ankipandas.raw import *
+from ankipandas.raw import (
+    load_db,
+    get_db_version,
+    close_db,
+    get_deck_info,
+    get_did2deck,
+    get_model_info,
+    get_mid2model,
+    set_table,
+    set_info,
+    get_info,
+    get_table,
+    get_mid2fields,
+)
 from ankipandas.util.dataframe import merge_dfs
 
 

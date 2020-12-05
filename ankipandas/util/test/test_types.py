@@ -4,7 +4,12 @@
 import unittest
 
 # ours
-from ankipandas.util.types import *
+from ankipandas.util.types import (
+    is_list_like,
+    is_list_dict_like,
+    is_dict_list_like,
+    is_list_list_like,
+)
 
 
 class TestTypes(unittest.TestCase):

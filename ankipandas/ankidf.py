@@ -20,7 +20,12 @@ from ankipandas.util.misc import invert_dict, flatten_list_list
 from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
 from ankipandas.util.guid import guid as generate_guid
-from ankipandas.util.types import *
+from ankipandas.util.types import (
+    is_list_list_like,
+    is_list_like,
+    is_list_dict_like,
+    is_dict_list_like,
+)
 
 
 class AnkiDataFrame(pd.DataFrame):
