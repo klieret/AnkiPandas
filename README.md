@@ -214,7 +214,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/exc4l"><img src="https://avatars3.githubusercontent.com/u/74188442?v=4" width="100px;" alt=""/><br /><sub><b>exc4l</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Aexc4l" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/exc4l"><img src="https://avatars3.githubusercontent.com/u/74188442?v=4" width="100px;" alt=""/><br /><sub><b>exc4l</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Aexc4l" title="Bug reports">🐛</a> <a href="https://github.com/klieret/AnkiPandas/commits?author=exc4l" title="Code">💻</a></td>
   </tr>
 </table>
 
