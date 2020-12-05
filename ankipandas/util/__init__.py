@@ -4,7 +4,7 @@
 
 .. warning::
 
-    These utilties are less aimed at end users and might therefore be subject
+    These utilities are less aimed at end users and might therefore be subject
     to change.
 
 """

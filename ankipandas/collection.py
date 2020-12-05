@@ -41,7 +41,7 @@ class Collection(object):
             # Specify full path to Anki's database
             col = Collection("/full/path/to/collection.anki2")
 
-            # Speficy partial path to Anki's database and specify user
+            # Specify partial path to Anki's database and specify user
             col = Collection("/partial/path/to/collection", user="User 1")
 
         """
@@ -300,12 +300,12 @@ class Collection(object):
             log.critical(
                 "Error while writing data to database at {path}"
                 "This means that your database might have become corrupted. "
-                "It's STRONGLY adviced that you manually restore the database "
+                "It's STRONGLY advised that you manually restore the database "
                 "by replacing it with the backup from {backup_path} and restart"
                 " from scratch. "
                 "Please also open a bug report at "
                 "https://github.com/klieret/AnkiPandas/issues/, as errors "
-                "during the actual writing process should never occurr!".format(
+                "during the actual writing process should never occur!".format(
                     path=self.path.resolve(), backup_path=backup_path.resolve()
                 )
             )

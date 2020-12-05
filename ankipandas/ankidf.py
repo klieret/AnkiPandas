@@ -25,7 +25,7 @@ from ankipandas.util.types import *
 
 class AnkiDataFrame(pd.DataFrame):
     #: Additional attributes of a :class:`AnkiDataFrame` that a normal
-    #: :class:`pandas.DataFrame` does not posess. These will be copied in the
+    #: :class:`pandas.DataFrame` does not possess. These will be copied in the
     #: constructor.
     #: See https://pandas.pydata.org/pandas-docs/stable/development/extending.html
     _metadata = [
@@ -175,7 +175,7 @@ class AnkiDataFrame(pd.DataFrame):
         if self._df_format == "in_progress":
             raise ValueError(
                 "Previous call to normalize() or raw() did not terminate "
-                "succesfully. This is usually a very bad sign, but you can "
+                "successfully. This is usually a very bad sign, but you can "
                 "try calling them again with the force option: raw(force=True) "
                 "or raw(force=True) and see if that works."
             )
@@ -396,7 +396,7 @@ class AnkiDataFrame(pd.DataFrame):
                 return self["odeck"].map(raw.get_deck2did(self.db))
         elif self._anki_table == "notes":
             raise ValueError(
-                "The original deck ID (odid) is not availabale for the notes "
+                "The original deck ID (odid) is not available for the notes "
                 "table."
             )
         else:
@@ -1020,7 +1020,7 @@ class AnkiDataFrame(pd.DataFrame):
         duplicate_ids = self[id_field][self[id_field].duplicated()].tolist()
         if duplicate_ids:
             log.critical(
-                "The following IDs occurr "
+                "The following IDs occur "
                 "more than once: {}. Please do not use this dataframe.".format(
                     ", ".join(map(str, duplicate_ids))
                 )
@@ -1406,7 +1406,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
         mid = mids[0]
 
-        # fixme: should use functino from ankipandas.raw
+        # fixme: should use function from ankipandas.raw
         available_ords = raw.get_mid2templateords(self.db)[mid]
         if cord is None:
             cord = available_ords

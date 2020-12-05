@@ -472,7 +472,7 @@ def get_mid2fields(db: sqlite3.Connection) -> Dict[int, List[str]]:
     """ Get mapping of model ID to field names.
 
     Args:
-        db: Databse (:class:`sqlite3.Connection`)
+        db: Database (:class:`sqlite3.Connection`)
 
     Returns:
         Dictionary mapping of model ID (mid) to list of field names.
