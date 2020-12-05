@@ -103,11 +103,10 @@ def find_db(
             "You can speed this up by specifying a search path or "
             "directly entering the path to your database."
         )
-        # todo: Windows paths?
         search_paths = [
             "~/.local/share/Anki2/",
             "~/Documents/Anki2",
-            "~/Anki2/",
+            pathlib.Path(os.getenv("APPDATA", "~")+"/Anki2/"),
             pathlib.Path.home(),
         ]
     if break_on_first:
