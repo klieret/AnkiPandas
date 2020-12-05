@@ -142,11 +142,14 @@ notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
 
 ## Manipulations
 
+**Please be careful and test this well!** Ankipandas will create a backup of your database before writing, so you can always restore the previous state. Please make sure that everything is working before continuing to use Anki normally!
+
 Add the `difficult-japanese` and `marked` tag to all notes that contain
 the tags `Japanese` and `leech`:
 
 ``` {.sourceCode .python}
-selection = col.notes.has_tags(["Japanese", "leech"])
+notes = col.notes
+selection = notes[notes.has_tags(["Japanese", "leech"])]
 selection = selection.add_tag(["difficult-japanese", "marked"])
 col.notes.update(selection)
 col.write(modify=True)  # Overwrites your database after creating a backup!
@@ -156,7 +159,8 @@ Set the `language` field to `English` for all notes of model
 `LanguageModel` that are tagged with `English`:
 
 ``` {.sourceCode .python}
-selection = col.notes.has_tag(["English"]).query("model=='LanguageModel'").copy()
+notes = col.notes
+selection = notes[notes.has_tag(["English"])].query("model=='LanguageModel'").copy()
 selection.fields_as_columns(inplace=True)
 selection["language"] = "English"
 col.notes.update(selection)
@@ -166,7 +170,8 @@ col.write(modify=True)
 Move all cards tagged `leech` to the deck `Leeches Only`:
 
 ``` {.sourceCode .python}
-selection = col.cards.has_tag("leech")
+cards = col.cards
+selection = cards[cards.has_tag("leech")]
 selection["cdeck"] = "Leeches Only"
 col.cards.update(selection)
 col.write(modify=True)
