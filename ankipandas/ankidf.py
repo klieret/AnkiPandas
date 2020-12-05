@@ -8,7 +8,7 @@ import time
 import numpy as np
 import pandas as pd
 import pathlib
-from typing import Union, List, Dict, Optional
+from typing import Union, List, Dict, Optional, Iterable
 
 # ours
 import ankipandas.paths
@@ -681,7 +681,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
         return sorted(list(self["nmodel"].unique()))
 
-    def has_tag(self, tags=None):
+    def has_tag(self, tags: Optional[Union[Iterable[str], str]] = None):
         """ Checks whether row has a certain tag ('ntags' column).
 
         Args:
@@ -722,7 +722,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             return self["ntags"].apply(bool)
 
-    def has_tags(self, tags=None):
+    def has_tags(self, tags: Optional[Union[Iterable[str], str]] = None):
         """ Checks whether row contains at least the supplied tags.
 
         Args:
@@ -751,7 +751,7 @@ class AnkiDataFrame(pd.DataFrame):
         _has_tags = set(tags).issubset
         return self["ntags"].apply(_has_tags)
 
-    def add_tag(self, tags, inplace=False):
+    def add_tag(self, tags: Union[Iterable[str], str], inplace=False):
         """ Adds tag ('ntags' column).
 
         Args:
@@ -779,7 +779,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         self["ntags"] = self["ntags"].apply(_add_tags)
 
-    def remove_tag(self, tags, inplace=False):
+    def remove_tag(self, tags: Union[Iterable[str], str, None], inplace=False):
         """ Removes tag ('ntags' column).
 
         Args:
@@ -812,7 +812,9 @@ class AnkiDataFrame(pd.DataFrame):
     # Compare
     # ==========================================================================
 
-    def was_modified(self, other: pd.DataFrame = None, na=True, _force=False):
+    def was_modified(
+        self, other: Optional[pd.DataFrame] = None, na=True, _force=False
+    ):
         """ Compare with original table, show which rows have changed.
         Will only compare columns existing in both dataframes.
 
@@ -856,7 +858,7 @@ class AnkiDataFrame(pd.DataFrame):
         return result
 
     def modified_columns(
-        self, other: pd.DataFrame = None, _force=False, only=True
+        self, other: Optional[pd.DataFrame] = None, _force=False, only=True
     ):
         """ Compare with original table, show which columns in which rows
         were modified.
@@ -888,7 +890,7 @@ class AnkiDataFrame(pd.DataFrame):
             columns=cols,
         )
 
-    def was_added(self, other: pd.DataFrame = None, _force=False):
+    def was_added(self, other: Optional[pd.DataFrame] = None, _force=False):
         """ Compare with original table, show which rows were added.
 
         Args:
@@ -912,7 +914,9 @@ class AnkiDataFrame(pd.DataFrame):
         new_indices = set(self.index) - other_ids
         return self.index.isin(new_indices)
 
-    def was_deleted(self, other: pd.DataFrame = None, _force=False) -> List:
+    def was_deleted(
+        self, other: Optional[pd.DataFrame] = None, _force=False
+    ) -> List:
         """ Compare with original table, return deleted indizes.
 
         Args:
