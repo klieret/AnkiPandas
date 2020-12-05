@@ -2,8 +2,7 @@
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-[![Build
-Status](https://travis-ci.org/klieret/AnkiPandas.svg?branch=master)](https://travis-ci.org/klieret/AnkiPandas)
+![gh actions](https://github.com/klieret/AnkiPandas/workflows/testing/badge.svg)
 [![Coveralls](https://coveralls.io/repos/github/klieret/AnkiPandas/badge.svg?branch=master)](https://coveralls.io/github/klieret/AnkiPandas?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/)
 [![Pypi status](https://badge.fury.io/py/ankipandas.svg)](https://pypi.org/project/ankipandas/)
