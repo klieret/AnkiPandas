@@ -80,7 +80,11 @@ class Collection(object):
         return self._db
 
     def __del__(self):
-        log.debug(f"Closing db {self.db} which was loaded from {self.path}.")
+        log.debug(
+            "Closing db {db} which was loaded from {path}.".format(
+                db=self.db, path=self.path
+            )
+        )
         raw.close_db(self.db)
         log.debug("Closing successful")
 
