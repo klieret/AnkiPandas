@@ -39,10 +39,9 @@ your Anki flashcards.
     or switch to the even more versatile
     [seaborn](https://seaborn.pydata.org/) (statistical analysis) or
     [matplotlib](https://matplotlib.org/) libraries
--   **Manipulate**: Apply fast bulk operations to the table (e.g. add
+-   **Manipulate & adding notes and cards**: Apply fast bulk operations to the table (e.g. add
     tags, change decks, set field contents, suspend cards, \...) or
-    iterate over the table and perform these manipulations step by step
--   **Add**: Add new notes and cards
+    iterate over the table and perform these manipulations step by step. **This is still in alpha/beta! Proceed with care and please report bugs!** (but ankipandas will always create a backup of your database before changing something).
 -   **Import and Export**: Pandas can export to (and import from) csv,
     MS Excel, HTML, JSON, \... ([io
     documentation](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html))
@@ -58,7 +57,7 @@ your Anki flashcards.
     [models](https://apps.ankiweb.net/docs/manual.html#note-types),
     [decks](https://apps.ankiweb.net/docs/manual.html#decks) and more in
     just one table!
--   **Fully documented**: Documentation on readthedocs\_
+-   **Fully documented**: Documentation on [readthedocs](https://ankipandas.readthedocs.io/)
 -   **Well tested**: More than 100 unit tests to keep everything in
     check
 
