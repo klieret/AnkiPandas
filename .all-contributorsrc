@@ -4,6 +4,7 @@
   ],
   "imageSize": 100,
   "commit": false,
+  "contributorsSortAlphabetically": true,
   "contributors": [
     {
       "login": "exc4l",
@@ -13,6 +14,33 @@
       "contributions": [
         "bug",
         "code"
+      ]
+    },
+    {
+      "login": "CalculusAce",
+      "name": "CalculusAce",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/42630988?v=4",
+      "profile": "https://github.com/CalculusAce",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "brownbat",
+      "name": "Thomas Brownback",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/26754?v=4",
+      "profile": "http://thomasbrownback.com/",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "p4nix",
+      "name": "p4nix",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/7038116?v=4",
+      "profile": "https://github.com/p4nix",
+      "contributions": [
+        "bug"
       ]
     }
   ],
