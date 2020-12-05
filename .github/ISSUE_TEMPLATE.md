@@ -2,7 +2,7 @@
 
 First off, thanks for helping! :heart:
 
-To make it easier to come up with a solution, plase make sure to include
+To make it easier to come up with a solution, please make sure to include
 
 * Your operating system
 * A minimal working example (MWE) of code that can be used to reproduce your problem (where applicable)
