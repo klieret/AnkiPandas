@@ -26,10 +26,12 @@ from ankipandas.raw import (
     get_mid2fields,
 )
 from ankipandas.util.dataframe import merge_dfs
+from ankipandas.util.log import set_debug_log_level
 
 
 class TestRawRead(unittest.TestCase):
     def setUp(self):
+        set_debug_log_level()
         self.db_folder = (
             pathlib.Path(__file__).parent / "data" / "few_basic_cards"
         )
@@ -101,6 +103,7 @@ class TestRawWrite(unittest.TestCase):
     )
 
     def setUp(self):
+        set_debug_log_level()
         self.db_read = load_db(self.db_read_path)
         self.db_write_dir = tempfile.TemporaryDirectory()
         self.db_write_path = (
@@ -220,6 +223,7 @@ class TestRawWriteV1(unittest.TestCase):
 
 class TestMergeDfs(unittest.TestCase):
     def setUp(self):
+        set_debug_log_level()
         self.df = pd.DataFrame(
             {"id_df": [1, 2, 3, 1, 1], "clash": ["a", "b", "c", "a", "a"]}
         )

@@ -60,4 +60,9 @@ def set_log_level(level: Union[str, int]) -> None:
     get_logger().setLevel(lvl)
 
 
+def set_debug_log_level() -> None:
+    """ Set global log level to debug. """
+    set_log_level(logging.DEBUG)
+
+
 log = get_logger()

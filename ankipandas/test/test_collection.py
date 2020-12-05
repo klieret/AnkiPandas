@@ -8,6 +8,7 @@ import shutil
 
 # ours
 from ankipandas.collection import Collection
+from ankipandas.util.log import set_debug_log_level
 
 
 class TestCollection(unittest.TestCase):
@@ -20,6 +21,7 @@ class TestCollection(unittest.TestCase):
     )
 
     def setUp(self):
+        set_debug_log_level()
         self.col = Collection(self.db_path)
         self.notes = self.col.notes
         self.cards = self.col.cards

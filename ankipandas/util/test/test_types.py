@@ -10,11 +10,12 @@ from ankipandas.util.types import (
     is_dict_list_like,
     is_list_list_like,
 )
+from ankipandas.util.log import set_debug_log_level
 
 
 class TestTypes(unittest.TestCase):
     def setUp(self):
-        pass
+        set_debug_log_level()
 
     def test_is_list_like(self):
         self.assertTrue(is_list_like([1, 2]))

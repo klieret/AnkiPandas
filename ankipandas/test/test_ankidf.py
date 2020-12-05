@@ -20,6 +20,7 @@ from ankipandas._columns import our_columns
 import ankipandas.raw as raw
 from ankipandas.collection import Collection
 import ankipandas._columns as _columns
+from ankipandas.util.log import set_debug_log_level
 
 
 class TestAnkiDF(unittest.TestCase):
@@ -31,6 +32,7 @@ class TestAnkiDF(unittest.TestCase):
     )
 
     def setUp(self):
+        set_debug_log_level()
         self.db = raw.load_db(self.db_path)
 
         self.col = Collection(self.db_path)

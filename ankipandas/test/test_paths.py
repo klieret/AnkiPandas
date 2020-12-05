@@ -13,6 +13,7 @@ from randomfiletree import sample_random_elements, iterative_gaussian_tree
 # ours
 import ankipandas.paths as paths
 from ankipandas.util.misc import flatten_list_list
+from ankipandas.util.log import set_debug_log_level
 
 
 def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:
@@ -38,6 +39,7 @@ def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:
 
 class TestFindDatabase(unittest.TestCase):
     def setUp(self):
+        set_debug_log_level()
         self.dirs = {
             "nothing": tempfile.TemporaryDirectory(),
             "multiple": tempfile.TemporaryDirectory(),
@@ -136,6 +138,7 @@ class TestFindDatabase(unittest.TestCase):
 
 class TestBackup(unittest.TestCase):
     def setUp(self):
+        set_debug_log_level()
         self.tmpdir = tempfile.TemporaryDirectory()
         self.tmpdir_path = Path(self.tmpdir.name)
         (self.tmpdir_path / "collection.anki2").touch()
