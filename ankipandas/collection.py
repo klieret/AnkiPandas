@@ -182,33 +182,42 @@ class Collection(object):
                 log.debug("Write: Skipping {}, because it's None.".format(key))
                 continue
             if key in ["notes", "cards", "revs"]:
-                if not delete:
-                    ndeleted = len(value.was_deleted())
-                    if ndeleted:
-                        raise ValueError(
-                            "You specified delete=False, but {} rows of item "
-                            "{} would be deleted.".format(ndeleted, key)
-                        )
-                if not modify:
-                    nmodified = sum(value.was_modified(na=False))
-                    if nmodified:
-                        raise ValueError(
-                            "You specified modify=False, but {} rows of item "
-                            "{} would be modified.".format(nmodified, key)
-                        )
-                if not add:
-                    nadded = sum(value.was_added())
-                    if nadded:
-                        raise ValueError(
-                            "You specified add=False, but {} rows of item "
-                            "{} would be modified.".format(nadded, key)
-                        )
+                ndeleted = len(value.was_deleted())
+                nmodified = sum(value.was_modified(na=False))
+                nadded = sum(value.was_added())
+
+                if not delete and ndeleted:
+                    raise ValueError(
+                        "You specified delete=False, but {} rows of item "
+                        "{} would be deleted.".format(ndeleted, key)
+                    )
+                if not modify and nmodified:
+                    raise ValueError(
+                        "You specified modify=False, but {} rows of item "
+                        "{} would be modified.".format(nmodified, key)
+                    )
+                if not add and nadded:
+                    raise ValueError(
+                        "You specified add=False, but {} rows of item "
+                        "{} would be modified.".format(nadded, key)
+                    )
+
+                if not ndeleted and not nmodified and not nadded:
+                    log.debug(
+                        "Skipping table {key} for writing, because nothing "
+                        "seemed to have changed".format(key=key)
+                    )
 
                 mode = "replace"
                 if modify and not add and not delete:
                     mode = "update"
                 if add and not modify and not delete:
                     mode = "append"
+                log.debug(
+                    "Will update table {key} with mode {mode}".format(
+                        key=key, mode=mode
+                    )
+                )
                 value._check_table_integrity()
                 raw_table = value.raw()
                 prepared[key] = {"raw": raw_table, "mode": mode}
@@ -282,7 +291,6 @@ class Collection(object):
             return None
 
         try:
-
             prepared = self._prepare_write_data(
                 modify=modify, add=add, delete=delete
             )
@@ -297,6 +305,12 @@ class Collection(object):
             raise e
         else:
             log.debug("Successfully prepared data for writing.")
+
+        if prepared == {}:
+            log.warning(
+                "Nothing seems to have been changed. Will not " "do anything!"
+            )
+            return None
 
         backup_path = ankipandas.paths.backup_db(
             self.path, backup_folder=backup_folder
