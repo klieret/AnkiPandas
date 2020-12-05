@@ -30,13 +30,13 @@ this_dir = Path(__file__).resolve().parent
 
 packages = setuptools.find_packages()
 
-with (this_dir / "README.md").open() as fh:
+with (this_dir / "README.md").open(encoding="utf8") as fh:
     long_description = fh.read()
 
-with (this_dir / "ankipandas" / "version.txt").open() as vf:
+with (this_dir / "ankipandas" / "version.txt").open(encoding="utf8") as vf:
     version = vf.read().strip()
 
-with (this_dir / "requirements.txt").open() as rf:
+with (this_dir / "requirements.txt").open(encoding="utf8") as rf:
     requirements = [
         req.strip()
         for req in rf.readlines()
