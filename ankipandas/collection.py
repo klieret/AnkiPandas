@@ -69,6 +69,9 @@ class Collection(object):
             "revs": None,
         }  # type: Dict[str, AnkiDataFrame]
 
+    def __del__(self):
+        raw.close_db(self.db)
+
     def _get_original_item(self, item):
         r = self.__original_items[item]
         if r is None:

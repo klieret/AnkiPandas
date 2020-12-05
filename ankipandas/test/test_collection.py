@@ -64,6 +64,9 @@ class TestCollection(unittest.TestCase):
             self.assertTrue(col.notes.equals(col_rel.notes))
             self.assertTrue(col.cards.equals(col_rel.cards))
             self.assertTrue(col.revs.equals(col_rel.revs))
+            # Need to close databases before we can remove the directory
+            del col
+            del col_rel
 
     def test_write_raises_delete(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -83,6 +86,8 @@ class TestCollection(unittest.TestCase):
                     self.assertTrue(
                         "would be deleted" in str(context.exception)
                     )
+            # Need to close databases before we can remove the directory
+            del col
 
     def test_write_raises_modified(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -102,6 +107,8 @@ class TestCollection(unittest.TestCase):
                     self.assertTrue(
                         "would be modified" in str(context.exception)
                     )
+            # Need to close databases before we can remove the directory
+            del col
 
     def test_write_raises_added(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -121,6 +128,8 @@ class TestCollection(unittest.TestCase):
                     self.assertTrue(
                         "would be modified" in str(context.exception)
                     )
+            # Need to close databases before we can remove the directory
+            del col
 
 
 class TestCollectionV1(TestCollection):
