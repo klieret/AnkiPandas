@@ -47,10 +47,11 @@ class TestFindDatabase(unittest.TestCase):
             iterative_gaussian_tree(
                 d.name,
                 repeat=5,
-                nfolders=1,
+                nfolders=3,
                 min_folders=1,
                 nfiles=2,
                 min_files=1,
+                maxdepth=4,
             )
         self.dbs = {
             "nothing": [],
