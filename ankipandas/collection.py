@@ -282,11 +282,12 @@ class Collection(object):
             return None
 
         try:
+
             prepared = self._prepare_write_data(
                 modify=modify, add=add, delete=delete
             )
-
-            self._get_and_update_info()
+            log.debug("Now getting & updating info.")
+            info = self._get_and_update_info()
         except Exception as e:
             log.critical(
                 "Something went wrong preparing the data for writing. "
@@ -308,13 +309,14 @@ class Collection(object):
         log.debug("Now actually writing to database.")
         try:
             for table, values in prepared.items():
+                log.debug("Now setting table {}.".format(table))
                 raw.set_table(
                     self.db, values["raw"], table=table, mode=values["mode"]
                 )
-            # Actually only needed if we actually modify the info.
-            # This will trigger a complete re-upload, so we want to avoid this
-            # if possible.
-            # raw.set_info(self.db, info)
+                log.debug("Setting table {} successful.".format(table))
+            log.debug("Now setting info")
+            raw.set_info(self.db, info)
+            log.debug("Setting info successful.")
         except Exception as e:
             log.critical(
                 "Error while writing data to database at {path}"

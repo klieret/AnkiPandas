@@ -27,6 +27,9 @@ class TestCollection(unittest.TestCase):
         self.cards = self.col.cards
         self.revs = self.col.revs
 
+    def tearDown(self) -> None:
+        del self.col
+
     # Summarize changes
     # ==========================================================================
 
