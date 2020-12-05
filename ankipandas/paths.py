@@ -11,7 +11,7 @@ import datetime
 import pathlib
 from functools import lru_cache
 import shutil
-from typing import Union
+from typing import Union, Optional
 
 # ours
 from ankipandas.util.log import log
@@ -23,11 +23,18 @@ def _find_db(
     maxdepth=6,
     filename="collection.anki2",
     break_on_first=False,
-    user=None,
+    user: Optional[str] = None,
 ):
     """
     Like find_database but only for one search path at a time. Also doesn't
     raise any error, even if the search path doesn't exist.
+
+    Args:
+        search_path:
+        maxdepth: Maximum depth relative to search_path
+        filename:
+        break_on_first: Break on first search result
+        user: Only search for this user
 
     Returns:
         collection.defaultdict({user: [list of results]})
@@ -60,7 +67,8 @@ def _find_db(
             if break_on_first:
                 log.debug("_find_db: Breaking after first hit.")
                 break
-        if maxdepth and root.count(os.sep) >= maxdepth:
+        depth = len(pathlib.Path(root).relative_to(search_path).parts)
+        if maxdepth and depth >= maxdepth:
             log.debug(
                 "_find_db: Abort search at '{}'. "
                 "Max depth exceeded.".format(str(root))
@@ -106,7 +114,7 @@ def find_db(
         search_paths = [
             "~/.local/share/Anki2/",
             "~/Documents/Anki2",
-            pathlib.Path(os.getenv("APPDATA", "~")+"/Anki2/"),
+            pathlib.Path(os.getenv("APPDATA", "~") + "/Anki2/"),
             pathlib.Path.home(),
         ]
     if break_on_first:
