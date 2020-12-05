@@ -48,12 +48,12 @@ class Collection(object):
         path = ankipandas.paths.db_path_input(path, user=user)
 
         #: Path to currently loaded database
-        self.path = path  # type: Path
+        self._path = path  # type: Path
 
         log.info("Loaded db from {}".format(self.path))
 
         #: Opened Anki database (:class:`sqlite3.Connection`)
-        self.db = raw.load_db(self.path)  # type: sqlite3.Connection
+        self._db = raw.load_db(self.path)  # type: sqlite3.Connection
 
         #: Should be accessed with _get_item!
         self.__items = {
@@ -69,8 +69,20 @@ class Collection(object):
             "revs": None,
         }  # type: Dict[str, AnkiDataFrame]
 
+    @property
+    def path(self) -> Path:
+        """ Path to currently loaded database """
+        return self._path
+
+    @property
+    def db(self) -> sqlite3.Connection:
+        """ Opened Anki database """
+        return self._db
+
     def __del__(self):
+        log.debug(f"Closing db {self.db} which was loaded from {self.path}.")
         raw.close_db(self.db)
+        log.debug("Closing successful")
 
     def _get_original_item(self, item):
         r = self.__original_items[item]
