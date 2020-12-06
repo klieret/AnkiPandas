@@ -22,13 +22,6 @@ class TestCollection(unittest.TestCase):
 
     def setUp(self):
         set_debug_log_level()
-        self.col = Collection(self.db_path)
-        self.notes = self.col.notes
-        self.cards = self.col.cards
-        self.revs = self.col.revs
-
-    def tearDown(self) -> None:
-        del self.col
 
     # Summarize changes
     # ==========================================================================
@@ -39,8 +32,9 @@ class TestCollection(unittest.TestCase):
         self.assertEqual(len(sc), 0)
 
     def test_summarize_changes_no_changes(self):
-        self.col.summarize_changes()
-        sc = self.col.summarize_changes(output="dict")
+        col = Collection(self.db_path)
+        col.summarize_changes()
+        sc = col.summarize_changes(output="dict")
         for item in ["cards", "revs", "notes"]:
             with self.subTest(item=item):
                 self.assertEqual(sc[item]["n_modified"], 0)
