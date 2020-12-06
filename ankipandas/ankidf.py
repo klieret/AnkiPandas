@@ -165,7 +165,7 @@ class AnkiDataFrame(pd.DataFrame):
     # Checks
     # ==========================================================================
 
-    def _check_table_integrity(self):
+    def check_table_integrity(self):
         duplicates = self.index[self.index.duplicated()].tolist()
         if duplicates:
             log.critical(
@@ -1069,7 +1069,7 @@ class AnkiDataFrame(pd.DataFrame):
         drop_columns = set(self.columns) - set(_columns.our_columns[table])
         self.drop(drop_columns, axis=1, inplace=True)
 
-        self._check_table_integrity()
+        self.check_table_integrity()
 
         self._df_format = "ours"
 
@@ -1207,7 +1207,7 @@ class AnkiDataFrame(pd.DataFrame):
         for col in new.columns:
             self[col] = new[col]
 
-        self._check_table_integrity()
+        self.check_table_integrity()
 
         self._df_format = "anki"
 

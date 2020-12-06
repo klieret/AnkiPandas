@@ -218,7 +218,7 @@ class Collection(object):
                         key=key, mode=mode
                     )
                 )
-                value._check_table_integrity()
+                value.check_table_integrity()
                 raw_table = value.raw()
                 prepared[key] = {"raw": raw_table, "mode": mode}
 
