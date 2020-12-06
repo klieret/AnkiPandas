@@ -9,6 +9,7 @@ import pytest
 
 # ours
 from ankipandas.collection import Collection
+from ankipandas.test.util import parameterized_paths
 
 
 def _init_all_tables(col: Collection) -> None:
@@ -18,22 +19,6 @@ def _init_all_tables(col: Collection) -> None:
     _ = col.notes
     _ = col.cards
     _ = col.revs
-
-
-_test_db_paths = [
-    pathlib.Path(__file__).resolve().parent
-    / "data"
-    / "few_basic_cards"
-    / "collection.anki2",
-    pathlib.Path(__file__).resolve().parent
-    / "data"
-    / "few_basic_cards"
-    / "collection_v1.anki2",
-]
-
-
-def parameterized_paths():
-    return pytest.mark.parametrize("db_path", _test_db_paths)
 
 
 # Summarize changes
