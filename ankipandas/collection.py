@@ -207,6 +207,7 @@ class Collection(object):
                         "Skipping table {key} for writing, because nothing "
                         "seemed to have changed".format(key=key)
                     )
+                    continue
 
                 mode = "replace"
                 if modify and not add and not delete:
