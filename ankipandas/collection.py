@@ -327,7 +327,11 @@ class Collection(object):
             "Currently AnkiPandas might not be able to tell Anki to"
             " sync its database. "
             "You might have to manually tell Anki to sync everything "
-            "to AnkiDroid."
+            "to AnkiDroid.\n"
+            "Furthermore, if you run into issues with tag searches not working"
+            "anymore, please first do Notes > Clear unused notes and then "
+            "Tools > Check Database (from the main menu). This should get them"
+            " to work (sorry about this issue)."
         )
 
         # Actually setting values here, after all conversion tasks have been
