@@ -115,6 +115,7 @@ def find_db(
             "~/.local/share/Anki2/",
             "~/Documents/Anki2",
             pathlib.Path(os.getenv("APPDATA", "~") + "/Anki2/"),
+            "~/.local/share/Anki2",
             pathlib.Path.home(),
         ]
     if break_on_first:
