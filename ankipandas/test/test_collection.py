@@ -75,7 +75,7 @@ def test_summarize_notes_changed(db_path):
 @parameterized_paths()
 def test_read_write_identical_trivial(db_path, tmpdir):
     db_path = shutil.copy2(str(db_path), str(tmpdir))
-    (pathlib.Path(tmpdir) / "backups").mkdir()
+    (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
     col.write(modify=True, delete=True, add=True)
     col_rel = Collection(db_path)
@@ -87,7 +87,7 @@ def test_read_write_identical_trivial(db_path, tmpdir):
 @parameterized_paths()
 def test_write_raises_delete(db_path, tmpdir):
     db_path = shutil.copy2(str(db_path), str(tmpdir))
-    (pathlib.Path(tmpdir) / "backups").mkdir()
+    (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
     col.notes.drop(col.notes.index, inplace=True)
     cases = [
@@ -103,7 +103,7 @@ def test_write_raises_delete(db_path, tmpdir):
 @parameterized_paths()
 def test_write_raises_modified(db_path, tmpdir):
     db_path = shutil.copy2(str(db_path), str(tmpdir))
-    (pathlib.Path(tmpdir) / "backups").mkdir()
+    (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
     col.notes.add_tag("test", inplace=True)
     cases = [
@@ -119,7 +119,7 @@ def test_write_raises_modified(db_path, tmpdir):
 @parameterized_paths()
 def test_write_raises_added(db_path, tmpdir):
     db_path = shutil.copy2(str(db_path), str(tmpdir))
-    (pathlib.Path(tmpdir) / "backups").mkdir()
+    (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
     col.notes.add_note("Basic", ["test", "back"], inplace=True)
     cases = [
