@@ -120,8 +120,8 @@ def find_db(
     if break_on_first:
         log.warning(
             "The search will stop at the first hit, so please verify that "
-            "the result is correct (for example in case there might be more"
-            "than one Anki installations)"
+            "the result is correct (for example in case there might be more "
+            "than one Anki installation)"
         )
     if isinstance(search_paths, (str, pathlib.PurePath)):
         search_paths = [search_paths]
