@@ -11,6 +11,15 @@ from ankipandas.collection import Collection
 from ankipandas.util.log import set_debug_log_level
 
 
+def _init_all_tables(col: Collection) -> None:
+    """ Access all attributes at least once to ensure that they are
+    initialized.
+    """
+    _ = col.notes
+    _ = col.cards
+    _ = col.revs
+
+
 class TestCollection(unittest.TestCase):
 
     db_path = (
@@ -33,6 +42,7 @@ class TestCollection(unittest.TestCase):
 
     def test_summarize_changes_no_changes(self):
         col = Collection(self.db_path)
+        _init_all_tables(col)
         col.summarize_changes()
         sc = col.summarize_changes(output="dict")
         for item in ["cards", "revs", "notes"]:
