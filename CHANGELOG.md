@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [here](https://discuss.python.org/t/pep-597-enable-utf-8-mode-by-default-on-windows/3122))
 - Issues with max search depth for databse search
 - AttributeError when calling `merge_notes` with `inplace=True`. [Issue #51](https://github.com/klieret/AnkiPandas/issues/51)
+- Default search paths might not have been working because the user name was not inserted properly
 
 ### Changed
 

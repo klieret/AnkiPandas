@@ -118,6 +118,9 @@ def find_db(
             "~/.local/share/Anki2",
             pathlib.Path.home(),
         ]
+        search_paths = [
+            pathlib.Path(sp).expanduser().resolve() for sp in search_paths
+        ]
     if break_on_first:
         log.warning(
             "The search will stop at the first hit, so please verify that "
