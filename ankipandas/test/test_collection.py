@@ -2,13 +2,13 @@
 
 # std
 import pathlib
-import unittest
-import tempfile
 import shutil
+
+# 3rd
+import pytest
 
 # ours
 from ankipandas.collection import Collection
-from ankipandas.util.log import set_debug_log_level
 
 
 def _init_all_tables(col: Collection) -> None:
@@ -20,133 +20,113 @@ def _init_all_tables(col: Collection) -> None:
     _ = col.revs
 
 
-class TestCollection(unittest.TestCase):
-
-    db_path = (
-        pathlib.Path(__file__).parent
-        / "data"
-        / "few_basic_cards"
-        / "collection.anki2"
-    )
-
-    def setUp(self):
-        set_debug_log_level()
-
-    # Summarize changes
-    # ==========================================================================
-
-    def test_summarize_changes_uninitialized(self):
-        col = Collection(self.db_path)
-        sc = col.summarize_changes(output="dict")
-        self.assertEqual(len(sc), 0)
-
-    def test_summarize_changes_no_changes(self):
-        col = Collection(self.db_path)
-        _init_all_tables(col)
-        col.summarize_changes()
-        sc = col.summarize_changes(output="dict")
-        for item in ["cards", "revs", "notes"]:
-            with self.subTest(item=item):
-                self.assertEqual(sc[item]["n_modified"], 0)
-                self.assertEqual(sc[item]["n_added"], 0)
-                self.assertEqual(sc[item]["n_deleted"], 0)
-                self.assertEqual(sc[item]["has_changed"], False)
-
-    def test_summarize_notes_changed(self):
-        col = Collection(self.db_path)
-        col.notes.add_tag("this_will_be_modified", inplace=True)
-        sc = col.summarize_changes(output="dict")
-        self.assertEqual(sc["notes"]["n_modified"], sc["notes"]["n"])
-
-    # Writing
-    # ==========================================================================
-
-    def test_read_write_identical_trivial(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            db_path = shutil.copy2(str(self.db_path), tmpdir)
-            (pathlib.Path(tmpdir) / "backups").mkdir()
-            col = Collection(db_path)
-            col.write(modify=True, delete=True, add=True)
-            col_rel = Collection(db_path)
-            self.assertTrue(col.notes.equals(col_rel.notes))
-            self.assertTrue(col.cards.equals(col_rel.cards))
-            self.assertTrue(col.revs.equals(col_rel.revs))
-            # Need to close databases before we can remove the directory
-            del col
-            del col_rel
-
-    def test_write_raises_delete(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            db_path = shutil.copy2(str(self.db_path), tmpdir)
-            (pathlib.Path(tmpdir) / "backups").mkdir()
-            col = Collection(db_path)
-            col.notes.drop(col.notes.index, inplace=True)
-            cases = [
-                dict(modify=False, add=True),
-                dict(modify=True, add=False),
-                dict(modify=True, add=True),
-            ]
-            for case in cases:
-                with self.subTest(**case):
-                    with self.assertRaises(ValueError) as context:
-                        col.write(**case, delete=False)
-                    self.assertTrue(
-                        "would be deleted" in str(context.exception)
-                    )
-            # Need to close databases before we can remove the directory
-            del col
-
-    def test_write_raises_modified(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            db_path = shutil.copy2(str(self.db_path), tmpdir)
-            (pathlib.Path(tmpdir) / "backups").mkdir()
-            col = Collection(db_path)
-            col.notes.add_tag("test", inplace=True)
-            cases = [
-                dict(add=False, delete=True),
-                dict(add=True, delete=False),
-                dict(add=True, delete=True),
-            ]
-            for case in cases:
-                with self.subTest(**case):
-                    with self.assertRaises(ValueError) as context:
-                        col.write(**case, modify=False)
-                    self.assertTrue(
-                        "would be modified" in str(context.exception)
-                    )
-            # Need to close databases before we can remove the directory
-            del col
-
-    def test_write_raises_added(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            db_path = shutil.copy2(str(self.db_path), tmpdir)
-            (pathlib.Path(tmpdir) / "backups").mkdir()
-            col = Collection(db_path)
-            col.notes.add_note("Basic", ["test", "back"], inplace=True)
-            cases = [
-                dict(modify=False, delete=True),
-                dict(modify=True, delete=False),
-                dict(modify=True, delete=True),
-            ]
-            for case in cases:
-                with self.subTest(**case):
-                    with self.assertRaises(ValueError) as context:
-                        col.write(**case, add=False)
-                    self.assertTrue(
-                        "would be modified" in str(context.exception)
-                    )
-            # Need to close databases before we can remove the directory
-            del col
+_test_db_paths = [
+    pathlib.Path(__file__).resolve().parent
+    / "data"
+    / "few_basic_cards"
+    / "collection.anki2",
+    pathlib.Path(__file__).resolve().parent
+    / "data"
+    / "few_basic_cards"
+    / "collection_v1.anki2",
+]
 
 
-class TestCollectionV1(TestCollection):
-    db_path = (
-        pathlib.Path(__file__).parent
-        / "data"
-        / "few_basic_cards"
-        / "collection_v1.anki2"
-    )
+def parameterized_paths():
+    return pytest.mark.parametrize("db_path", _test_db_paths)
 
 
-if __name__ == "__main__":
-    unittest.main()
+# Summarize changes
+# ==========================================================================
+
+
+@parameterized_paths()
+def test_summarize_changes_uninitialized(db_path):
+    col = Collection(db_path)
+    sc = col.summarize_changes(output="dict")
+    assert len(sc) == 0
+
+
+@parameterized_paths()
+def test_summarize_changes_no_changes(db_path):
+    col = Collection(db_path)
+    _init_all_tables(col)
+    col.summarize_changes()
+    sc = col.summarize_changes(output="dict")
+    for item in ["cards", "revs", "notes"]:
+        assert sc[item]["n_modified"] == 0
+        assert sc[item]["n_added"] == 0
+        assert sc[item]["n_deleted"] == 0
+        assert sc[item]["has_changed"] == False
+
+
+@parameterized_paths()
+def test_summarize_notes_changed(db_path):
+    col = Collection(db_path)
+    col.notes.add_tag("this_will_be_modified", inplace=True)
+    sc = col.summarize_changes(output="dict")
+    assert sc["notes"]["n_modified"] == sc["notes"]["n"]
+
+
+# Writing
+# ==========================================================================
+
+
+@parameterized_paths()
+def test_read_write_identical_trivial(db_path, tmpdir):
+    db_path = shutil.copy2(str(db_path), tmpdir)
+    (pathlib.Path(tmpdir) / "backups").mkdir()
+    col = Collection(db_path)
+    col.write(modify=True, delete=True, add=True)
+    col_rel = Collection(db_path)
+    assert col.notes.equals(col_rel.notes)
+    assert col.cards.equals(col_rel.cards)
+    assert col.revs.equals(col_rel.revs)
+
+
+@parameterized_paths()
+def test_write_raises_delete(db_path, tmpdir):
+    db_path = shutil.copy2(str(db_path), tmpdir)
+    (pathlib.Path(tmpdir) / "backups").mkdir()
+    col = Collection(db_path)
+    col.notes.drop(col.notes.index, inplace=True)
+    cases = [
+        dict(modify=False, add=True),
+        dict(modify=True, add=False),
+        dict(modify=True, add=True),
+    ]
+    for case in cases:
+        with pytest.raises(ValueError, match=".*would be deleted.*"):
+            col.write(**case, delete=False)
+
+
+@parameterized_paths()
+def test_write_raises_modified(db_path, tmpdir):
+    db_path = shutil.copy2(str(db_path), tmpdir)
+    (pathlib.Path(tmpdir) / "backups").mkdir()
+    col = Collection(db_path)
+    col.notes.add_tag("test", inplace=True)
+    cases = [
+        dict(add=False, delete=True),
+        dict(add=True, delete=False),
+        dict(add=True, delete=True),
+    ]
+    for case in cases:
+        with pytest.raises(ValueError, match=".*would be modified.*"):
+            col.write(**case, modify=False)
+
+
+@parameterized_paths()
+def test_write_raises_added(db_path, tmpdir):
+    db_path = shutil.copy2(str(db_path), tmpdir)
+    (pathlib.Path(tmpdir) / "backups").mkdir()
+    col = Collection(db_path)
+    col.notes.add_note("Basic", ["test", "back"], inplace=True)
+    cases = [
+        dict(modify=False, delete=True),
+        dict(modify=True, delete=False),
+        dict(modify=True, delete=True),
+    ]
+    for case in cases:
+        with pytest.raises(ValueError, match=".*would be modified.*"):
+            col.write(**case, add=False)
