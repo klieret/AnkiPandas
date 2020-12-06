@@ -69,10 +69,10 @@ def _find_db(
                 break
         depth = len(pathlib.Path(root).relative_to(search_path).parts)
         if maxdepth and depth >= maxdepth:
-            log.debug(
-                "_find_db: Abort search at '{}'. "
-                "Max depth exceeded.".format(str(root))
-            )
+            # log.debug(
+            #     "_find_db: Abort search at '{}'. "
+            #     "Max depth exceeded.".format(str(root))
+            # )
             del dirs[:]
     return found
 
