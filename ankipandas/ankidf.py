@@ -464,8 +464,6 @@ class AnkiDataFrame(pd.DataFrame):
             columns=columns,
             drop_columns=drop_columns,
         )
-        for md in self._metadata:
-            setattr(ret, md, getattr(self, md))
         return ret
 
     def merge_cards(
@@ -513,8 +511,6 @@ class AnkiDataFrame(pd.DataFrame):
             prepend=prepend,
             prepend_clash_only=prepend_clash_only,
         )
-        for md in self._metadata:
-            setattr(ret, md, getattr(self, md))
         return ret
 
     # Toggle format

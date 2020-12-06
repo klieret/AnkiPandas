@@ -5,9 +5,39 @@
 # 3rd
 import pandas as pd
 
+# ours
+from ankipandas.util.log import log
+
+
+def _sync_metadata(df_ret: pd.DataFrame, df_old: pd.DataFrame) -> None:
+    """
+    If the df_old has a `_metadata` field, containing a list of attribute
+    names that contain metadata, then this is copied from `df_old` to the new
+    dataframe `df_ret.
+
+    Args:
+        df_ret:
+        df_old:
+
+    Returns:
+        None
+    """
+    if hasattr(df_old, "_metadata"):
+        for key in df_old._metadata:
+            value = getattr(df_old, key)
+            log.debug(
+                "Setting metadata attribute {key} to {value}".format(
+                    key=key, value=value
+                )
+            )
+            setattr(df_ret, key, value)
+
 
 def replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
     """ Replace dataframe 'in place'.
+    If the dataframe has a `_metadata` field, containing a list of attribute
+    names that contain metadata, then this is copied from `df` to the new
+    dataframe.
 
     Args:
         df: :class:`pandas.DataFrame` to be replaced
@@ -24,6 +54,7 @@ def replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
     drop_cols = set(df.columns) - set(df_new.columns)
     if drop_cols:
         df.drop(drop_cols, axis=1, inplace=True)
+    _sync_metadata(df_new, df)
 
 
 # todo: this might be made more elegant in the future for sure...
@@ -42,6 +73,9 @@ def merge_dfs(
 ):
     """
     Merge information from two dataframes.
+    If the dataframe has a `_metadata` field, containing a list of attribute
+    names that contain metadata, then this is copied from `df` to the new
+    dataframe.
 
     Args:
         df: Original :class:`pandas.DataFrame`
@@ -118,6 +152,8 @@ def merge_dfs(
         new_id_add_col = rename_dict[id_add]
     if new_id_add_col in df_merge.columns and id_df != new_id_add_col:
         df_merge.drop(new_id_add_col, axis=1, inplace=True)
+
+    _sync_metadata(df_merge, df)
 
     if inplace:
         return replace_df_inplace(df, df_merge)
