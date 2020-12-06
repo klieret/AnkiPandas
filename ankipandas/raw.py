@@ -299,7 +299,6 @@ class NumpyJSONEncoder(json.JSONEncoder):
             return super(NumpyJSONEncoder, self).default(obj)
 
 
-# Currently not used
 def set_info(db: sqlite3.Connection, info: dict) -> None:
     """ Write back extra info to database
 
