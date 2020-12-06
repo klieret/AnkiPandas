@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   using utf8 by default which often results in errors, see
   [here](https://discuss.python.org/t/pep-597-enable-utf-8-mode-by-default-on-windows/3122))
 - Issues with max search depth for databse search
+- AttributeError when calling `merge_notes` with `inplace=True`. [Issue #51](https://github.com/klieret/AnkiPandas/issues/51)
 
 ### Changed
 
 - Improved database search on windows machines
+- If no changes are detected in the different tables, the database will not be overwritten
 
 ## 0.3.7 -- 2020-11-28
 
