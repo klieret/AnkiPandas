@@ -60,14 +60,14 @@ class Collection(object):
             "notes": None,
             "cards": None,
             "revs": None,
-        }  # type: Dict[str, AnkiDataFrame]
+        }  # type: Dict[str, Optional[AnkiDataFrame]]
 
         #: Should be accessed with _get_original_item!
         self.__original_items = {
             "notes": None,
             "cards": None,
             "revs": None,
-        }  # type: Dict[str, AnkiDataFrame]
+        }  # type: Dict[str, Optional[AnkiDataFrame]]
 
     @property
     def path(self) -> Path:
@@ -308,7 +308,7 @@ class Collection(object):
 
         if prepared == {}:
             log.warning(
-                "Nothing seems to have been changed. Will not " "do anything!"
+                "Nothing seems to have been changed. Will not do anything!"
             )
             return None
 

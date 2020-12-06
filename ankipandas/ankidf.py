@@ -65,6 +65,8 @@ class AnkiDataFrame(pd.DataFrame):
         # todo: document
         self.col = None
 
+        # noinspection PyTypeChecker
+        # gets set by _get_table
         #: Type of anki table: 'notes', 'cards' or 'revlog'. This corresponds to
         #: the meaning of the ID row.
         self._anki_table = None  # type: str
@@ -76,6 +78,8 @@ class AnkiDataFrame(pd.DataFrame):
         #:   or ``anki`` (default)
         self._fields_format = "anki"
 
+        # gets set by _get_table
+        # noinspection PyTypeChecker
         #: Overal structure of the dataframe ``anki``, ``ours``, ``in_progress``
         self._df_format = None  # type: str
 
