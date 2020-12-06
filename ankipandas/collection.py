@@ -232,8 +232,13 @@ class Collection(object):
         # fixme: this currently doesn't work. In the new db structure there's
         #   a tags table instead of a field, but it doesn't seem to be
         #   used.
-        # if self.__items["notes"] is not None:
-        #
+        if self.__items["notes"] is not None:
+            log.warning(
+                "Currently AnkiPandas might not be able to tell Anki to"
+                " sync its tags. So if you added any new tags, you "
+                "might have to manually tell Anki to sync everything "
+                "if you want to see and use them in AnkiDroid."
+            )
         #     missing_tags = list(
         #         set(info["tags"].keys())
         #         - set(self.__items["notes"].list_tags())
@@ -312,12 +317,6 @@ class Collection(object):
             self.path, backup_folder=backup_folder
         )
         log.info("Backup created at {}.".format(backup_path.resolve()))
-        log.warning(
-            "Currently AnkiPandas might not be able to tell Anki to"
-            " sync its database. "
-            "You might have to manually tell Anki to sync everything "
-            "to AnkiDroid."
-        )
 
         # Actually setting values here, after all conversion tasks have been
         # carried out. That way if any of them fails, we don't have a
@@ -330,9 +329,9 @@ class Collection(object):
                     self.db, values["raw"], table=table, mode=values["mode"]
                 )
                 log.debug("Setting table {} successful.".format(table))
-            # log.debug("Now setting info")
-            # raw.set_info(self.db, info)
-            # log.debug("Setting info successful.")
+            log.debug("Now setting info")
+            raw.set_info(self.db, info)
+            log.debug("Setting info successful.")
         except Exception as e:
             log.critical(
                 "Error while writing data to database at {path}"
