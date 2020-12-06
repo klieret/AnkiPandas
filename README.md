@@ -1,4 +1,5 @@
 # Analyze and manipulate your Anki collection using pandas!
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
@@ -71,14 +72,14 @@ package](https://pypi.org/project/ankipandas/) and can be installed or
 upgrade with the [python package
 manager](https://pip.pypa.io/en/stable/):
 
-``` {.sourceCode .sh}
+```sh
 pip3 install --user --upgrade ankipandas
 ```
 
 For the latest development version you can also work from a cloned
 version of this repository:
 
-``` {.sourceCode .sh}
+```sh
 git clone https://github.com/klieret/ankipandas/
 cd ankipandas
 pip3 install --user --upgrade .
@@ -88,7 +89,7 @@ pip3 install --user --upgrade .
 
 Starting up is as easy as this:
 
-``` {.sourceCode .python}
+```python
 from ankipandas import Collection
 
 col = Collection()
@@ -121,13 +122,13 @@ documentation](https://ankipandas.readthedocs.io/en/latest/examples.html)
 Show a histogram of the number of reviews (repetitions) of each card for
 all decks:
 
-``` {.sourceCode .python}
+```python
 col.cards.hist(column="creps", by="cdeck")
 ```
 
 Show the number of leeches per deck as pie chart:
 
-``` {.sourceCode .python}
+```python
 cards = col.cards.merge_notes()
 selection = cards[cards.has_tag("leech")]
 selection["cdeck"].value_counts().plot.pie()
@@ -135,7 +136,7 @@ selection["cdeck"].value_counts().plot.pie()
 
 Find all notes of model `MnemoticModel` with empty `Mnemotic` field:
 
-``` {.sourceCode .python}
+```python
 notes = col.notes.fields_as_columns()
 notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
 ```
@@ -147,7 +148,7 @@ notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
 Add the `difficult-japanese` and `marked` tag to all notes that contain
 the tags `Japanese` and `leech`:
 
-``` {.sourceCode .python}
+```python
 notes = col.notes
 selection = notes[notes.has_tags(["Japanese", "leech"])]
 selection = selection.add_tag(["difficult-japanese", "marked"])
@@ -158,7 +159,7 @@ col.write(modify=True)  # Overwrites your database after creating a backup!
 Set the `language` field to `English` for all notes of model
 `LanguageModel` that are tagged with `English`:
 
-``` {.sourceCode .python}
+```python
 notes = col.notes
 selection = notes[notes.has_tag(["English"])].query("model=='LanguageModel'").copy()
 selection.fields_as_columns(inplace=True)
@@ -169,7 +170,7 @@ col.write(modify=True)
 
 Move all cards tagged `leech` to the deck `Leeches Only`:
 
-``` {.sourceCode .python}
+```python
 cards = col.cards
 selection = cards[cards.has_tag("leech")]
 selection["cdeck"] = "Leeches Only"
