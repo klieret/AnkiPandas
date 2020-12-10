@@ -2,4 +2,6 @@
 omit =
     setup.py
     examples/*
+    */test/*
+    test_*
 relative_files = True
