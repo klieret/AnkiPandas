@@ -1,4 +1,5 @@
 [run]
-omit = 
+omit =
     setup.py
     examples/*
+relative_files = True
