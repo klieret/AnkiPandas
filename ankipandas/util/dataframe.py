@@ -25,11 +25,7 @@ def _sync_metadata(df_ret: pd.DataFrame, df_old: pd.DataFrame) -> None:
     if hasattr(df_old, "_metadata"):
         for key in df_old._metadata:
             value = getattr(df_old, key)
-            log.debug(
-                "Setting metadata attribute {key} to {value}".format(
-                    key=key, value=value
-                )
-            )
+            log.debug("Setting metadata attribute %s to %s", key, value)
             setattr(df_ret, key, value)
 
 

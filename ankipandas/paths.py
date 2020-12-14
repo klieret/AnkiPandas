@@ -41,10 +41,7 @@ def _find_db(
     """
     search_path = pathlib.Path(search_path)
     if not search_path.exists():
-        log.debug(
-            "_find_db: Search path '{}' does not "
-            "exist.".format(str(search_path))
-        )
+        log.debug("_find_db: Search path %r does not exist.", str(search_path))
         return collections.defaultdict(list)
     if search_path.is_file():
         if search_path.name == filename:
@@ -53,8 +50,10 @@ def _find_db(
             )
         else:
             log.warning(
-                "_find_db: Search path '{}' is a file, but filename does not "
-                "match that of '{}'.".format(str(search_path), filename)
+                "_find_db: Search path %r is a file, but filename does not "
+                "match that of %r.",
+                str(search_path),
+                filename
             )
             return collections.defaultdict(list)
     found = collections.defaultdict(list)
@@ -70,8 +69,9 @@ def _find_db(
         depth = len(pathlib.Path(root).relative_to(search_path).parts)
         if maxdepth and depth >= maxdepth:
             # log.debug(
-            #     "_find_db: Abort search at '{}'. "
-            #     "Max depth exceeded.".format(str(root))
+            #     "_find_db: Abort search at %r. "
+            #     "Max depth exceeded.",
+            #     str(root)
             # )
             del dirs[:]
     return found
@@ -175,7 +175,7 @@ def find_db(
             )
         )
     found = found[0]
-    log.debug("Database found at '{}'.".format(found))
+    log.debug("Database found at %r.", found)
     return found
 
 
@@ -210,14 +210,14 @@ def db_path_input(
             )
         if path.is_file():
             log.debug(
-                "db_path_input: Database explicitly set to '{}'.".format(path)
+                "db_path_input: Database explicitly set to %r.", str(path)
             )
             result = path
         else:
             result = find_db(
                 search_paths=(path,), user=user, break_on_first=False
             )
-            log.info("Database found at '{}'.".format(result))
+            log.info("Database found at %r.", str(result))
     if result:
         return result
     else:
@@ -278,7 +278,7 @@ def backup_db(
     if backup_folder:
         backup_folder = pathlib.Path(backup_folder)
         if not backup_folder.is_dir():
-            log.debug("Creating backup directory {}".format(str(backup_folder)))
+            log.debug("Creating backup directory %s.", backup_folder)
             backup_folder.mkdir(parents=True)
     else:
         backup_folder = get_anki_backup_folder(db_path, nexist="raise")

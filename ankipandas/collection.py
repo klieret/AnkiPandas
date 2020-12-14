@@ -50,7 +50,7 @@ class Collection(object):
         #: Path to currently loaded database
         self._path = path  # type: Path
 
-        log.info("Loaded db from {}".format(self.path))
+        log.info("Loaded db from %s", self.path)
 
         #: Opened Anki database (:class:`sqlite3.Connection`)
         self._db = raw.load_db(self.path)  # type: sqlite3.Connection
@@ -81,9 +81,8 @@ class Collection(object):
 
     def __del__(self):
         log.debug(
-            "Closing db {db} which was loaded from {path}.".format(
-                db=self.db, path=self.path
-            )
+            "Closing db %s which was loaded from %s.",
+            self.db, self.path
         )
         raw.close_db(self.db)
         log.debug("Closing successful")
@@ -179,7 +178,7 @@ class Collection(object):
         prepared = {}
         for key, value in self.__items.items():
             if value is None:
-                log.debug("Write: Skipping {}, because it's None.".format(key))
+                log.debug("Write: Skipping %s, because it's None.", key)
                 continue
             if key in ["notes", "cards", "revs"]:
                 ndeleted = len(value.was_deleted())
@@ -204,8 +203,9 @@ class Collection(object):
 
                 if not ndeleted and not nmodified and not nadded:
                     log.debug(
-                        "Skipping table {key} for writing, because nothing "
-                        "seemed to have changed".format(key=key)
+                        "Skipping table %s for writing, because nothing "
+                        "seemed to have changed",
+                        key
                     )
                     continue
 
@@ -214,11 +214,7 @@ class Collection(object):
                     mode = "update"
                 if add and not modify and not delete:
                     mode = "append"
-                log.debug(
-                    "Will update table {key} with mode {mode}".format(
-                        key=key, mode=mode
-                    )
-                )
+                log.debug("Will update table %s with mode %s", key, mode)
                 value.check_table_integrity()
                 raw_table = value.raw()
                 prepared[key] = {"raw": raw_table, "mode": mode}
@@ -322,7 +318,7 @@ class Collection(object):
         backup_path = ankipandas.paths.backup_db(
             self.path, backup_folder=backup_folder
         )
-        log.info("Backup created at {}.".format(backup_path.resolve()))
+        log.info("Backup created at %s", backup_path.resolve())
         log.warning(
             "Currently AnkiPandas might not be able to tell Anki to"
             " sync its database. "
@@ -340,25 +336,24 @@ class Collection(object):
         log.debug("Now actually writing to database.")
         try:
             for table, values in prepared.items():
-                log.debug("Now setting table {}.".format(table))
+                log.debug("Now setting table %s.", table)
                 raw.set_table(
                     self.db, values["raw"], table=table, mode=values["mode"]
                 )
-                log.debug("Setting table {} successful.".format(table))
+                log.debug("Setting table %s successful.", table)
             # log.debug("Now setting info")
             # raw.set_info(self.db, info)
             # log.debug("Setting info successful.")
         except Exception as e:
             log.critical(
-                "Error while writing data to database at {path}"
+                "Error while writing data to database at %s. "
                 "This means that your database might have become corrupted. "
                 "It's STRONGLY advised that you manually restore the database "
-                "by replacing it with the backup from {backup_path} and restart"
+                "by replacing it with the backup from %s and restart"
                 " from scratch. "
                 "Please also open a bug report at "
                 "https://github.com/klieret/AnkiPandas/issues/, as errors "
-                "during the actual writing process should never occur!".format(
-                    path=self.path.resolve(), backup_path=backup_path.resolve()
-                )
+                "during the actual writing process should never occur!",
+                self.path.resolve(), backup_path.resolve()
             )
             raise e
