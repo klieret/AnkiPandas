@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import ankipandas.raw
 import ankipandas.paths
 import ankipandas.util

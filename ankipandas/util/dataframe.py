@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """ DataFrame utilities. """
 
 # 3rd

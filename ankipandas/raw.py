@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """ These function implement the more direct interactions with the Anki
 database and provide basic functionality that is then used to implement the
 functionality in :class:`~ankipandas.collection.Collection`,

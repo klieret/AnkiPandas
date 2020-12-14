@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """ Most of the functionality of the AnkiDataFrames is already tested in
 test_core, because that saves to write a lot of duplicate code.
 
