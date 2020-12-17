@@ -836,7 +836,7 @@ class AnkiDataFrame(pd.DataFrame):
         if self._fields_format == "columns":
             self_sf = self.fields_as_list(inplace=False, force=_force)
 
-        cols = sorted(set(self_sf.columns) & set(other.columns))
+        cols = sorted(set(self_sf.columns).intersection(set(other.columns)))
 
         other_nids = set(other.index)
         inters = set(self_sf.index).intersection(other_nids)
@@ -1716,7 +1716,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             nid = self._get_ids(n=n_notes)
 
-        already_present = sorted(set(nid) & set(self.index))
+        already_present = sorted(set(nid).intersection(set(self.index)))
         if already_present:
             raise ValueError(
                 "The following note IDs (nid) are "
