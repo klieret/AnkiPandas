@@ -49,7 +49,7 @@ def load_db(path: Union[str, pathlib.PurePath]) -> sqlite3.Connection:
     """
     path = pathlib.Path(path)
     if not path.is_file():
-        raise FileNotFoundError("Not a file/file not found: {}".format(path))
+        raise FileNotFoundError(f"Not a file/file not found: {path}")
     return sqlite3.connect(str(path.resolve()))
 
 
@@ -129,7 +129,7 @@ def read_info(db: sqlite3.Connection, table_name: str):
     """
     version = get_db_version(db)
     _df = pd.read_sql_query(
-        "SELECT * FROM {table_name} ".format(table_name=table_name), db
+        f"SELECT * FROM {table_name} ", db
     )
     if version == 0:
         assert len(_df) == 1, _df
@@ -234,7 +234,7 @@ def _consolidate_tables(
     elif mode == "replace":
         indices = set(new_indices)
     else:
-        raise ValueError("Unknown mode '{}'.".format(mode))
+        raise ValueError(f"Unknown mode '{mode}'.")
 
     df = df[df[id_column].isin(indices)]
 
@@ -249,7 +249,7 @@ def _consolidate_tables(
     elif mode == "replace":
         df_new = df.copy()
     else:
-        raise ValueError("Unknown mode '{}'.".format(mode))
+        raise ValueError(f"Unknown mode '{mode}'.")
 
     return df_new
 
@@ -294,7 +294,7 @@ class NumpyJSONEncoder(json.JSONEncoder):
         elif isinstance(obj, np.ndarray):
             return obj.tolist()
         else:
-            return super(NumpyJSONEncoder, self).default(obj)
+            return super().default(obj)
 
 
 def set_info(db: sqlite3.Connection, info: dict) -> None:

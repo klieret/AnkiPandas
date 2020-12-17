@@ -150,7 +150,7 @@ def find_db(
     if user:
         if user not in found:
             raise ValueError(
-                "Could not find database belonging to user {}".format(user)
+                f"Could not find database belonging to user {user}"
             )
         found = found[user]
     else:
@@ -173,7 +173,7 @@ def find_db(
             )
         )
     found = found[0]
-    log.debug("Database found at '{}'.".format(found))
+    log.debug(f"Database found at '{found}'.")
     return found
 
 
@@ -208,14 +208,14 @@ def db_path_input(
             )
         if path.is_file():
             log.debug(
-                "db_path_input: Database explicitly set to '{}'.".format(path)
+                f"db_path_input: Database explicitly set to '{path}'."
             )
             result = path
         else:
             result = find_db(
                 search_paths=(path,), user=user, break_on_first=False
             )
-            log.info("Database found at '{}'.".format(result))
+            log.info(f"Database found at '{result}'.")
     if result:
         return result
     else:
@@ -245,7 +245,7 @@ def get_anki_backup_folder(
     path = pathlib.Path(path)
     if not path.is_file():
         raise FileNotFoundError(
-            "Database path {} seems to be invalid.".format(path)
+            f"Database path {path} seems to be invalid."
         )
     backup_folder = path.parent / "backups"
     if nexist == "raise" and not backup_folder.is_dir():

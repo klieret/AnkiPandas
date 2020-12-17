@@ -11,7 +11,7 @@ from ankipandas.ankidf import AnkiDataFrame
 from ankipandas.util.log import log
 
 
-class Collection(object):
+class Collection:
     def __init__(self, path=None, user=None):
         """ Initialize :class:`~ankipandas.collection.Collection` object.
 
@@ -48,7 +48,7 @@ class Collection(object):
         #: Path to currently loaded database
         self._path = path  # type: Path
 
-        log.info("Loaded db from {}".format(self.path))
+        log.info(f"Loaded db from {self.path}")
 
         #: Opened Anki database (:class:`sqlite3.Connection`)
         self._db = raw.load_db(self.path)  # type: sqlite3.Connection
@@ -166,10 +166,10 @@ class Collection(object):
         elif output == "print":
             for key, value in self.__items.items():
                 if value is not None:
-                    print("======== {} ========".format(key))
+                    print(f"======== {key} ========")
                     value.summarize_changes()
         else:
-            raise ValueError("Invalid output setting: {}".format(output))
+            raise ValueError(f"Invalid output setting: {output}")
 
     def _prepare_write_data(
         self, modify=False, add=False, delete=False
@@ -177,7 +177,7 @@ class Collection(object):
         prepared = {}
         for key, value in self.__items.items():
             if value is None:
-                log.debug("Write: Skipping {}, because it's None.".format(key))
+                log.debug(f"Write: Skipping {key}, because it's None.")
                 continue
             if key in ["notes", "cards", "revs"]:
                 ndeleted = len(value.was_deleted())
@@ -320,7 +320,7 @@ class Collection(object):
         backup_path = ankipandas.paths.backup_db(
             self.path, backup_folder=backup_folder
         )
-        log.info("Backup created at {}.".format(backup_path.resolve()))
+        log.info(f"Backup created at {backup_path.resolve()}.")
         log.warning(
             "Currently AnkiPandas might not be able to tell Anki to"
             " sync its database. "
@@ -338,11 +338,11 @@ class Collection(object):
         log.debug("Now actually writing to database.")
         try:
             for table, values in prepared.items():
-                log.debug("Now setting table {}.".format(table))
+                log.debug(f"Now setting table {table}.")
                 raw.set_table(
                     self.db, values["raw"], table=table, mode=values["mode"]
                 )
-                log.debug("Setting table {} successful.".format(table))
+                log.debug(f"Setting table {table} successful.")
             # log.debug("Now setting info")
             # raw.set_info(self.db, info)
             # log.debug("Setting info successful.")

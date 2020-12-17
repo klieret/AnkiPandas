@@ -155,7 +155,7 @@ class AnkiDataFrame(pd.DataFrame):
                             f1=self._fields_format, f2=other._fields_format
                         )
                     )
-        super(AnkiDataFrame, self).update(other, **kwargs)
+        super().update(other, **kwargs)
         # Fix https://github.com/pandas-dev/pandas/issues/4094
         for col, typ in _columns.dtype_casts2[self._anki_table].items():
             self[col] = self[col].astype(typ)
@@ -176,7 +176,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
 
     def _invalid_table(self):
-        raise ValueError("Invalid table: {}.".format(self._anki_table))
+        raise ValueError(f"Invalid table: {self._anki_table}.")
 
     def _check_df_format(self):
         if self._df_format == "in_progress":
@@ -192,7 +192,7 @@ class AnkiDataFrame(pd.DataFrame):
             pass
         else:
             raise ValueError(
-                "Unknown value of _df_format: {}".format(self._df_format)
+                f"Unknown value of _df_format: {self._df_format}"
             )
 
     def _check_our_format(self):
@@ -550,7 +550,7 @@ class AnkiDataFrame(pd.DataFrame):
             pass
         else:
             raise ValueError(
-                "Unknown _fields_format: {}".format(self._fields_format)
+                f"Unknown _fields_format: {self._fields_format}"
             )
 
         if "nflds" not in self.columns:
@@ -612,7 +612,7 @@ class AnkiDataFrame(pd.DataFrame):
             pass
         else:
             raise ValueError(
-                "Unknown _fields_format: {}".format(self._fields_format)
+                f"Unknown _fields_format: {self._fields_format}"
             )
 
         self._fields_format = "in_progress"
@@ -651,9 +651,9 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             return sorted(
                 list(
-                    set(
-                        [item for lst in self["ntags"].tolist() for item in lst]
-                    )
+                    {
+                        item for lst in self["ntags"].tolist() for item in lst
+                    }
                 )
             )
 
@@ -1237,7 +1237,7 @@ class AnkiDataFrame(pd.DataFrame):
         elif output == "dict":
             return as_dict
         else:
-            raise ValueError("Invalid output setting: {}".format(output))
+            raise ValueError(f"Invalid output setting: {output}")
 
     # Append
     # ==========================================================================
@@ -1648,7 +1648,7 @@ class AnkiDataFrame(pd.DataFrame):
         model2mid = raw.get_model2mid(self.db)
         if nmodel not in model2mid.keys():
             raise ValueError(
-                "No model of with name '{}' exists.".format(nmodel)
+                f"No model of with name '{nmodel}' exists."
             )
         field_keys = raw.get_mid2fields(self.db)[model2mid[nmodel]]
 
@@ -1766,7 +1766,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
 
         # todo: make efficient
-        duplicate_guids = sorted(set([g for g in nguid if nguid.count(g) >= 2]))
+        duplicate_guids = sorted({g for g in nguid if nguid.count(g) >= 2})
         if duplicate_guids:
             raise ValueError(
                 "The following gloally unique IDs (guid) are not unique: ",
@@ -1937,7 +1937,7 @@ class AnkiDataFrame(pd.DataFrame):
         df = self.help_cols(column)
         if len(df) == 0:
             raise ValueError(
-                "Could not find help for your search request.".format(column)
+                f"Could not find help for your search request."
             )
         if len(df) == 2:
             # fix for nid and cid column:
@@ -1945,7 +1945,7 @@ class AnkiDataFrame(pd.DataFrame):
         if len(df) != 1:
             raise ValueError("Could not find help due to bug.")
         data = df.loc[column].to_dict()
-        h = "Help for column '{}'\n".format(column)
+        h = f"Help for column '{column}'\n"
         h += "-" * (len(h) - 1) + "\n"
         if data["Native"]:
             h += "Name in raw Anki database: " + data["AnkiColumn"] + "\n"
