@@ -159,13 +159,13 @@ def find_db(
                 "Found databases for more than one user: {}. Please specify "
                 "the user.".format(", ".join(found))
             )
-        elif len(found) == 0:
+        elif not found:
             raise ValueError(
                 "No database found. You might increase the search depth or "
                 "specify search paths to find more."
             )
         else:
-            found = list(found.values())[0]
+            found = found.popitem()[1]
     if len(found) >= 2:
         raise ValueError(
             "Found more than one database belonging to user {} at {}".format(

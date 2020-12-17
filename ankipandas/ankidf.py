@@ -1678,15 +1678,15 @@ class AnkiDataFrame(pd.DataFrame):
                 for i, field_key in enumerate(field_keys)
             }
         elif is_dict_list_like(nflds):
-            lengths = list({len(x) for x in  nflds.values()})
+            lengths = {len(x) for x in  nflds.values()}
             if len(lengths) >= 2:
                 raise ValueError(
                     "Inconsistent number of "
                     "fields: {}".format(", ".join(map(str, lengths)))
                 )
-            elif len(lengths) == 0:
+            elif not lengths:
                 raise ValueError("Are you trying to add zero notes?")
-            n_notes = lengths[0]
+            n_notes = lengths.pop()
             field_key2field = copy.deepcopy(nflds)
             for key in field_keys:
                 if key not in field_key2field:

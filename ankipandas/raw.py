@@ -99,7 +99,7 @@ def get_empty_table(table: str) -> pd.DataFrame:
 
 
 def _interpret_json_val(val):
-    if isinstance(val, str) and len(val) >= 1:
+    if isinstance(val, str) and val:
         try:
             return json.loads(val)
         except json.decoder.JSONDecodeError:
