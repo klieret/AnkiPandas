@@ -24,5 +24,6 @@ if sys.version_info < (3, 6):
         "updates). Keeping old versions supported is also difficult for "
         "developers, so AnkiPandas has decided to drop support of python "
         " < 3.6. We strongly encourage you to update your python version to "
-        "receive updates."
+        "receive updates.",
+        ".".join(sys.version_info),
     )
