@@ -17,7 +17,7 @@ def invert_dict(dct: dict) -> dict:
     """
     if not len(set(dct.values())) == len(dct.values()):
         print(dct)
-        print(sorted(list(dct.values())))
+        print(sorted(dct.values()))
         raise ValueError("Dictionary does not seem to be invertible.")
     return {value: key for key, value in dct.items()}
 
