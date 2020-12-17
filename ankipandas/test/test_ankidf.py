@@ -343,22 +343,24 @@ class TestAnkiDF(unittest.TestCase):
     def test_remove_tags(self):
         notes = self.nnotes()
         notes = notes.remove_tag(None)
-        self.assertEqual(list(set(map(tuple, notes["ntags"]))), [()])
+        self.assertEqual(list({tuple(x) for x in notes["ntags"]}), [()])
 
     def test_add_tags(self):
         notes = self.nnotes().remove_tag(None).add_tag("1145")
-        self.assertListEqual(list(set(map(tuple, notes["ntags"]))), [("1145",)])
+        self.assertListEqual(
+            list({tuple(x) for x in notes["ntags"]}), [("1145",)]
+        )
         notes.add_tag("abc", inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))), [("1145", "abc")]
+            list({tuple(x) for x in notes["ntags"]}), [("1145", "abc")]
         )
         notes.add_tag(["abc", "def"], inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))), [("1145", "abc", "def")]
+            list({tuple(x) for x in notes["ntags"]}), [("1145", "abc", "def")]
         )
         notes.add_tag([], inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))), [("1145", "abc", "def")]
+            list({tuple(x) for x in notes["ntags"]}), [("1145", "abc", "def")]
         )
 
     def test_has_tag(self):

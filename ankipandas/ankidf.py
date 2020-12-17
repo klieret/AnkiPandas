@@ -1400,14 +1400,14 @@ class AnkiDataFrame(pd.DataFrame):
                 )
             )
 
-        mids = list(set(map(lambda x: nid2mid[x], nid)))
+        mids = {nid2mid[x] for x in nid}
         if len(mids) >= 2:
             raise ValueError(
                 "It is only supported to add cards for notes of the same model"
                 ", but you're trying to add cards for notes of "
                 "models: {}".format(", ".join(map(str, mids)))
             )
-        mid = mids[0]
+        mid = mids.pop()
 
         # fixme: should use function from ankipandas.raw
         available_ords = raw.get_mid2templateords(self.db)[mid]
@@ -1659,11 +1659,11 @@ class AnkiDataFrame(pd.DataFrame):
                     "Unknown fields: {}".format(", ".join(unknown_fields))
                 )
             field_key2field = {
-                key: list(map(lambda d: d.get(key), nflds))
+                key: [d.get(key) for d in nflds]
                 for key in field_keys
             }
         elif is_list_list_like(nflds):
-            n_fields = list(set(map(len, nflds)))
+            n_fields = list({len(x) for x in nflds})
             n_notes = len(nflds)
             if not (len(n_fields) == 1 and n_fields[0] == len(field_keys)):
                 raise ValueError(
@@ -1674,11 +1674,11 @@ class AnkiDataFrame(pd.DataFrame):
                     )
                 )
             field_key2field = {
-                field_keys[i]: list(map(lambda x: x[i], nflds))
-                for i in range(len(field_keys))
+                field_key: [x[i] for x in nflds]
+                for i, field_key in enumerate(field_keys)
             }
         elif is_dict_list_like(nflds):
-            lengths = list(set(map(len, nflds.values())))
+            lengths = list({len(x) for x in  nflds.values()})
             if len(lengths) >= 2:
                 raise ValueError(
                     "Inconsistent number of "

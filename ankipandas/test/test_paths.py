@@ -92,7 +92,7 @@ class TestFindDatabase(unittest.TestCase):
                 ).values()
                 for val in vals
             )
-            b = sorted(map(str, self.dbs[d]))
+            b = sorted(str(x) for x in self.dbs[d])
             self.assertListEqual(a, b)
 
     def test__find_database_filename(self):
