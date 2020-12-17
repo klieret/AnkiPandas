@@ -242,14 +242,14 @@ class TestAnkiDF(unittest.TestCase):
             "cards": set(self.cards.mid),
             "revs": set(self.revs.mid),
         }
-        mids = set(raw.get_mid2model(self.db).keys())
+        mids = set(raw.get_mid2model(self.db))
         for table, mids2 in mids2s.items():
             with self.subTest(table=table):
                 self.assertTrue(mids2.issubset(mids))
 
     def test_dids(self):
         did2s = {"cards": set(self.cards.did), "revs": set(self.revs.did)}
-        dids = set(raw.get_did2deck(self.db).keys())
+        dids = set(raw.get_did2deck(self.db))
         for table, dids2 in did2s.items():
             with self.subTest(table=table):
                 self.assertTrue(dids2.issubset(dids))
@@ -757,7 +757,7 @@ class TestAnkiDF(unittest.TestCase):
         empty = self.necards()
         empty2 = self.necards()
 
-        nid = list(raw.get_nid2mid(self.db).keys())[0]
+        nid = list(raw.get_nid2mid(self.db))[0]
         deck = list(raw.get_did2deck(self.db).values())[0]
 
         init_dict2 = dict(

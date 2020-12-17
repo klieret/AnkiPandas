@@ -1642,7 +1642,7 @@ class AnkiDataFrame(pd.DataFrame):
         # --- Model ---
 
         model2mid = raw.get_model2mid(self.db)
-        if nmodel not in model2mid.keys():
+        if nmodel not in model2mid:
             raise ValueError(
                 f"No model of with name '{nmodel}' exists."
             )

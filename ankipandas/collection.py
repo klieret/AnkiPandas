@@ -232,11 +232,11 @@ class Collection:
         )
         if raw.get_db_version(self.db) == 0:
             for key in info_updates:
-                assert key in info.keys()
+                assert key in info
             info.update(info_updates)
         elif raw.get_db_version(self.db) == 1:
-            assert len(list(info.keys())) == 1
-            first_key = list(info.keys())[0]
+            assert len(info) == 1
+            first_key = list(info)[0]
             info[first_key].update(info_updates)
         # fixme: this currently doesn't work. In the new db structure there's
         #   a tags table instead of a field, but it doesn't seem to be
