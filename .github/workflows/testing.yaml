@@ -33,10 +33,3 @@ jobs:
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       if: ${{ matrix.os  == 'ubuntu-latest' && matrix.python-version == 3.8 }}
-
-  coveralls_finish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      uses: AndreMiras/coveralls-python-action@develop
