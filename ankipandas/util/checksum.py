@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import re
 from hashlib import sha1
 from html.entities import name2codepoint

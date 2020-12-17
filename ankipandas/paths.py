@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """ Convenience functions to find the database and other system locations
 without the user having to specify full paths.
 """

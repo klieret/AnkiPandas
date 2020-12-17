@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """ These tests are created from issues that we fixed to avoid that they might
 come back later.
 """

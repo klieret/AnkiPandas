@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # std
 from typing import List, Any
 import collections

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # std
 import copy
 from pathlib import Path

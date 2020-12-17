@@ -1,6 +1,3 @@
-#!/usr/bin/env ptyhon3
-
-
 def is_list_like(obj):
     """ True if object type is similar to list, tuple etc. """
     return isinstance(obj, (tuple, list))

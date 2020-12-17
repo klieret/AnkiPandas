@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # std
 from pathlib import Path, PurePath
 import sqlite3
