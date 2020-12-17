@@ -128,14 +128,14 @@ def merge_dfs(
     elif id_add == df_add.index.name:
         merge_kwargs["right_index"] = True
     else:
-        raise ValueError("'{}' is neither index nor column.".format(id_add))
+        raise ValueError(f"'{id_add}' is neither index nor column.")
 
     if id_df in df.columns:
         merge_kwargs["left_on"] = id_df
     elif id_df == df.index.name:
         merge_kwargs["left_index"] = True
     else:
-        raise ValueError("'{}' is neither index nor column.".format(id_df))
+        raise ValueError(f"'{id_df}' is neither index nor column.")
 
     df_merge = df.merge(df_add, **merge_kwargs)
 
