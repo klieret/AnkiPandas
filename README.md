@@ -222,7 +222,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/CalculusAce"><img src="https://avatars3.githubusercontent.com/u/42630988?v=4" width="100px;" alt=""/><br /><sub><b>CalculusAce</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3ACalculusAce" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://thomasbrownback.com/"><img src="https://avatars2.githubusercontent.com/u/26754?v=4" width="100px;" alt=""/><br /><sub><b>Thomas Brownback</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Abrownbat" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/p4nix"><img src="https://avatars1.githubusercontent.com/u/7038116?v=4" width="100px;" alt=""/><br /><sub><b>p4nix</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Ap4nix" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/eumiro"><img src="https://avatars0.githubusercontent.com/u/6774676?v=4" width="100px;" alt=""/><br /><sub><b>Miroslav Šedivý</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/eumiro"><img src="https://avatars0.githubusercontent.com/u/6774676?v=4" width="100px;" alt=""/><br /><sub><b>Miroslav Šedivý</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Tests">⚠️</a> <a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Code">💻</a></td>
   </tr>
 </table>
 
