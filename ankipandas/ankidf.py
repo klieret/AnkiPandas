@@ -14,7 +14,7 @@ import ankipandas.raw as raw
 import ankipandas.util.dataframe
 from ankipandas.util.dataframe import replace_df_inplace
 import ankipandas._columns as _columns
-from ankipandas.util.misc import invert_dict, flatten_list_list
+from ankipandas.util.misc import invert_dict
 from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
 from ankipandas.util.guid import guid as generate_guid
@@ -1652,9 +1652,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         if is_list_dict_like(nflds):
             n_notes = len(nflds)
-            specified_fields = set(
-                flatten_list_list(list(map(lambda d: list(d.keys()), nflds)))
-            )
+            specified_fields = {key for nfld in nflds for key in nfld}
             unknown_fields = sorted(specified_fields - set(field_keys))
             if unknown_fields:
                 raise ValueError(
