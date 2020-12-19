@@ -117,3 +117,13 @@ def test_write_raises_added(db_path, tmpdir):
     for case in cases:
         with pytest.raises(ValueError, match=".*would be modified.*"):
             col.write(**case, add=False)
+
+
+@parameterized_paths()
+def test_write_added(db_path, tmpdir):
+    db_path = shutil.copy2(str(db_path), str(tmpdir))
+    (pathlib.Path(str(tmpdir)) / "backups").mkdir()
+    col = Collection(db_path)
+    _init_all_tables(col)
+    col.notes.add_note("Basic", ["test", "back"], inplace=True)
+    col.write(add=True)
