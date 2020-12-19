@@ -1642,9 +1642,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         if is_list_dict_like(nflds):
             n_notes = len(nflds)
-            specified_fields = set(
-                flatten_list_list(list(map(lambda d: list(d.keys()), nflds)))
-            )
+            specified_fields = set(flatten_list_list(map(list, nflds)))
             unknown_fields = sorted(specified_fields - set(field_keys))
             if unknown_fields:
                 raise ValueError(
