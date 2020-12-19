@@ -10,7 +10,6 @@ from randomfiletree import sample_random_elements, iterative_gaussian_tree
 
 # ours
 import ankipandas.paths as paths
-from ankipandas.util.misc import flatten_list_list
 from ankipandas.util.log import set_debug_log_level
 
 
@@ -85,18 +84,15 @@ class TestFindDatabase(unittest.TestCase):
     def test__find_database(self):
         for d in self.dirs:
             a = sorted(
-                map(
-                    str,
-                    flatten_list_list(
-                        paths._find_db(
-                            self.dirs[d].name,
-                            maxdepth=None,
-                            break_on_first=False,
-                        ).values()
-                    ),
-                )
+                str(val)
+                for vals in paths._find_db(
+                    self.dirs[d].name,
+                    maxdepth=None,
+                    break_on_first=False,
+                ).values()
+                for val in vals
             )
-            b = sorted(map(str, self.dbs[d]))
+            b = sorted(str(x) for x in self.dbs[d])
             self.assertListEqual(a, b)
 
     def test__find_database_filename(self):

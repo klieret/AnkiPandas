@@ -246,10 +246,10 @@ class TestMergeDfs(unittest.TestCase):
             drop_columns=["id_add", "drop"],
         )
         self.assertListEqual(
-            sorted(list(df_merged.columns)),
+            sorted(df_merged.columns),
             ["_clash", "clash", "id_df", "value"],
         )
-        self.assertListEqual(sorted(list(df_merged["value"])), [4, 4, 4, 5, 6])
+        self.assertListEqual(sorted(df_merged["value"]), [4, 4, 4, 5, 6])
 
     def test_merge_dfs_prepend_all(self):
         df_merged = merge_dfs(
@@ -261,7 +261,7 @@ class TestMergeDfs(unittest.TestCase):
             prepend_clash_only=False,
         )
         self.assertListEqual(
-            sorted(list(df_merged.columns)),
+            sorted(df_merged.columns),
             ["_clash", "_drop", "_ignore", "_value", "clash", "id_df"],
         )
 
@@ -269,10 +269,10 @@ class TestMergeDfs(unittest.TestCase):
         df = copy.deepcopy(self.df)
         merge_dfs(df, self.df_add, id_df="id_df", id_add="id_add", inplace=True)
         self.assertListEqual(
-            sorted(list(df.columns)),
+            sorted(df.columns),
             ["clash_x", "clash_y", "drop", "id_df", "ignore", "value"],
         )
-        self.assertListEqual(sorted(list(df["value"])), [4, 4, 4, 5, 6])
+        self.assertListEqual(sorted(df["value"]), [4, 4, 4, 5, 6])
 
 
 if __name__ == "__main__":

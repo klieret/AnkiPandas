@@ -14,7 +14,7 @@ import ankipandas.raw as raw
 import ankipandas.util.dataframe
 from ankipandas.util.dataframe import replace_df_inplace
 import ankipandas._columns as _columns
-from ankipandas.util.misc import invert_dict, flatten_list_list
+from ankipandas.util.misc import invert_dict
 from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
 from ankipandas.util.guid import guid as generate_guid
@@ -650,11 +650,9 @@ class AnkiDataFrame(pd.DataFrame):
             )
         else:
             return sorted(
-                list(
-                    {
-                        item for lst in self["ntags"].tolist() for item in lst
-                    }
-                )
+                {
+                    item for lst in self["ntags"].tolist() for item in lst
+                }
             )
 
     def list_decks(self) -> List[str]:
@@ -665,7 +663,7 @@ class AnkiDataFrame(pd.DataFrame):
                 "or merge it into your table."
             )
         else:
-            decks = sorted(list(self["cdeck"].unique()))
+            decks = sorted(self["cdeck"].unique())
             if "" in decks:
                 decks.remove("")
             return decks
@@ -677,7 +675,7 @@ class AnkiDataFrame(pd.DataFrame):
                 "Model column 'nmodel' not present. Either use the notes table"
                 " or merge it into your table."
             )
-        return sorted(list(self["nmodel"].unique()))
+        return sorted(self["nmodel"].unique())
 
     def has_tag(self, tags: Optional[Union[Iterable[str], str]] = None):
         """ Checks whether row has a certain tag ('ntags' column).
@@ -773,7 +771,7 @@ class AnkiDataFrame(pd.DataFrame):
             return
 
         def _add_tags(other):
-            return other + sorted(list(set(tags) - set(other)))
+            return other + sorted(set(tags) - set(other))
 
         self["ntags"] = self["ntags"].apply(_add_tags)
 
@@ -838,9 +836,7 @@ class AnkiDataFrame(pd.DataFrame):
         if self._fields_format == "columns":
             self_sf = self.fields_as_list(inplace=False, force=_force)
 
-        cols = sorted(
-            list(set(self_sf.columns).intersection(set(other.columns)))
-        )
+        cols = sorted(set(self_sf.columns).intersection(set(other.columns)))
 
         other_nids = set(other.index)
         inters = set(self_sf.index).intersection(other_nids)
@@ -881,7 +877,7 @@ class AnkiDataFrame(pd.DataFrame):
             inters = inters.intersection(
                 self[self.was_modified(other=other, _force=_force)].index
             )
-        inters = sorted(list(inters))
+        inters = sorted(inters)
         return pd.DataFrame(
             self.loc[inters, cols].values != other.loc[inters, cols].values,
             index=self.loc[inters].index,
@@ -935,7 +931,7 @@ class AnkiDataFrame(pd.DataFrame):
             other_ids = set(self.col._get_original_item(self._anki_table).id)
 
         deleted_indices = other_ids - set(self.index)
-        return sorted(list(deleted_indices))
+        return sorted(deleted_indices)
 
     # Update modification stamps and similar
     # ==========================================================================
@@ -1394,7 +1390,7 @@ class AnkiDataFrame(pd.DataFrame):
         # --- Ord ---
 
         nid2mid = raw.get_nid2mid(self.db)
-        missing_nids = sorted(list(set(nid) - set(nid2mid.keys())))
+        missing_nids = sorted(set(nid) - set(nid2mid))
         if missing_nids:
             raise ValueError(
                 "The following note IDs (nid) can't be found in the notes "
@@ -1404,14 +1400,14 @@ class AnkiDataFrame(pd.DataFrame):
                 )
             )
 
-        mids = list(set(map(lambda x: nid2mid[x], nid)))
+        mids = {nid2mid[x] for x in nid}
         if len(mids) >= 2:
             raise ValueError(
                 "It is only supported to add cards for notes of the same model"
                 ", but you're trying to add cards for notes of "
                 "models: {}".format(", ".join(map(str, mids)))
             )
-        mid = mids[0]
+        mid = mids.pop()
 
         # fixme: should use function from ankipandas.raw
         available_ords = raw.get_mid2templateords(self.db)[mid]
@@ -1425,7 +1421,7 @@ class AnkiDataFrame(pd.DataFrame):
             raise ValueError(
                 "Unknown type for cord specifiation: {}".format(type(cord))
             )
-        not_available = sorted(list(set(cord) - set(available_ords)))
+        not_available = sorted(set(cord) - set(available_ords))
         if not_available:
             raise ValueError(
                 "The following templates are not available for notes of "
@@ -1446,7 +1442,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             raise ValueError("Unknown format for cdeck: {}".format(type(cdeck)))
         unknown_decks = sorted(
-            list(set(cdeck) - set(raw.get_did2deck(self.db).values()))
+            set(cdeck) - set(raw.get_did2deck(self.db).values())
         )
         if unknown_decks:
             raise ValueError(
@@ -1476,7 +1472,7 @@ class AnkiDataFrame(pd.DataFrame):
                     )
                 )
             if options is not None:
-                invalid = sorted(list(set(inpt) - set(options)))
+                invalid = sorted(set(inpt) - set(options))
                 if invalid:
                     raise ValueError(
                         "The following values are no valid "
@@ -1646,7 +1642,7 @@ class AnkiDataFrame(pd.DataFrame):
         # --- Model ---
 
         model2mid = raw.get_model2mid(self.db)
-        if nmodel not in model2mid.keys():
+        if nmodel not in model2mid:
             raise ValueError(
                 f"No model of with name '{nmodel}' exists."
             )
@@ -1656,20 +1652,18 @@ class AnkiDataFrame(pd.DataFrame):
 
         if is_list_dict_like(nflds):
             n_notes = len(nflds)
-            specified_fields = set(
-                flatten_list_list(list(map(lambda d: list(d.keys()), nflds)))
-            )
-            unknown_fields = sorted(list(specified_fields - set(field_keys)))
+            specified_fields = {key for nfld in nflds for key in nfld}
+            unknown_fields = sorted(specified_fields - set(field_keys))
             if unknown_fields:
                 raise ValueError(
                     "Unknown fields: {}".format(", ".join(unknown_fields))
                 )
             field_key2field = {
-                key: list(map(lambda d: d.get(key), nflds))
+                key: [d.get(key) for d in nflds]
                 for key in field_keys
             }
         elif is_list_list_like(nflds):
-            n_fields = list(set(map(len, nflds)))
+            n_fields = list({len(x) for x in nflds})
             n_notes = len(nflds)
             if not (len(n_fields) == 1 and n_fields[0] == len(field_keys)):
                 raise ValueError(
@@ -1680,19 +1674,19 @@ class AnkiDataFrame(pd.DataFrame):
                     )
                 )
             field_key2field = {
-                field_keys[i]: list(map(lambda x: x[i], nflds))
-                for i in range(len(field_keys))
+                field_key: [x[i] for x in nflds]
+                for i, field_key in enumerate(field_keys)
             }
         elif is_dict_list_like(nflds):
-            lengths = list(set(map(len, nflds.values())))
+            lengths = {len(x) for x in  nflds.values()}
             if len(lengths) >= 2:
                 raise ValueError(
                     "Inconsistent number of "
                     "fields: {}".format(", ".join(map(str, lengths)))
                 )
-            elif len(lengths) == 0:
+            elif not lengths:
                 raise ValueError("Are you trying to add zero notes?")
-            n_notes = lengths[0]
+            n_notes = lengths.pop()
             field_key2field = copy.deepcopy(nflds)
             for key in field_keys:
                 if key not in field_key2field:
@@ -1722,7 +1716,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             nid = self._get_ids(n=n_notes)
 
-        already_present = sorted(list(set(nid).intersection(set(self.index))))
+        already_present = sorted(set(nid).intersection(set(self.index)))
         if already_present:
             raise ValueError(
                 "The following note IDs (nid) are "
@@ -1756,9 +1750,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             nguid = [generate_guid() for _ in range(n_notes)]
 
-        existing_guids = sorted(
-            list(set(nguid).intersection(self["nguid"].unique()))
-        )
+        existing_guids = sorted(set(nguid) & set(self["nguid"].unique()))
         if existing_guids:
             raise ValueError(
                 "The following globally unique IDs (guid) are already"

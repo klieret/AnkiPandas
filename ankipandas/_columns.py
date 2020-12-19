@@ -21,14 +21,12 @@ fields_df = pd.read_csv(fields_file)
 #: nid.
 table2index = {"cards": "cid", "notes": "nid", "revs": "rid"}
 
-our_tables = sorted(list(tables_ours2anki.keys()))
+our_tables = sorted(tables_ours2anki)
 our_columns = {
     table: sorted(
-        list(
-            fields_df[(fields_df["Table"] == table) & fields_df["Default"]][
-                "Column"
-            ].unique()
-        )
+        fields_df[(fields_df["Table"] == table) & fields_df["Default"]][
+            "Column"
+        ].unique()
     )
     for table in our_tables
 }

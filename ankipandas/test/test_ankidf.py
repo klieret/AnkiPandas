@@ -101,7 +101,7 @@ class TestAnkiDF(unittest.TestCase):
             self.assertEqual(len(eadf), 0)
             adf = self.table2adf[table]
             self.assertListEqual(
-                sorted(list(adf.columns)), sorted(list(eadf.columns))
+                sorted(adf.columns), sorted(eadf.columns)
             )
 
     def test_tags(self):
@@ -118,20 +118,20 @@ class TestAnkiDF(unittest.TestCase):
         cards = self.cards
         self.assertGreater(len(cards), 11)
         self.assertEqual(
-            list(sorted(cards.columns)), sorted(our_columns["cards"])
+            sorted(cards.columns), sorted(our_columns["cards"])
         )
 
     def test_notes(self):
         notes = self.notes
         self.assertGreater(len(notes), 6)
         self.assertEqual(
-            list(sorted(notes.columns)), sorted(our_columns["notes"])
+            sorted(notes.columns), sorted(our_columns["notes"])
         )
 
     def test_get_revs(self):
         revs = self.revs
         self.assertEqual(
-            list(sorted(revs.columns)), sorted(our_columns["revs"])
+            sorted(revs.columns), sorted(our_columns["revs"])
         )
         self.assertGreater(len(revs), 4)
 
@@ -141,21 +141,19 @@ class TestAnkiDF(unittest.TestCase):
     def test_merge_notes_cards(self):
         merged = self.ncards().merge_notes()
         self.assertListEqual(
-            sorted(list(merged.columns)),
-            sorted(list(set(our_columns["cards"]) | set(our_columns["notes"]))),
+            sorted(merged.columns),
+            sorted(set(our_columns["cards"]) | set(our_columns["notes"])),
         )
 
     def test_merge_notes_revs(self):
         merged = self.nrevs().merge_notes()
         self.assertListEqual(
-            sorted(list(merged.columns)),
+            sorted(merged.columns),
             sorted(
-                list(
-                    # Note: 'nid' is not a notes column.
-                    set(our_columns["revs"])
-                    | set(our_columns["notes"])
-                    | {"nid"}
-                )
+                # Note: 'nid' is not a notes column.
+                set(our_columns["revs"])
+                | set(our_columns["notes"])
+                | {"nid"}
             ),
         )
 
@@ -166,8 +164,8 @@ class TestAnkiDF(unittest.TestCase):
     def test_merge_cards(self):
         merged = self.nrevs().merge_cards()
         self.assertListEqual(
-            sorted(list(merged.columns)),
-            sorted(list(set(our_columns["revs"]) | set(our_columns["cards"]))),
+            sorted(merged.columns),
+            sorted(set(our_columns["revs"]) | set(our_columns["cards"])),
         )
 
     def test_merge_cards_raises(self):
@@ -244,14 +242,14 @@ class TestAnkiDF(unittest.TestCase):
             "cards": set(self.cards.mid),
             "revs": set(self.revs.mid),
         }
-        mids = set(raw.get_mid2model(self.db).keys())
+        mids = set(raw.get_mid2model(self.db))
         for table, mids2 in mids2s.items():
             with self.subTest(table=table):
                 self.assertTrue(mids2.issubset(mids))
 
     def test_dids(self):
         did2s = {"cards": set(self.cards.did), "revs": set(self.revs.did)}
-        dids = set(raw.get_did2deck(self.db).keys())
+        dids = set(raw.get_did2deck(self.db))
         for table, dids2 in did2s.items():
             with self.subTest(table=table):
                 self.assertTrue(dids2.issubset(dids))
@@ -265,7 +263,7 @@ class TestAnkiDF(unittest.TestCase):
         cols.remove("nflds")
         prefix = notes.fields_as_columns_prefix
         new_cols = [prefix + item for item in ["Front", "Back"]]
-        self.assertEqual(sorted(list(notes.columns)), sorted(cols + new_cols))
+        self.assertEqual(sorted(notes.columns), sorted(cols + new_cols))
 
     def test_fields_as_columns_x2(self):
         notes = self.nnotes()
@@ -282,7 +280,7 @@ class TestAnkiDF(unittest.TestCase):
         notes = notes.fields_as_columns().fields_as_list()
         self.assertEqual(list(flds), list(notes["nflds"].values))
         self.assertListEqual(
-            sorted(list(notes.columns)), sorted(our_columns["notes"])
+            sorted(notes.columns), sorted(our_columns["notes"])
         )
 
     def test_fields_as_list_x2(self):
@@ -345,22 +343,24 @@ class TestAnkiDF(unittest.TestCase):
     def test_remove_tags(self):
         notes = self.nnotes()
         notes = notes.remove_tag(None)
-        self.assertEqual(list(set(map(tuple, notes["ntags"]))), [()])
+        self.assertEqual(list({tuple(x) for x in notes["ntags"]}), [()])
 
     def test_add_tags(self):
         notes = self.nnotes().remove_tag(None).add_tag("1145")
-        self.assertListEqual(list(set(map(tuple, notes["ntags"]))), [("1145",)])
+        self.assertListEqual(
+            list({tuple(x) for x in notes["ntags"]}), [("1145",)]
+        )
         notes.add_tag("abc", inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))), [("1145", "abc")]
+            list({tuple(x) for x in notes["ntags"]}), [("1145", "abc")]
         )
         notes.add_tag(["abc", "def"], inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))), [("1145", "abc", "def")]
+            list({tuple(x) for x in notes["ntags"]}), [("1145", "abc", "def")]
         )
         notes.add_tag([], inplace=True)
         self.assertListEqual(
-            list(set(map(tuple, notes["ntags"]))), [("1145", "abc", "def")]
+            list({tuple(x) for x in notes["ntags"]}), [("1145", "abc", "def")]
         )
 
     def test_has_tag(self):
@@ -757,7 +757,7 @@ class TestAnkiDF(unittest.TestCase):
         empty = self.necards()
         empty2 = self.necards()
 
-        nid = list(raw.get_nid2mid(self.db).keys())[0]
+        nid = list(raw.get_nid2mid(self.db))[0]
         deck = list(raw.get_did2deck(self.db).values())[0]
 
         init_dict2 = dict(
@@ -991,7 +991,7 @@ class TestAnkiDF(unittest.TestCase):
                 )
                 self.assertListEqual(
                     sorted(adf.columns),
-                    sorted(list(set(df.index))),  # nid, cid appear twice
+                    sorted(set(df.index)),  # nid, cid appear twice
                 )
 
     def test_help(self):
