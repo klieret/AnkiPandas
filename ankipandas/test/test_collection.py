@@ -60,6 +60,7 @@ def test_read_write_identical_trivial(db_path, tmpdir):
     db_path = shutil.copy2(str(db_path), str(tmpdir))
     (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
+    _init_all_tables(col)
     col.write(modify=True, delete=True, add=True)
     col_rel = Collection(db_path)
     assert col.notes.equals(col_rel.notes)
@@ -72,6 +73,7 @@ def test_write_raises_delete(db_path, tmpdir):
     db_path = shutil.copy2(str(db_path), str(tmpdir))
     (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
+    _init_all_tables(col)
     col.notes.drop(col.notes.index, inplace=True)
     cases = [
         dict(modify=False, add=True),
@@ -88,6 +90,7 @@ def test_write_raises_modified(db_path, tmpdir):
     db_path = shutil.copy2(str(db_path), str(tmpdir))
     (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
+    _init_all_tables(col)
     col.notes.add_tag("test", inplace=True)
     cases = [
         dict(add=False, delete=True),
@@ -104,6 +107,7 @@ def test_write_raises_added(db_path, tmpdir):
     db_path = shutil.copy2(str(db_path), str(tmpdir))
     (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
+    _init_all_tables(col)
     col.notes.add_note("Basic", ["test", "back"], inplace=True)
     cases = [
         dict(modify=False, delete=True),
