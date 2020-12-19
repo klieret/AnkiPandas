@@ -116,7 +116,7 @@ def merge_dfs(
 
     if replace:
         # Simply remove all potential clashes
-        replaced_columns = set(df_add.columns).intersection(set(df.columns))
+        replaced_columns = set(df_add.columns) & set(df.columns)
         df = df.drop(replaced_columns, axis=1)
 
     merge_kwargs = {}

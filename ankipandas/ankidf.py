@@ -191,9 +191,7 @@ class AnkiDataFrame(pd.DataFrame):
         elif self._df_format == "ours":
             pass
         else:
-            raise ValueError(
-                f"Unknown value of _df_format: {self._df_format}"
-            )
+            raise ValueError(f"Unknown value of _df_format: {self._df_format}")
 
     def _check_our_format(self):
         self._check_df_format()
@@ -549,9 +547,7 @@ class AnkiDataFrame(pd.DataFrame):
         elif self._fields_format == "list":
             pass
         else:
-            raise ValueError(
-                f"Unknown _fields_format: {self._fields_format}"
-            )
+            raise ValueError(f"Unknown _fields_format: {self._fields_format}")
 
         if "nflds" not in self.columns:
             raise ValueError("Could not find fields column 'nflds'.")
@@ -611,9 +607,7 @@ class AnkiDataFrame(pd.DataFrame):
         elif self._fields_format == "columns":
             pass
         else:
-            raise ValueError(
-                f"Unknown _fields_format: {self._fields_format}"
-            )
+            raise ValueError(f"Unknown _fields_format: {self._fields_format}")
 
         self._fields_format = "in_progress"
         mids = self.mid.unique()
@@ -650,9 +644,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
         else:
             return sorted(
-                {
-                    item for lst in self["ntags"].tolist() for item in lst
-                }
+                {item for lst in self["ntags"].tolist() for item in lst}
             )
 
     def list_decks(self) -> List[str]:
@@ -836,10 +828,10 @@ class AnkiDataFrame(pd.DataFrame):
         if self._fields_format == "columns":
             self_sf = self.fields_as_list(inplace=False, force=_force)
 
-        cols = sorted(set(self_sf.columns).intersection(set(other.columns)))
+        cols = sorted(set(self_sf.columns) & set(other.columns))
 
         other_nids = set(other.index)
-        inters = set(self_sf.index).intersection(other_nids)
+        inters = set(self_sf.index & other_nids)
         result = pd.Series(na, index=self_sf.index)
         new_bools = np.any(
             other.loc[other.index.isin(inters), cols].values
@@ -872,9 +864,9 @@ class AnkiDataFrame(pd.DataFrame):
             other = self.init_with_table(col=self.col, table=self._anki_table)
         cols = [c for c in self.columns if c in other.columns]
         other_nids = set(other.index)
-        inters = set(self.index).intersection(other_nids)
+        inters = set(self.index) & other_nids
         if only:
-            inters = inters.intersection(
+            inters &= set(
                 self[self.was_modified(other=other, _force=_force)].index
             )
         inters = sorted(inters)
@@ -1643,9 +1635,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         model2mid = raw.get_model2mid(self.db)
         if nmodel not in model2mid:
-            raise ValueError(
-                f"No model of with name '{nmodel}' exists."
-            )
+            raise ValueError(f"No model of with name '{nmodel}' exists.")
         field_keys = raw.get_mid2fields(self.db)[model2mid[nmodel]]
 
         # --- Fields ---
@@ -1659,8 +1649,7 @@ class AnkiDataFrame(pd.DataFrame):
                     "Unknown fields: {}".format(", ".join(unknown_fields))
                 )
             field_key2field = {
-                key: [d.get(key) for d in nflds]
-                for key in field_keys
+                key: [d.get(key) for d in nflds] for key in field_keys
             }
         elif is_list_list_like(nflds):
             n_fields = list({len(x) for x in nflds})
@@ -1678,7 +1667,7 @@ class AnkiDataFrame(pd.DataFrame):
                 for i, field_key in enumerate(field_keys)
             }
         elif is_dict_list_like(nflds):
-            lengths = {len(x) for x in  nflds.values()}
+            lengths = {len(x) for x in nflds.values()}
             if len(lengths) >= 2:
                 raise ValueError(
                     "Inconsistent number of "
@@ -1716,7 +1705,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             nid = self._get_ids(n=n_notes)
 
-        already_present = sorted(set(nid).intersection(set(self.index)))
+        already_present = sorted(set(nid) & set(self.index))
         if already_present:
             raise ValueError(
                 "The following note IDs (nid) are "
@@ -1928,9 +1917,7 @@ class AnkiDataFrame(pd.DataFrame):
         """
         df = self.help_cols(column)
         if len(df) == 0:
-            raise ValueError(
-                f"Could not find help for your search request."
-            )
+            raise ValueError(f"Could not find help for your search request.")
         if len(df) == 2:
             # fix for nid and cid column:
             df = self.help_cols(column, table=self._anki_table)
