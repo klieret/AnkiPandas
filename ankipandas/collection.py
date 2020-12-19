@@ -360,3 +360,18 @@ class Collection:
                 )
             )
             raise e
+        # This is important, because we have written to the database but still
+        # have it opened, which can cause DatabaseErrors.
+        log.debug("I will now drop all copies of the tables")
+        for key in self.__items:
+            self.__items[key] = None
+        for key in self.__original_items:
+            self.__original_items[key] = None
+        log.debug("I will now reload the connection.")
+        self._db = raw.load_db(self.path)
+        log.info(
+            "In case you're running this from a Jupyter notebook, make "
+            "sure to shutdown the kernel or delete all ankipandas objects"
+            " before you open anki to take a look at the result (only one "
+            "application can use the database at a time)."
+        )
