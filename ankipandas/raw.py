@@ -128,9 +128,7 @@ def read_info(db: sqlite3.Connection, table_name: str):
 
     """
     version = get_db_version(db)
-    _df = pd.read_sql_query(
-        f"SELECT * FROM {table_name} ", db
-    )
+    _df = pd.read_sql_query(f"SELECT * FROM {table_name} ", db)
     if version == 0:
         assert len(_df) == 1, _df
         ret = {}

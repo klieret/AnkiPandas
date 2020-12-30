@@ -100,9 +100,7 @@ class TestAnkiDF(unittest.TestCase):
         for table, eadf in eadfs.items():
             self.assertEqual(len(eadf), 0)
             adf = self.table2adf[table]
-            self.assertListEqual(
-                sorted(adf.columns), sorted(eadf.columns)
-            )
+            self.assertListEqual(sorted(adf.columns), sorted(eadf.columns))
 
     def test_tags(self):
         self.assertListEqual(
@@ -117,22 +115,16 @@ class TestAnkiDF(unittest.TestCase):
     def test_cards(self):
         cards = self.cards
         self.assertGreater(len(cards), 11)
-        self.assertEqual(
-            sorted(cards.columns), sorted(our_columns["cards"])
-        )
+        self.assertEqual(sorted(cards.columns), sorted(our_columns["cards"]))
 
     def test_notes(self):
         notes = self.notes
         self.assertGreater(len(notes), 6)
-        self.assertEqual(
-            sorted(notes.columns), sorted(our_columns["notes"])
-        )
+        self.assertEqual(sorted(notes.columns), sorted(our_columns["notes"]))
 
     def test_get_revs(self):
         revs = self.revs
-        self.assertEqual(
-            sorted(revs.columns), sorted(our_columns["revs"])
-        )
+        self.assertEqual(sorted(revs.columns), sorted(our_columns["revs"]))
         self.assertGreater(len(revs), 4)
 
     # Test merging

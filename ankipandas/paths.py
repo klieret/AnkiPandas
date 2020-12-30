@@ -207,9 +207,7 @@ def db_path_input(
                 "db_path_input: File '{}' does not exist.".format(str(path))
             )
         if path.is_file():
-            log.debug(
-                f"db_path_input: Database explicitly set to '{path}'."
-            )
+            log.debug(f"db_path_input: Database explicitly set to '{path}'.")
             result = path
         else:
             result = find_db(
@@ -244,9 +242,7 @@ def get_anki_backup_folder(
     """
     path = pathlib.Path(path)
     if not path.is_file():
-        raise FileNotFoundError(
-            f"Database path {path} seems to be invalid."
-        )
+        raise FileNotFoundError(f"Database path {path} seems to be invalid.")
     backup_folder = path.parent / "backups"
     if nexist == "raise" and not backup_folder.is_dir():
         raise ValueError(
