@@ -104,11 +104,11 @@ class TestAnkiDF(unittest.TestCase):
 
     def test_tags(self):
         self.assertListEqual(
-            list(self.notes.query("index=='1555579337683'")["ntags"].values)[0],
+            list(self.notes.query("index==1555579337683")["ntags"].values)[0],
             ["other_test_tag"],
         )
         self.assertListEqual(
-            list(self.notes.query("index=='1555579352896'")["ntags"].values)[0],
+            list(self.notes.query("index==1555579352896")["ntags"].values)[0],
             ["some_test_tag"],
         )
 
