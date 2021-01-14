@@ -141,6 +141,9 @@ try:
     html_theme = "sphinx_rtd_theme"
     html_theme_path = [theme.get_html_theme_path()]
 except ImportError:
+    print(
+        "**** WARNING ****: reverting to default theme, because sphinx_rtd_theme is not installed"
+    )
     html_theme = "default"
 print("html_theme='{}'".format(html_theme))
 
