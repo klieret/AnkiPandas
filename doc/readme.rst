@@ -1,6 +1,4 @@
 Readme
 ======
 
-.. include:: ../README.rst
-   :start-after: start-body
-   :end-before: end-body
+Read the readme on `github <https://github.com/klieret/AnkiPandas/>`_.
