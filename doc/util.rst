@@ -1,8 +1,6 @@
 Utilities
 =========
 
-.. module:: ankipandas.util
-
 .. automodule:: ankipandas.util
 
 .. automodule:: ankipandas.util.log

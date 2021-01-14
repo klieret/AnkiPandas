@@ -1,7 +1,6 @@
-Raw Dataframes
-==============
+Internals
+=========
 
-.. module:: ankipandas.raw
 
 .. automodule:: ankipandas.raw
     :members:
