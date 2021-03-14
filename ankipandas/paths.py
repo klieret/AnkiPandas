@@ -116,9 +116,7 @@ def find_db(
             "~/.local/share/Anki2",
             Path.home(),
         ]
-        search_paths = [
-            Path(sp).expanduser().resolve() for sp in search_paths
-        ]
+        search_paths = [Path(sp).expanduser().resolve() for sp in search_paths]
     if break_on_first:
         log.warning(
             "The search will stop at the first hit, so please verify that "
@@ -148,7 +146,7 @@ def find_db(
                     break
 
     if user:
-        # We were searchin gfor a specific user
+        # We were searching for a specific user
         if user not in found:
             raise ValueError(
                 f"Could not find database belonging to user {user}"
@@ -184,9 +182,7 @@ def find_db(
 
 
 @lru_cache(32)
-def db_path_input(
-    path: Union[str, PurePath] = None, user: str = None
-) -> Path:
+def db_path_input(path: Union[str, PurePath] = None, user: str = None) -> Path:
     """ Helper function to interpret user input of path to database.
 
     1. If no path is given, we search through some default locations
@@ -233,9 +229,7 @@ def db_backup_file_name() -> str:
     )
 
 
-def get_anki_backup_folder(
-    path: Union[str, PurePath], nexist="raise"
-) -> Path:
+def get_anki_backup_folder(path: Union[str, PurePath], nexist="raise") -> Path:
     """ Return path to Anki backup folder.
 
     Args:
@@ -260,8 +254,7 @@ def get_anki_backup_folder(
 
 
 def backup_db(
-    db_path: Union[str, PurePath],
-    backup_folder: Union[str, PurePath] = None,
+    db_path: Union[str, PurePath], backup_folder: Union[str, PurePath] = None,
 ) -> Path:
     """
     Back up database file.

@@ -2020,4 +2020,4 @@ class AnkiDataFrame(pd.DataFrame):
             return h
         else:
             print(h)
-            return None  # explicit fo rmypy
+            return None  # explicit for mypy

@@ -121,7 +121,7 @@ value_maps = {
 dtype_casts = {
     "notes": {},
     "cards": {},
-    "revs": {}
+    "revs": {},
 }  # type: Dict[str, Dict[str, Any]]
 
 # todo: more precise?
@@ -129,7 +129,7 @@ dtype_casts_back = {
     "notes": {},
     "cards": {},
     "revs": {},
-}    # type: Dict[str, Dict[str, Any]]
+}  # type: Dict[str, Dict[str, Any]]
 
 # Avoiding problem with ints to floats such as here:
 # https://github.com/pandas-dev/pandas/issues/4094

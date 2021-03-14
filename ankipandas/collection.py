@@ -169,7 +169,7 @@ class Collection:
                 if value is not None:
                     print(f"======== {key} ========")
                     value.summarize_changes()
-            return None   # explicit for mypy
+            return None  # explicit for mypy
         else:
             raise ValueError(f"Invalid output setting: {output}")
 

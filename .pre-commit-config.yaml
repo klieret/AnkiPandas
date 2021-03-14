@@ -23,7 +23,7 @@ repos:
     rev: ''  # Use the sha / tag you want to point at
     hooks:
     -   id: mypy
-        exclude: "config_gen.py|conftest.py|notebooks/"
+        exclude: "conftest.py|^doc/examples/examples/|^doc/conf.py"
 -   repo: https://github.com/codespell-project/codespell
     rev: ''
     hooks:
