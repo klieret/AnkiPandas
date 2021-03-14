@@ -49,7 +49,7 @@ def nested_dict():
     return collections.defaultdict(nested_dict)
 
 
-def defaultdict2dict(defdict: collections.defaultdict):
+def defaultdict2dict(defdict: collections.defaultdict) -> dict:
     return {
         key: defaultdict2dict(value)
         if isinstance(value, collections.defaultdict)

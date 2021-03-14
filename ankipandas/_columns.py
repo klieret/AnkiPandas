@@ -1,5 +1,6 @@
 # std
 import copy
+from typing import Dict, Any
 from pathlib import Path
 
 # 3rd
@@ -117,10 +118,18 @@ value_maps = {
     "revs": {"rtype": {0: "learning", 1: "review", 2: "relearn", 3: "cram"}},
 }
 
-dtype_casts = {"notes": {}, "cards": {}, "revs": {}}
+dtype_casts = {
+    "notes": {},
+    "cards": {},
+    "revs": {}
+}  # type: Dict[str, Dict[str, Any]]
 
 # todo: more precise?
-dtype_casts_back = {"notes": {}, "cards": {}, "revs": {}}
+dtype_casts_back = {
+    "notes": {},
+    "cards": {},
+    "revs": {},
+}    # type: Dict[str, Dict[str, Any]]
 
 # Avoiding problem with ints to floats such as here:
 # https://github.com/pandas-dev/pandas/issues/4094

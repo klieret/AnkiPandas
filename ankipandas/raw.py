@@ -116,7 +116,7 @@ def _interpret_json_val(val):
         return val
 
 
-def read_info(db: sqlite3.Connection, table_name: str):
+def read_info(db: sqlite3.Connection, table_name: str) -> dict:
     """ Get a table from the database and return nested dictionary mapping of
     it.
 
@@ -131,7 +131,7 @@ def read_info(db: sqlite3.Connection, table_name: str):
     _df = pd.read_sql_query(f"SELECT * FROM {table_name} ", db)
     if version == 0:
         assert len(_df) == 1, _df
-        ret = {}
+        ret = nested_dict()
         for col in _df.columns:
             ret[col] = _interpret_json_val(_df[col][0])
     elif version == 1:

@@ -161,13 +161,15 @@ class Collection:
             as_dict = {}
             for key, value in self.__items.items():
                 if value is not None:
-                    as_dict[key] = value.summarize_changes(output="dict")
-            return as_dict
+                    changes = value.summarize_changes(output="dict")
+                    as_dict[key] = changes  # type: ignore
+            return as_dict  # type: ignore
         elif output == "print":
             for key, value in self.__items.items():
                 if value is not None:
                     print(f"======== {key} ========")
                     value.summarize_changes()
+            return None   # explicit for mypy
         else:
             raise ValueError(f"Invalid output setting: {output}")
 

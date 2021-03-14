@@ -6,7 +6,7 @@ import time
 import numpy as np
 import pandas as pd
 import pathlib
-from typing import Union, List, Dict, Optional, Iterable
+from typing import Union, List, Dict, Optional, Iterable, Sequence, Any
 
 # ours
 import ankipandas.paths
@@ -739,7 +739,7 @@ class AnkiDataFrame(pd.DataFrame):
         _has_tags = set(tags).issubset
         return self["ntags"].apply(_has_tags)
 
-    def add_tag(self, tags: Union[Iterable[str], str], inplace=False):
+    def add_tag(self, tags: Union[Sequence[str], str], inplace=False):
         """ Adds tag ('ntags' column).
 
         Args:
@@ -820,21 +820,24 @@ class AnkiDataFrame(pd.DataFrame):
             self._check_our_format()
 
         if other is None:
-            other = self.col._get_original_item(
+            _other = self.col._get_original_item(
                 self._anki_table
             )  # type: AnkiDataFrame
+        else:
+            _other = other
+        del other  # avoid confusion
 
         self_sf = self
         if self._fields_format == "columns":
             self_sf = self.fields_as_list(inplace=False, force=_force)
 
-        cols = sorted(set(self_sf.columns) & set(other.columns))
+        cols = sorted(set(self_sf.columns) & set(_other.columns))
 
-        other_nids = set(other.index)
+        other_nids = set(_other.index)
         inters = set(self_sf.index & other_nids)
         result = pd.Series(na, index=self_sf.index)
         new_bools = np.any(
-            other.loc[other.index.isin(inters), cols].values
+            _other.loc[_other.index.isin(inters), cols].values
             != self_sf.loc[self_sf.index.isin(inters), cols].values,
             axis=1,
         )
@@ -869,10 +872,11 @@ class AnkiDataFrame(pd.DataFrame):
             inters &= set(
                 self[self.was_modified(other=other, _force=_force)].index
             )
-        inters = sorted(inters)
+        inters_st = sorted(inters)
+        del inters
         return pd.DataFrame(
-            self.loc[inters, cols].values != other.loc[inters, cols].values,
-            index=self.loc[inters].index,
+            self.loc[inters_st, cols].values != other.loc[inters_st, cols].values,
+            index=self.loc[inters_st].index,
             columns=cols,
         )
 
@@ -1222,6 +1226,7 @@ class AnkiDataFrame(pd.DataFrame):
             print("Modified rows: {}".format(as_dict["n_modified"]))
             print("Added rows: {}".format(as_dict["n_added"]))
             print("Deleted rows: {}".format(as_dict["n_deleted"]))
+            return None  # make explicit for mypy
         elif output == "dict":
             return as_dict
         else:
@@ -1303,6 +1308,7 @@ class AnkiDataFrame(pd.DataFrame):
     # todo: change order of arguments?
     # fixme: cord will be replaced
     # todo: duplicate cards (same note, same cord)?
+    # fixme: This is an absolute mess with the signature and mypy...
     def add_cards(
         self,
         nid: List[int],
@@ -1445,7 +1451,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         # --- Rest ---
 
-        def _handle_input(inpt, name, default, typ, options=None):
+        def _handle_input(inpt, name, default, typ, options=None) -> List[Any]:
             if inpt is None:
                 inpt = [default] * len(nid)
             elif is_list_like(inpt):
@@ -1575,7 +1581,7 @@ class AnkiDataFrame(pd.DataFrame):
         Args:
             n: Number of IDs to generate
         """
-        indices = []
+        indices = []  # type: List[int]
         for i in range(n):
             indices.append(self._get_id(others=indices))
         return indices
@@ -1642,7 +1648,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         if is_list_dict_like(nflds):
             n_notes = len(nflds)
-            specified_fields = set(flatten_list_list(map(list, nflds)))
+            specified_fields = set(flatten_list_list(list(map(list, nflds))))
             unknown_fields = sorted(specified_fields - set(field_keys))
             if unknown_fields:
                 raise ValueError(
@@ -1676,7 +1682,7 @@ class AnkiDataFrame(pd.DataFrame):
             elif not lengths:
                 raise ValueError("Are you trying to add zero notes?")
             n_notes = lengths.pop()
-            field_key2field = copy.deepcopy(nflds)
+            field_key2field = copy.deepcopy(nflds)  # type: ignore
             for key in field_keys:
                 if key not in field_key2field:
                     field_key2field[key] = [""] * n_notes
@@ -1866,14 +1872,17 @@ class AnkiDataFrame(pd.DataFrame):
             new note ID (``int``)
 
         """
+        _nflds = []  # type: Union[List[List[str]], Dict[str, List[str]]]
         if is_list_like(nflds):
-            nflds = [nflds]
+            _nflds = [nflds]
         elif isinstance(nflds, dict):
-            nflds = [nflds]
+            _nflds = {key: [value] for key, value in nflds.items()}
         else:
             raise ValueError(
                 "Unknown type for fields specification: {}".format(type(nflds))
             )
+        del nflds
+
         if ntags is not None:
             ntags = [ntags]
         if nid is not None:
@@ -1887,7 +1896,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         ret = self.add_notes(
             nmodel=nmodel,
-            nflds=nflds,
+            nflds=_nflds,
             ntags=ntags,
             nid=nid,
             nguid=nguid,
@@ -1935,6 +1944,7 @@ class AnkiDataFrame(pd.DataFrame):
             return h
         else:
             print(h)
+            return None  # Make explicit for mypy
 
     def help_cols(
         self, column="auto", table="all", ankicolumn="all"
@@ -2007,3 +2017,4 @@ class AnkiDataFrame(pd.DataFrame):
             return h
         else:
             print(h)
+            return None  # explicit fo rmypy
