@@ -875,7 +875,8 @@ class AnkiDataFrame(pd.DataFrame):
         inters_st = sorted(inters)
         del inters
         return pd.DataFrame(
-            self.loc[inters_st, cols].values != other.loc[inters_st, cols].values,
+            self.loc[inters_st, cols].values
+            != other.loc[inters_st, cols].values,
             index=self.loc[inters_st].index,
             columns=cols,
         )
@@ -1435,7 +1436,7 @@ class AnkiDataFrame(pd.DataFrame):
                 raise ValueError(
                     "Number of decks doesn't match number of "
                     "notes for which cards should be added: {} "
-                    "instead of {}.".format(len(cmod), len(nid))
+                    "instead of {}.".format(len(cdeck), len(nid))
                 )
         else:
             raise ValueError("Unknown format for cdeck: {}".format(type(cdeck)))
@@ -1459,7 +1460,7 @@ class AnkiDataFrame(pd.DataFrame):
                     raise ValueError(
                         "Number of {} doesn't match number of "
                         "notes for which cards should be added: {} "
-                        "instead of {}.".format(name, len(cmod), len(nid))
+                        "instead of {}.".format(name, len(inpt), len(nid))
                     )
             elif isinstance(inpt, typ):
                 inpt = [inpt] * len(nid)
@@ -1526,7 +1527,7 @@ class AnkiDataFrame(pd.DataFrame):
                 raise ValueError(
                     "Number of cdue doesn't match number of "
                     "notes for which cards should be added: {} "
-                    "instead of {}.".format(len(cmod), len(nid))
+                    "instead of {}.".format(len(cdue), len(nid))
                 )
         elif isinstance(cdue, int):
             cdue = [cdue] * len(nid)
@@ -1648,14 +1649,16 @@ class AnkiDataFrame(pd.DataFrame):
 
         if is_list_dict_like(nflds):
             n_notes = len(nflds)
-            specified_fields = set(flatten_list_list(list(map(list, nflds))))
+            specified_fields = set(
+                flatten_list_list(list(map(lambda x: list(x), nflds)))
+            )  # mypy doesn't want to use list as a function here
             unknown_fields = sorted(specified_fields - set(field_keys))
             if unknown_fields:
                 raise ValueError(
                     "Unknown fields: {}".format(", ".join(unknown_fields))
                 )
             field_key2field = {
-                key: [d.get(key) for d in nflds] for key in field_keys
+                key: [d.get(key) for d in nflds] for key in field_keys  # type: ignore
             }
         elif is_list_list_like(nflds):
             n_fields = list({len(x) for x in nflds})
@@ -1673,7 +1676,7 @@ class AnkiDataFrame(pd.DataFrame):
                 for i, field_key in enumerate(field_keys)
             }
         elif is_dict_list_like(nflds):
-            lengths = {len(x) for x in nflds.values()}
+            lengths = {len(x) for x in nflds.values()}  # type: ignore
             if len(lengths) >= 2:
                 raise ValueError(
                     "Inconsistent number of "
@@ -1874,7 +1877,7 @@ class AnkiDataFrame(pd.DataFrame):
         """
         _nflds = []  # type: Union[List[List[str]], Dict[str, List[str]]]
         if is_list_like(nflds):
-            _nflds = [nflds]
+            _nflds = [nflds]  # type: ignore
         elif isinstance(nflds, dict):
             _nflds = {key: [value] for key, value in nflds.items()}
         else:
