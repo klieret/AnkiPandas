@@ -9,10 +9,8 @@ import pathlib
 from typing import Union, List, Dict, Optional, Iterable, Sequence, Any
 
 # ours
-import ankipandas.paths
 import ankipandas.raw as raw
-import ankipandas.util.dataframe
-from ankipandas.util.dataframe import replace_df_inplace
+from ankipandas.util.dataframe import replace_df_inplace, merge_dfs
 import ankipandas._columns as _columns
 from ankipandas.util.misc import invert_dict, flatten_list_list
 from ankipandas.util.log import log
@@ -449,7 +447,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
         elif self._anki_table == "revs":
             self["nid"] = self.nid
-        ret = ankipandas.util.dataframe.merge_dfs(
+        ret = merge_dfs(
             df=self,
             df_add=self.col.notes,
             id_df="nid",
@@ -496,7 +494,7 @@ class AnkiDataFrame(pd.DataFrame):
                 "notes table."
             )
         self._check_our_format()
-        ret = ankipandas.util.dataframe.merge_dfs(
+        ret = merge_dfs(
             df=self,
             df_add=self.col.cards,
             id_df="cid",
@@ -1591,7 +1589,9 @@ class AnkiDataFrame(pd.DataFrame):
     def add_notes(
         self,
         nmodel: str,
-        nflds: Union[List[List[str]], Dict[str, List[str]]],
+        nflds: Union[
+            List[List[str]], Dict[str, List[str]], List[Dict[str, str]]
+        ],
         ntags: List[List[str]] = None,
         nid=None,
         nguid=None,
@@ -1672,7 +1672,7 @@ class AnkiDataFrame(pd.DataFrame):
                     )
                 )
             field_key2field = {
-                field_key: [x[i] for x in nflds]
+                field_key: [x[i] for x in nflds]  # type: ignore
                 for i, field_key in enumerate(field_keys)
             }
         elif is_dict_list_like(nflds):
