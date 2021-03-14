@@ -300,7 +300,7 @@ class Collection:
                 modify=modify, add=add, delete=delete
             )
             log.debug("Now getting & updating info.")
-            info = self._get_and_update_info()
+            self._get_and_update_info()
         except Exception as e:
             log.critical(
                 "Something went wrong preparing the data for writing. "

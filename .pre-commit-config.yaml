@@ -15,3 +15,17 @@ repos:
     -   id: detect-private-key
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: ''  # pick a git hash / tag to point to
+    hooks:
+    -   id: flake8
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: ''  # Use the sha / tag you want to point at
+    hooks:
+    -   id: mypy
+        exclude: "config_gen.py|conftest.py|notebooks/"
+-   repo: https://github.com/codespell-project/codespell
+    rev: ''
+    hooks:
+    -   id: codespell
+        args: ["-I", "codespell.txt"]

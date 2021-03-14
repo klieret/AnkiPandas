@@ -1917,7 +1917,7 @@ class AnkiDataFrame(pd.DataFrame):
         """
         df = self.help_cols(column)
         if len(df) == 0:
-            raise ValueError(f"Could not find help for your search request.")
+            raise ValueError("Could not find help for your search request.")
         if len(df) == 2:
             # fix for nid and cid column:
             df = self.help_cols(column, table=self._anki_table)

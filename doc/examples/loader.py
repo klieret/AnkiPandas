@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 
 # ours
 sys.path.insert(0, "../..")
-import ankipandas
-from ankipandas.util.log import get_logger
+import ankipandas  # noqa E402
+from ankipandas.util.log import get_logger  # noqa E402
 
 
 class Loader(object):
@@ -33,7 +33,7 @@ class Loader(object):
 
     def run_example(self, path: Path, save=True):
         self.log.info("Running example {}".format(path))
-        col = ankipandas.Collection(self.col_path)
+        col = ankipandas.Collection(self.col_path)  # noqa F841
         with path.open("r") as example_file:
             exec(example_file.read())
         if save:
@@ -50,5 +50,5 @@ class Loader(object):
 
 
 if __name__ == "__main__":
-    l = Loader()
-    l.run_all()
+    loader = Loader()
+    loader.run_all()

@@ -40,7 +40,7 @@ def test_summarize_changes_no_changes(db_path):
         assert sc[item]["n_modified"] == 0
         assert sc[item]["n_added"] == 0
         assert sc[item]["n_deleted"] == 0
-        assert sc[item]["has_changed"] == False
+        assert not sc[item]["has_changed"]
 
 
 @parameterized_paths()
