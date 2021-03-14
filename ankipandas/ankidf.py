@@ -165,12 +165,11 @@ class AnkiDataFrame(pd.DataFrame):
         duplicates = self.index[self.index.duplicated()].tolist()
         if duplicates:
             log.critical(
-                "Duplicated indizes in table {} discovered, so something "
+                "Duplicated indizes in table %s discovered, so something "
                 "definitely went wrong. Please don't ignore this warning. "
-                "These indizes appear more "
-                "than once: {}".format(
-                    self._anki_table, ", ".join(map(str, duplicates))
-                )
+                "These indizes appear more than once: %s",
+                self._anki_table,
+                ", ".join(map(str, duplicates)),
             )
 
     def _invalid_table(self):
@@ -1019,9 +1018,8 @@ class AnkiDataFrame(pd.DataFrame):
         if duplicate_ids:
             log.critical(
                 "The following IDs occur "
-                "more than once: {}. Please do not use this dataframe.".format(
-                    ", ".join(map(str, duplicate_ids))
-                )
+                "more than once: %s. Please do not use this dataframe.",
+                ", ".join(map(str, duplicate_ids)),
             )
         self.set_index(id_field, inplace=True)
 

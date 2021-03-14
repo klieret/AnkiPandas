@@ -32,13 +32,13 @@ class Loader(object):
         return examples
 
     def run_example(self, path: Path, save=True):
-        self.log.info("Running example {}".format(path))
+        self.log.info("Running example %s", path)
         col = ankipandas.Collection(self.col_path)  # noqa F841
         with path.open("r") as example_file:
             exec(example_file.read())
         if save:
             out = self.output_dir.resolve() / (path.resolve().stem + ".png")
-            self.log.info("Plotting to {}".format(out))
+            self.log.info("Plotting to %s", out)
             plt.savefig(out, bbox_inches="tight", transparent=True, dpi=75)
             plt.cla()
             plt.clf()
