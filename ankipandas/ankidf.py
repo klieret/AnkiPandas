@@ -1523,11 +1523,11 @@ class AnkiDataFrame(pd.DataFrame):
                     )
                 )
         elif is_list_like(cdue):
-            if len(cdue) != len(nid):
+            if len(cdue) != len(nid):  # type: ignore
                 raise ValueError(
                     "Number of cdue doesn't match number of "
                     "notes for which cards should be added: {} "
-                    "instead of {}.".format(len(cdue), len(nid))
+                    "instead of {}.".format(len(cdue), len(nid))  # type: ignore
                 )
         elif isinstance(cdue, int):
             cdue = [cdue] * len(nid)
