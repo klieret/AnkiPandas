@@ -15,10 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Setup problems with editable install as described [here](https://github.com/pypa/pip/issues/7953)
-- Compability issues with building ankipandas on windows machines (windows is not
+- Compatibility issues with building ankipandas on windows machines (windows is not
   using utf8 by default which often results in errors, see
   [here](https://discuss.python.org/t/pep-597-enable-utf-8-mode-by-default-on-windows/3122))
-- Issues with max search depth for databse search
+- Issues with max search depth for database search
 - AttributeError when calling `merge_notes` with `inplace=True`. [Issue #51](https://github.com/klieret/AnkiPandas/issues/51)
 - Default search paths might not have been working because the user name was not inserted properly
 - Properly tell anki that things were changed and that it should sync its tables

@@ -83,7 +83,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def _constructor(self):
-        """ This needs to be overriden so that any DataFrame operations do not
+        """ This needs to be overridden so that any DataFrame operations do not
         return a :class:`pandas.DataFrame` but a :class:`AnkiDataFrame`."""
 
         return AnkiDataFrame
