@@ -6,10 +6,10 @@ without the user having to specify full paths.
 import os
 import collections
 import datetime
-import pathlib
+from pathlib import Path, PurePath
 from functools import lru_cache
 import shutil
-from typing import Union, Optional
+from typing import Union, Optional, DefaultDict, Dict, List
 
 # ours
 from ankipandas.util.log import log
@@ -22,7 +22,7 @@ def _find_db(
     filename="collection.anki2",
     break_on_first=False,
     user: Optional[str] = None,
-):
+) -> DefaultDict[str, List[Path]]:
     """
     Like find_database but only for one search path at a time. Also doesn't
     raise any error, even if the search path doesn't exist.
@@ -37,7 +37,7 @@ def _find_db(
     Returns:
         collection.defaultdict({user: [list of results]})
     """
-    search_path = pathlib.Path(search_path)
+    search_path = Path(search_path)
     if not search_path.exists():
         log.debug(
             "_find_db: Search path '{}' does not "
@@ -55,17 +55,17 @@ def _find_db(
                 "match that of '{}'.".format(str(search_path), filename)
             )
             return collections.defaultdict(list)
-    found = collections.defaultdict(list)
+    found = collections.defaultdict(list)  # type: DefaultDict[str, List[Path]]
     for root, dirs, files in os.walk(str(search_path)):
         if filename in files:
             _user = os.path.basename(root)
             if user and not _user == user:
                 continue
-            found[_user].append(pathlib.Path(root) / filename)
+            found[_user].append(Path(root) / filename)
             if break_on_first:
                 log.debug("_find_db: Breaking after first hit.")
                 break
-        depth = len(pathlib.Path(root).relative_to(search_path).parts)
+        depth = len(Path(root).relative_to(search_path).parts)
         if maxdepth and depth >= maxdepth:
             # log.debug(
             #     "_find_db: Abort search at '{}'. "
@@ -82,7 +82,7 @@ def find_db(
     filename="collection.anki2",
     user=None,
     break_on_first=True,
-) -> pathlib.Path:
+) -> Path:
     """
     Find path to anki2 database.
 
@@ -101,7 +101,7 @@ def find_db(
         If none ore more than one result is found: :class:`ValueError`
 
     Returns:
-        pathlib.Path to the anki2 database
+        Path to the anki2 database
     """
     if not search_paths:
         log.info(
@@ -112,12 +112,12 @@ def find_db(
         search_paths = [
             "~/.local/share/Anki2/",
             "~/Documents/Anki2",
-            pathlib.Path(os.getenv("APPDATA", "~") + "/Anki2/"),
+            Path(os.getenv("APPDATA", "~") + "/Anki2/"),
             "~/.local/share/Anki2",
-            pathlib.Path.home(),
+            Path.home(),
         ]
         search_paths = [
-            pathlib.Path(sp).expanduser().resolve() for sp in search_paths
+            Path(sp).expanduser().resolve() for sp in search_paths
         ]
     if break_on_first:
         log.warning(
@@ -125,9 +125,9 @@ def find_db(
             "the result is correct (for example in case there might be more "
             "than one Anki installation)"
         )
-    if isinstance(search_paths, (str, pathlib.PurePath)):
+    if isinstance(search_paths, (str, PurePath)):
         search_paths = [search_paths]
-    found = {}
+    found = {}  # type: Dict[str, List[Path]]
     for search_path in search_paths:
         found = {
             **found,
@@ -148,11 +148,13 @@ def find_db(
                     break
 
     if user:
+        # We were searchin gfor a specific user
         if user not in found:
             raise ValueError(
                 f"Could not find database belonging to user {user}"
             )
-        found = found[user]
+        else:
+            results_user = found[user]
     else:
         if len(found) >= 2:
             raise ValueError(
@@ -165,22 +167,26 @@ def find_db(
                 "specify search paths to find more."
             )
         else:
-            found = found.popitem()[1]
-    if len(found) >= 2:
+            # No user specified but we found only one
+            results_user = found.popitem()[1]
+
+    if len(results_user) >= 2:
         raise ValueError(
             "Found more than one database belonging to user {} at {}".format(
-                user, ", ".join(map(str, found))
+                user, ", ".join(map(str, results_user))
             )
         )
-    found = found[0]
-    log.debug(f"Database found at '{found}'.")
-    return found
+
+    assert len(results_user) == 1
+    final_result = results_user[0]
+    log.debug(f"Database found at '{final_result}'.")
+    return final_result
 
 
 @lru_cache(32)
 def db_path_input(
-    path: Union[str, pathlib.PurePath] = None, user: str = None
-) -> pathlib.Path:
+    path: Union[str, PurePath] = None, user: str = None
+) -> Path:
     """ Helper function to interpret user input of path to database.
 
     1. If no path is given, we search through some default locations
@@ -192,7 +198,7 @@ def db_path_input(
         user: User name of anki collection or None
 
     Returns:
-        Path to anki database as :class:`pathlib.Path` object
+        Path to anki database as :class:`Path` object
 
     Raises:
         If path does not exist: :class:`FileNotFoundError`
@@ -201,7 +207,7 @@ def db_path_input(
     if path is None:
         result = find_db(user=user)
     else:
-        path = pathlib.Path(path)
+        path = Path(path)
         if not path.exists():
             raise FileNotFoundError(
                 "db_path_input: File '{}' does not exist.".format(str(path))
@@ -228,19 +234,19 @@ def db_backup_file_name() -> str:
 
 
 def get_anki_backup_folder(
-    path: Union[str, pathlib.PurePath], nexist="raise"
-) -> pathlib.Path:
+    path: Union[str, PurePath], nexist="raise"
+) -> Path:
     """ Return path to Anki backup folder.
 
     Args:
-        path: Path to Aki database as :class:`pathlib.Path`
+        path: Path to Aki database as :class:`Path`
         nexist: What to do if backup folder doesn't seem to exist: ``raise`` or
             ``ignore``.
 
     Returns:
-        Path to Anki backup folder as :class:`pathlib.Path`.
+        Path to Anki backup folder as :class:`Path`.
     """
-    path = pathlib.Path(path)
+    path = Path(path)
     if not path.is_file():
         raise FileNotFoundError(f"Database path {path} seems to be invalid.")
     backup_folder = path.parent / "backups"
@@ -254,9 +260,9 @@ def get_anki_backup_folder(
 
 
 def backup_db(
-    db_path: Union[str, pathlib.PurePath],
-    backup_folder: Union[str, pathlib.PurePath] = None,
-) -> pathlib.Path:
+    db_path: Union[str, PurePath],
+    backup_folder: Union[str, PurePath] = None,
+) -> Path:
     """
     Back up database file.
 
@@ -266,11 +272,11 @@ def backup_db(
             created in the Anki backup directory.
 
     Returns:
-        Path to newly created backup file as :class:`pathlib.Path`.
+        Path to newly created backup file as :class:`Path`.
     """
-    db_path = pathlib.Path(db_path)
+    db_path = Path(db_path)
     if backup_folder:
-        backup_folder = pathlib.Path(backup_folder)
+        backup_folder = Path(backup_folder)
         if not backup_folder.is_dir():
             log.debug("Creating backup directory {}".format(str(backup_folder)))
             backup_folder.mkdir(parents=True)
