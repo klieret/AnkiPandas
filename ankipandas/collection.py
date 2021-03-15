@@ -13,7 +13,7 @@ from ankipandas.util.log import log
 
 class Collection:
     def __init__(self, path=None, user=None):
-        """ Initialize :class:`~ankipandas.collection.Collection` object.
+        """Initialize :class:`~ankipandas.collection.Collection` object.
 
         Args:
             path: (Search) path to database. See
@@ -125,22 +125,22 @@ class Collection:
         self.__items["revs"] = value
 
     def empty_notes(self):
-        """ Similar :class:`ankipandas.ankidf.AnkiDataFrame`
-        to :attr:`notes`, but without any rows. """
+        """Similar :class:`ankipandas.ankidf.AnkiDataFrame`
+        to :attr:`notes`, but without any rows."""
         return AnkiDataFrame.init_with_table(self, "notes", empty=True)
 
     def empty_cards(self):
-        """ Similar :class:`ankipandas.ankidf.AnkiDataFrame`
-        to :attr:`cards`, but without any rows. """
+        """Similar :class:`ankipandas.ankidf.AnkiDataFrame`
+        to :attr:`cards`, but without any rows."""
         return AnkiDataFrame.init_with_table(self, "cards", empty=True)
 
     def empty_revs(self):
-        """ Similar :class:`ankipandas.ankidf.AnkiDataFrame`
-        to :attr:`revs`, but without any rows. """
+        """Similar :class:`ankipandas.ankidf.AnkiDataFrame`
+        to :attr:`revs`, but without any rows."""
         return AnkiDataFrame.init_with_table(self, "revs", empty=True)
 
     def summarize_changes(self, output="print") -> Optional[Dict[str, dict]]:
-        """ Summarize changes that were made with respect to the table
+        """Summarize changes that were made with respect to the table
         as loaded from the database.
         If notes/cards/etc. were not loaded at all (and hence also definitely
         not modified), they do not appear in the output.
@@ -255,7 +255,7 @@ class Collection:
         delete=False,
         backup_folder: Union[PurePath, str] = None,
     ):
-        """ Creates a backup of the database and then writes back the new
+        """Creates a backup of the database and then writes back the new
         data.
 
         .. danger::

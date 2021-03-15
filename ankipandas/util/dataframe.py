@@ -31,7 +31,7 @@ def _sync_metadata(df_ret: pd.DataFrame, df_old: pd.DataFrame) -> None:
 
 
 def replace_df_inplace(df: pd.DataFrame, df_new: pd.DataFrame) -> None:
-    """ Replace dataframe 'in place'.
+    """Replace dataframe 'in place'.
     If the dataframe has a `_metadata` field, containing a list of attribute
     names that contain metadata, then this is copied from `df` to the new
     dataframe.

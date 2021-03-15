@@ -38,7 +38,7 @@ class AnkiDataFrame(pd.DataFrame):
     ]
 
     def __init__(self, *args, **kwargs):
-        """ Initializes a blank :class:`AnkiDataFrame`.
+        """Initializes a blank :class:`AnkiDataFrame`.
 
         .. warning::
 
@@ -81,7 +81,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def _constructor(self):
-        """ This needs to be overridden so that any DataFrame operations do not
+        """This needs to be overridden so that any DataFrame operations do not
         return a :class:`pandas.DataFrame` but a :class:`AnkiDataFrame`."""
 
         return AnkiDataFrame
@@ -213,8 +213,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def id(self):
-        """ Return note/card/review ID as :class:`pandas.Series` of integers.
-        """
+        """Return note/card/review ID as :class:`pandas.Series` of integers."""
         if self._anki_table == "notes":
             return self.nid
         elif self._anki_table == "cards":
@@ -383,7 +382,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def odid(self):
-        """ Original deck ID for cards in filtered deck as
+        """Original deck ID for cards in filtered deck as
         :class:`pandas.Series` of integers.
         """
         if self._anki_table == "cards":
@@ -425,7 +424,7 @@ class AnkiDataFrame(pd.DataFrame):
         prepend="n",
         prepend_clash_only=True,
     ):
-        """ Merge note table into existing dataframe.
+        """Merge note table into existing dataframe.
 
         Args:
             inplace: If False, return new dataframe, else update old one
@@ -667,7 +666,7 @@ class AnkiDataFrame(pd.DataFrame):
         return sorted(self["nmodel"].unique())
 
     def has_tag(self, tags: Optional[Union[Iterable[str], str]] = None):
-        """ Checks whether row has a certain tag ('ntags' column).
+        """Checks whether row has a certain tag ('ntags' column).
 
         Args:
             tags: String or list thereof. In the latter case, True is returned
@@ -708,7 +707,7 @@ class AnkiDataFrame(pd.DataFrame):
             return self["ntags"].apply(bool)
 
     def has_tags(self, tags: Optional[Union[Iterable[str], str]] = None):
-        """ Checks whether row contains at least the supplied tags.
+        """Checks whether row contains at least the supplied tags.
 
         Args:
             tags: String or list thereof.
@@ -737,7 +736,7 @@ class AnkiDataFrame(pd.DataFrame):
         return self["ntags"].apply(_has_tags)
 
     def add_tag(self, tags: Union[Sequence[str], str], inplace=False):
-        """ Adds tag ('ntags' column).
+        """Adds tag ('ntags' column).
 
         Args:
             tags: String or list thereof.
@@ -765,7 +764,7 @@ class AnkiDataFrame(pd.DataFrame):
         self["ntags"] = self["ntags"].apply(_add_tags)
 
     def remove_tag(self, tags: Union[Iterable[str], str, None], inplace=False):
-        """ Removes tag ('ntags' column).
+        """Removes tag ('ntags' column).
 
         Args:
             tags: String or list thereof. If None, all tags are removed.
@@ -800,7 +799,7 @@ class AnkiDataFrame(pd.DataFrame):
     def was_modified(
         self, other: Optional[pd.DataFrame] = None, na=True, _force=False
     ):
-        """ Compare with original table, show which rows have changed.
+        """Compare with original table, show which rows have changed.
         Will only compare columns existing in both dataframes.
 
         Args:
@@ -846,7 +845,7 @@ class AnkiDataFrame(pd.DataFrame):
     def modified_columns(
         self, other: Optional[pd.DataFrame] = None, _force=False, only=True
     ):
-        """ Compare with original table, show which columns in which rows
+        """Compare with original table, show which columns in which rows
         were modified.
 
         Args:
@@ -879,7 +878,7 @@ class AnkiDataFrame(pd.DataFrame):
         )
 
     def was_added(self, other: Optional[pd.DataFrame] = None, _force=False):
-        """ Compare with original table, show which rows were added.
+        """Compare with original table, show which rows were added.
 
         Args:
             other: Compare with this :class:`pandas.DataFrame`.
@@ -905,7 +904,7 @@ class AnkiDataFrame(pd.DataFrame):
     def was_deleted(
         self, other: Optional[pd.DataFrame] = None, _force=False
     ) -> List:
-        """ Compare with original table, return deleted indizes.
+        """Compare with original table, return deleted indizes.
 
         Args:
             other: Compare with this :class:`pandas.DataFrame`.
@@ -955,7 +954,7 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     def normalize(self, inplace=False, force=False):
-        """ Bring a :class:`AnkiDataFrame` from the ``raw`` format (i.e. the
+        """Bring a :class:`AnkiDataFrame` from the ``raw`` format (i.e. the
         exact format that Anki uses in its internal representation) to our
         convenient format.
 
@@ -1057,7 +1056,7 @@ class AnkiDataFrame(pd.DataFrame):
         self._df_format = "ours"
 
     def raw(self, inplace=False, force=False):
-        """ Bring a :class:`AnkiDataFrame` into the ``raw`` format (i.e. the
+        """Bring a :class:`AnkiDataFrame` into the ``raw`` format (i.e. the
         exact format that Anki uses in its internal representation) .
 
         Args:
@@ -1198,7 +1197,7 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     def summarize_changes(self, output="print") -> Optional[dict]:
-        """ Summarize changes that were made with respect to the table
+        """Summarize changes that were made with respect to the table
         as loaded from the database.
 
         Args:
@@ -1233,7 +1232,7 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     def _get_id(self, others=()) -> int:
-        """ Generate ID from timestamp and increment if it is already in use.
+        """Generate ID from timestamp and increment if it is already in use.
 
         .. warning::
 
@@ -1573,7 +1572,7 @@ class AnkiDataFrame(pd.DataFrame):
             return all_cids
 
     def _get_ids(self, n=1) -> List[int]:
-        """ Generate ID from timestamp and increment if it is already in use.
+        """Generate ID from timestamp and increment if it is already in use.
 
         Args:
             n: Number of IDs to generate
@@ -1597,7 +1596,7 @@ class AnkiDataFrame(pd.DataFrame):
         nusn=None,
         inplace=False,
     ):
-        """ Add multiple new notes corresponding to one model.
+        """Add multiple new notes corresponding to one model.
 
         Args:
             nmodel: Name of the model (must exist already, check
@@ -1839,7 +1838,7 @@ class AnkiDataFrame(pd.DataFrame):
         nusn=-1,
         inplace=False,
     ):
-        """ Add new note.
+        """Add new note.
 
         .. note::
 
@@ -1994,7 +1993,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @staticmethod
     def help(ret=False) -> Union[str, None]:
-        """ Display short help text.
+        """Display short help text.
 
         Args:
             ret: Return as string instead of printing it.

@@ -11,7 +11,7 @@ from ankipandas.test.util import parameterized_paths
 
 
 def _init_all_tables(col: Collection) -> None:
-    """ Access all attributes at least once to ensure that they are
+    """Access all attributes at least once to ensure that they are
     initialized.
     """
     _ = col.notes

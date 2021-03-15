@@ -9,7 +9,7 @@ from ankipandas.test.util import parameterized_paths
 
 @parameterized_paths()
 def test_inplace_merge_notes(db_path):
-    """ https://github.com/klieret/AnkiPandas/issues/51
+    """https://github.com/klieret/AnkiPandas/issues/51
     AttributeError: 'NoneType' object has no attribute 'col'
     """
     col = Collection(db_path)

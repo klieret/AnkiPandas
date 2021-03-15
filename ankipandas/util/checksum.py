@@ -62,7 +62,7 @@ def _checksum(data):
 
 
 def field_checksum(data: str) -> int:
-    """ 32 bit unsigned number from first 8 digits of sha1 hash.
+    """32 bit unsigned number from first 8 digits of sha1 hash.
     Apply this to the first field to the the field checksum that is used by
     Anki to detect duplicates.
 

@@ -183,7 +183,7 @@ def find_db(
 
 @lru_cache(32)
 def db_path_input(path: Union[str, PurePath] = None, user: str = None) -> Path:
-    """ Helper function to interpret user input of path to database.
+    """Helper function to interpret user input of path to database.
 
     1. If no path is given, we search through some default locations
     2. If path points to a file: Take that file
@@ -232,7 +232,7 @@ def db_backup_file_name() -> str:
 
 
 def get_anki_backup_folder(path: Union[str, PurePath], nexist="raise") -> Path:
-    """ Return path to Anki backup folder.
+    """Return path to Anki backup folder.
 
     Args:
         path: Path to Aki database as :class:`Path`
@@ -256,7 +256,8 @@ def get_anki_backup_folder(path: Union[str, PurePath], nexist="raise") -> Path:
 
 
 def backup_db(
-    db_path: Union[str, PurePath], backup_folder: Union[str, PurePath] = None,
+    db_path: Union[str, PurePath],
+    backup_folder: Union[str, PurePath] = None,
 ) -> Path:
     """
     Back up database file.
