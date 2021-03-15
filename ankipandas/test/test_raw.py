@@ -246,7 +246,8 @@ class TestMergeDfs(unittest.TestCase):
             drop_columns=["id_add", "drop"],
         )
         self.assertListEqual(
-            sorted(df_merged.columns), ["_clash", "clash", "id_df", "value"],
+            sorted(df_merged.columns),
+            ["_clash", "clash", "id_df", "value"],
         )
         self.assertListEqual(sorted(df_merged["value"]), [4, 4, 4, 5, 6])
 

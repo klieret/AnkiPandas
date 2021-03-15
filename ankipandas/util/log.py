@@ -40,7 +40,7 @@ def get_logger():
 
 
 def set_log_level(level: Union[str, int]) -> None:
-    """ Set global log level.
+    """Set global log level.
 
     Args:
         level: Either an int

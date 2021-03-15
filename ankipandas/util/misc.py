@@ -4,7 +4,7 @@ import collections
 
 
 def invert_dict(dct: dict) -> dict:
-    """ Invert dictionary, i.e. reverse keys and values.
+    """Invert dictionary, i.e. reverse keys and values.
 
     Args:
         dct: Dictionary
@@ -23,7 +23,7 @@ def invert_dict(dct: dict) -> dict:
 
 
 def flatten_list_list(lst: List[List[Any]]) -> List[Any]:
-    """ Takes a list of lists and returns a list of all elements.
+    """Takes a list of lists and returns a list of all elements.
 
     Args:
         lst: List of Lists
@@ -35,7 +35,7 @@ def flatten_list_list(lst: List[List[Any]]) -> List[Any]:
 
 
 def nested_dict():
-    """ This is very clever and stolen from
+    """This is very clever and stolen from
     https://stackoverflow.com/questions/16724788/
     Use it to initialize a dictionary-like object which automatically adds
     levels.

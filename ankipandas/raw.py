@@ -54,7 +54,7 @@ def load_db(path: Union[str, pathlib.PurePath]) -> sqlite3.Connection:
 
 
 def close_db(db: sqlite3.Connection) -> None:
-    """ Close the database.
+    """Close the database.
 
     Args:
         db:  Database (:class:`sqlite3.Connection`)
@@ -70,7 +70,7 @@ def close_db(db: sqlite3.Connection) -> None:
 
 
 def get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
-    """ Get raw table from the Anki database.
+    """Get raw table from the Anki database.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -87,7 +87,7 @@ def get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
 
 
 def get_empty_table(table: str) -> pd.DataFrame:
-    """ Get empty table
+    """Get empty table
 
     Args:
         table: ``cards``, ``notes`` or ``revs``
@@ -117,7 +117,7 @@ def _interpret_json_val(val):
 
 
 def read_info(db: sqlite3.Connection, table_name: str) -> dict:
-    """ Get a table from the database and return nested dictionary mapping of
+    """Get a table from the database and return nested dictionary mapping of
     it.
 
     Args:
@@ -175,7 +175,7 @@ def get_info(db: sqlite3.Connection) -> dict:
 
 @lru_cache(CACHE_SIZE)
 def get_db_version(db: sqlite3.Connection) -> int:
-    """ Get "version" of database structure
+    """Get "version" of database structure
 
     Args:
         db:
@@ -281,8 +281,8 @@ def set_table(
 
 
 class NumpyJSONEncoder(json.JSONEncoder):
-    """ JSON Encoder that support numpy datatypes by converting them to
-    built in datatypes. """
+    """JSON Encoder that support numpy datatypes by converting them to
+    built in datatypes."""
 
     def default(self, obj):
         if isinstance(obj, np.integer):
@@ -296,7 +296,7 @@ class NumpyJSONEncoder(json.JSONEncoder):
 
 
 def set_info(db: sqlite3.Connection, info: dict) -> None:
-    """ Write back extra info to database
+    """Write back extra info to database
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -332,7 +332,7 @@ def set_info(db: sqlite3.Connection, info: dict) -> None:
 
 @lru_cache(CACHE_SIZE)
 def get_ids(db: sqlite3.Connection, table: str) -> List[int]:
-    """ Get list of IDs, e.g. note IDs etc.
+    """Get list of IDs, e.g. note IDs etc.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -346,7 +346,7 @@ def get_ids(db: sqlite3.Connection, table: str) -> List[int]:
 
 @lru_cache(CACHE_SIZE)
 def get_deck_info(db: sqlite3.Connection) -> dict:
-    """ Get information about decks.
+    """Get information about decks.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -369,7 +369,7 @@ def get_deck_info(db: sqlite3.Connection) -> dict:
 
 @lru_cache(CACHE_SIZE)
 def get_did2deck(db: sqlite3.Connection) -> Dict[int, str]:
-    """ Mapping of deck IDs (did) to deck names.
+    """Mapping of deck IDs (did) to deck names.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -384,7 +384,7 @@ def get_did2deck(db: sqlite3.Connection) -> Dict[int, str]:
 
 @lru_cache(CACHE_SIZE)
 def get_deck2did(db: sqlite3.Connection) -> Dict[str, int]:
-    """ Mapping of deck names to deck IDs
+    """Mapping of deck names to deck IDs
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -399,7 +399,7 @@ def get_deck2did(db: sqlite3.Connection) -> Dict[str, int]:
 
 @lru_cache(CACHE_SIZE)
 def get_model_info(db: sqlite3.Connection) -> dict:
-    """ Get information about models.
+    """Get information about models.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -421,7 +421,7 @@ def get_model_info(db: sqlite3.Connection) -> dict:
 
 @lru_cache(CACHE_SIZE)
 def get_mid2model(db: sqlite3.Connection) -> Dict[int, str]:
-    """ Mapping of model IDs (mid) to model names.
+    """Mapping of model IDs (mid) to model names.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -436,7 +436,7 @@ def get_mid2model(db: sqlite3.Connection) -> Dict[int, str]:
 
 @lru_cache(CACHE_SIZE)
 def get_model2mid(db: sqlite3.Connection) -> Dict[str, int]:
-    """ Mapping of model name to model ID (mid)
+    """Mapping of model name to model ID (mid)
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -464,7 +464,7 @@ def get_mid2sortfield(db: sqlite3.Connection) -> Dict[int, int]:
 
 @lru_cache(CACHE_SIZE)
 def get_mid2fields(db: sqlite3.Connection) -> Dict[int, List[str]]:
-    """ Get mapping of model ID to field names.
+    """Get mapping of model ID to field names.
 
     Args:
         db: Database (:class:`sqlite3.Connection`)
@@ -491,7 +491,7 @@ def get_mid2fields(db: sqlite3.Connection) -> Dict[int, List[str]]:
 
 @lru_cache(CACHE_SIZE)
 def get_mid2templateords(db: sqlite3.Connection) -> Dict[int, List[int]]:
-    """ Get mapping of model ID to available templates ids
+    """Get mapping of model ID to available templates ids
 
     Args:
         db:
@@ -511,7 +511,7 @@ def get_mid2templateords(db: sqlite3.Connection) -> Dict[int, List[int]]:
 
 @lru_cache(CACHE_SIZE)
 def get_cid2nid(db: sqlite3.Connection) -> Dict[int, int]:
-    """ Mapping card ID to note ID.
+    """Mapping card ID to note ID.
 
     Args:
         db:  Database (:class:`sqlite3.Connection`)
@@ -526,7 +526,7 @@ def get_cid2nid(db: sqlite3.Connection) -> Dict[int, int]:
 
 @lru_cache(CACHE_SIZE)
 def get_cid2did(db: sqlite3.Connection) -> Dict[int, int]:
-    """ Mapping card ID to deck ID.
+    """Mapping card ID to deck ID.
 
     Args:
         db:  Database (:class:`sqlite3.Connection`)
@@ -541,7 +541,7 @@ def get_cid2did(db: sqlite3.Connection) -> Dict[int, int]:
 
 @lru_cache(CACHE_SIZE)
 def get_nid2mid(db: sqlite3.Connection) -> Dict[int, int]:
-    """ Mapping note ID to model ID.
+    """Mapping note ID to model ID.
 
     Args:
         db:  Database (:class:`sqlite3.Connection`)

@@ -15,7 +15,7 @@ from ankipandas.util.log import set_debug_log_level
 
 
 def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:
-    """ Create files in random folders.
+    """Create files in random folders.
 
     Args:
         basedir: Starting directory
