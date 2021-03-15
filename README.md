@@ -3,6 +3,7 @@
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/klieret/AnkiPandas.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/klieret/AnkiPandas/context:python)
 [![gh actions](https://github.com/klieret/AnkiPandas/workflows/testing/badge.svg)](https://github.com/klieret/AnkiPandas/actions)
 [![Coveralls](https://coveralls.io/repos/github/klieret/AnkiPandas/badge.svg?branch=master)](https://coveralls.io/github/klieret/AnkiPandas?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/)
