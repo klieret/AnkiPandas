@@ -29,5 +29,5 @@ def _guid64():
 
 
 def guid():
-    """ Return globally unique ID """
+    """Return globally unique ID"""
     return _guid64()

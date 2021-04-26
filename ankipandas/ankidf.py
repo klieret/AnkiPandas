@@ -225,7 +225,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def nid(self):
-        """ Note ID as :class:`pandas.Series` of integers. """
+        """Note ID as :class:`pandas.Series` of integers."""
         if self._anki_table == "notes":
             return self.index
         elif self._anki_table == "cards":
@@ -257,7 +257,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def cid(self):
-        """ Card ID as :class:`pandas.Series` of integers. """
+        """Card ID as :class:`pandas.Series` of integers."""
         if self._anki_table == "cards":
             return self.index
         if self._anki_table == "revs":
@@ -294,7 +294,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def rid(self):
-        """ Review ID as :class:`pandas.Series` of integers. """
+        """Review ID as :class:`pandas.Series` of integers."""
         if self._anki_table == "revs":
             return self.index
         else:
@@ -323,7 +323,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def mid(self):
-        """ Model ID as :class:`pandas.Series` of integers. """
+        """Model ID as :class:`pandas.Series` of integers."""
         if self._anki_table in ["notes"]:
             if "nmodel" not in self.columns:
                 raise ValueError(
@@ -352,7 +352,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     @property
     def did(self):
-        """ Deck ID as :class:`pandas.Series` of integers. """
+        """Deck ID as :class:`pandas.Series` of integers."""
         if self._anki_table == "cards":
             if "cdeck" not in self.columns:
                 raise ValueError(
@@ -632,7 +632,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
 
     def list_tags(self) -> List[str]:
-        """ Return sorted list of all tags in the current table. """
+        """Return sorted list of all tags in the current table."""
         if "ntags" not in self.columns:
             raise ValueError(
                 "Tags column 'ntags' not present. Either use the notes table"
@@ -644,7 +644,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
 
     def list_decks(self) -> List[str]:
-        """ Return sorted list of deck names in the current table. """
+        """Return sorted list of deck names in the current table."""
         if "cdeck" not in self.columns:
             raise ValueError(
                 "Deck column 'cdeck' not present. Either use the cards table "
@@ -657,7 +657,7 @@ class AnkiDataFrame(pd.DataFrame):
             return decks
 
     def list_models(self):
-        """ Return sorted list of model names in the current table. """
+        """Return sorted list of model names in the current table."""
         if "nmodel" not in self.columns:
             raise ValueError(
                 "Model column 'nmodel' not present. Either use the notes table"
@@ -930,14 +930,14 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     def _set_usn(self):
-        """ Update usn (update sequence number) for all changed rows. """
+        """Update usn (update sequence number) for all changed rows."""
         self.loc[
             self.was_modified(na=True, _force=True),
             _columns.columns_anki2ours[self._anki_table]["usn"],
         ] = -1
 
     def _set_mod(self):
-        """ Update modification timestamps for all changed rows. """
+        """Update modification timestamps for all changed rows."""
         if self._anki_table in ["cards", "notes"]:
             self.loc[
                 self.was_modified(na=True, _force=True),
@@ -946,7 +946,7 @@ class AnkiDataFrame(pd.DataFrame):
 
     # todo: test
     def _set_guid(self):
-        """ Update globally unique id """
+        """Update globally unique id"""
         if self._anki_table == "notes":
             self.loc[~self["nguid"].apply(bool)].apply(generate_guid)
 

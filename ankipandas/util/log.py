@@ -8,7 +8,7 @@ LOG_DEFAULT_LEVEL = logging.INFO
 
 
 def get_logger():
-    """ Sets up global logger. """
+    """Sets up global logger."""
     _log = colorlog.getLogger("AnkiPandas")
 
     if _log.handlers:
@@ -59,7 +59,7 @@ def set_log_level(level: Union[str, int]) -> None:
 
 
 def set_debug_log_level() -> None:
-    """ Set global log level to debug. """
+    """Set global log level to debug."""
     set_log_level(logging.DEBUG)
 
 
