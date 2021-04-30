@@ -69,12 +69,12 @@ class Collection:
 
     @property
     def path(self) -> Path:
-        """ Path to currently loaded database """
+        """Path to currently loaded database"""
         return self._path
 
     @property
     def db(self) -> sqlite3.Connection:
-        """ Opened Anki database """
+        """Opened Anki database"""
         return self._db
 
     def __del__(self):
@@ -99,7 +99,7 @@ class Collection:
 
     @property
     def notes(self) -> AnkiDataFrame:
-        """ Notes as :class:`ankipandas.ankidf.AnkiDataFrame`. """
+        """Notes as :class:`ankipandas.ankidf.AnkiDataFrame`."""
         return self._get_item("notes")
 
     @notes.setter
@@ -108,7 +108,7 @@ class Collection:
 
     @property
     def cards(self) -> AnkiDataFrame:
-        """ Cards as :class:`ankipandas.ankidf.AnkiDataFrame`. """
+        """Cards as :class:`ankipandas.ankidf.AnkiDataFrame`."""
         return self._get_item("cards")
 
     @cards.setter
@@ -117,7 +117,7 @@ class Collection:
 
     @property
     def revs(self) -> AnkiDataFrame:
-        """ Reviews as :class:`ankipandas.ankidf.AnkiDataFrame`. """
+        """Reviews as :class:`ankipandas.ankidf.AnkiDataFrame`."""
         return self._get_item("revs")
 
     @revs.setter

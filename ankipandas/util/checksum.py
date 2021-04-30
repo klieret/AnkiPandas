@@ -23,7 +23,7 @@ def _strip_html(s):
 
 
 def _strip_html_media(s):
-    """ Strip HTML but keep media filenames """
+    """Strip HTML but keep media filenames"""
     s = _reMedia.sub(" \\1 ", s)
     return _strip_html(s)
 

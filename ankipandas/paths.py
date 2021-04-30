@@ -225,7 +225,7 @@ def db_path_input(path: Union[str, PurePath] = None, user: str = None) -> Path:
 
 
 def db_backup_file_name() -> str:
-    """ Time based file name of the backup file. """
+    """Time based file name of the backup file."""
     return "backup-ankipandas-{}.anki2".format(
         datetime.datetime.now().strftime("%Y-%m-%d-%H.%M.%S.%f")
     )

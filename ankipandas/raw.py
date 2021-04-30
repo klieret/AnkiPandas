@@ -451,7 +451,7 @@ def get_model2mid(db: sqlite3.Connection) -> Dict[str, int]:
 
 @lru_cache(CACHE_SIZE)
 def get_mid2sortfield(db: sqlite3.Connection) -> Dict[int, int]:
-    """ Mapping of model ID to index of sort field. """
+    """Mapping of model ID to index of sort field."""
     if get_db_version(db) == 0:
         minfo = get_model_info(db)
         _mid2sortfield = {mid: minfo[mid]["sortf"] for mid in minfo}
