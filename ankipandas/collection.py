@@ -3,6 +3,7 @@ from pathlib import Path, PurePath
 import sqlite3
 from typing import Optional, Dict, Union, Any
 import time
+from contextlib import closing
 
 # ours
 import ankipandas.paths
@@ -48,11 +49,6 @@ class Collection:
         #: Path to currently loaded database
         self._path = path  # type: Path
 
-        log.info("Loaded db from %s", self.path)
-
-        #: Opened Anki database (:class:`sqlite3.Connection`)
-        self._db = raw.load_db(self.path)  # type: sqlite3.Connection
-
         #: Should be accessed with _get_item!
         self.__items = {
             "notes": None,
@@ -74,13 +70,11 @@ class Collection:
 
     @property
     def db(self) -> sqlite3.Connection:
-        """Opened Anki database"""
-        return self._db
-
-    def __del__(self):
-        log.debug("Closing db %s which was loaded from %s.", self.db, self.path)
-        raw.close_db(self.db)
-        log.debug("Closing successful")
+        """Opened Anki database. Make sure to call `db.close()` after you're
+        done. Better still, use `contextlib.closing`.
+        """
+        log.debug(f"Opening Db from {self._path}")
+        return raw.load_db(self._path)
 
     def _get_original_item(self, item):
         r = self.__original_items[item]
@@ -219,33 +213,34 @@ class Collection:
         return prepared
 
     def _get_and_update_info(self) -> Dict[str, Any]:
-        info = raw.get_info(self.db)
+        with closing(self.db) as db:
+            info = raw.get_info(db)
 
-        info_updates = dict(
-            mod=int(time.time() * 1000),  # Modification time stamp
-            usn=-1,  # Signals update needed
-        )
-        if raw.get_db_version(self.db) == 0:
-            for key in info_updates:
-                assert key in info
-            info.update(info_updates)
-        elif raw.get_db_version(self.db) == 1:
-            assert len(info) == 1
-            first_key = list(info)[0]
-            info[first_key].update(info_updates)
-        # fixme: this currently doesn't work. In the new db structure there's
-        #   a tags table instead of a field, but it doesn't seem to be
-        #   used.
-        # if self.__items["notes"] is not None:
-        #
-        #     missing_tags = list(
-        #         set(info["tags"].keys())
-        #         - set(self.__items["notes"].list_tags())
-        #     )
-        #     for tag in missing_tags:
-        #         # I'm assuming that this is the usn (update sequence number)
-        #         # of the tags
-        #         info["tags"][tag] = -1
+            info_updates = dict(
+                mod=int(time.time() * 1000),  # Modification time stamp
+                usn=-1,  # Signals update needed
+            )
+            if raw.get_db_version(db) == 0:
+                for key in info_updates:
+                    assert key in info
+                info.update(info_updates)
+            elif raw.get_db_version(db) == 1:
+                assert len(info) == 1
+                first_key = list(info)[0]
+                info[first_key].update(info_updates)
+            # fixme: this currently doesn't work. In the new db structure there's
+            #   a tags table instead of a field, but it doesn't seem to be
+            #   used.
+            # if self.__items["notes"] is not None:
+            #
+            #     missing_tags = list(
+            #         set(info["tags"].keys())
+            #         - set(self.__items["notes"].list_tags())
+            #     )
+            #     for tag in missing_tags:
+            #         # I'm assuming that this is the usn (update sequence number)
+            #         # of the tags
+            #         info["tags"][tag] = -1
         return info
 
     def write(
@@ -334,10 +329,11 @@ class Collection:
         try:
             for table, values in prepared.items():
                 log.debug("Now setting table %s.", table)
-                raw.set_table(
-                    self.db, values["raw"], table=table, mode=values["mode"]
-                )
-                log.debug("Setting table %s successful.", table)
+                with closing(self.db) as db:
+                    raw.set_table(
+                        db, values["raw"], table=table, mode=values["mode"]
+                    )
+                    log.debug("Setting table %s successful.", table)
             # log.debug("Now setting info")
             # raw.set_info(self.db, info)
             # log.debug("Setting info successful.")

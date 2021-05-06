@@ -1,12 +1,14 @@
 # std
 import copy
 import time
+from contextlib import closing
 
 # 3rd
 import numpy as np
 import pandas as pd
 import pathlib
 from typing import Union, List, Dict, Optional, Iterable, Sequence, Any
+from sqlite3 import Connection
 
 # ours
 import ankipandas.raw as raw
@@ -97,7 +99,8 @@ class AnkiDataFrame(pd.DataFrame):
         if empty:
             df = raw.get_empty_table(table)
         else:
-            df = raw.get_table(col.db, table)
+            with closing(col.db) as db:
+                df = raw.get_table(db, table)
 
         replace_df_inplace(self, df)
         self.normalize(inplace=True)
@@ -204,8 +207,11 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     @property
-    def db(self):
-        """Opened Anki database (:class:`sqlite3.Connection`)"""
+    def db(self) -> Connection:
+        """Opened Anki database (:class:`sqlite3.Connection`). Make sure to
+        call `db.close()` after you're done. Better still, use
+        `contextlib.closing`.
+        """
         return self.col.db
 
     # IDs
