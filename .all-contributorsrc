@@ -52,6 +52,15 @@
         "test",
         "code"
       ]
+    },
+    {
+      "login": "khughitt",
+      "name": "Keith Hughitt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/125001?v=4",
+      "profile": "https://github.com/khughitt",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
