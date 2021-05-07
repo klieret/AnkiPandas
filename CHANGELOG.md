@@ -3,6 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.10 -- 2021-05-07
+
+### Fixed
+
+- The SQLite connection to the database is now always closed right away by the Collection.
+  This solves issues where the connection was kept open even though all collection and
+  AnkiDataFrame objects were deleted (there is additional garbage collection trouble).
+  Read more in [issue 75](https://github.com/klieret/AnkiPandas/issues/75)
+
 ## 0.3.9 -- 2020-12-17
 
 ### Deprecated
