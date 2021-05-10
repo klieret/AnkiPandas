@@ -1,0 +1,2 @@
+include ankipandas/version.txt
+include requirements.txt

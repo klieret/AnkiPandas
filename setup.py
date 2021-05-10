@@ -80,4 +80,5 @@ setup(
         "Topic :: Utilities",
     ],
     python_requires=">=3.6",
+    include_package_data=True,
 )
