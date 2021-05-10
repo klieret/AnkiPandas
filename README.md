@@ -1,7 +1,7 @@
 # Analyze and manipulate your Anki collection using pandas!
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/klieret/AnkiPandas.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/klieret/AnkiPandas/context:python)
 [![gh actions](https://github.com/klieret/AnkiPandas/workflows/testing/badge.svg)](https://github.com/klieret/AnkiPandas/actions)
@@ -222,6 +222,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/CalculusAce"><img src="https://avatars3.githubusercontent.com/u/42630988?v=4?s=100" width="100px;" alt=""/><br /><sub><b>CalculusAce</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3ACalculusAce" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/khughitt"><img src="https://avatars.githubusercontent.com/u/125001?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Keith Hughitt</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Akhughitt" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/eumiro"><img src="https://avatars0.githubusercontent.com/u/6774676?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Miroslav Šedivý</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Tests">⚠️</a> <a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/bollwyvl"><img src="https://avatars.githubusercontent.com/u/45380?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicholas Bollweg</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=bollwyvl" title="Code">💻</a></td>
     <td align="center"><a href="http://thomasbrownback.com/"><img src="https://avatars2.githubusercontent.com/u/26754?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thomas Brownback</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Abrownbat" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/exc4l"><img src="https://avatars3.githubusercontent.com/u/74188442?v=4?s=100" width="100px;" alt=""/><br /><sub><b>exc4l</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Aexc4l" title="Bug reports">🐛</a> <a href="https://github.com/klieret/AnkiPandas/commits?author=exc4l" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/p4nix"><img src="https://avatars1.githubusercontent.com/u/7038116?v=4?s=100" width="100px;" alt=""/><br /><sub><b>p4nix</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Ap4nix" title="Bug reports">🐛</a></td>
