@@ -1,2 +1,5 @@
 include ankipandas/version.txt
 include requirements.txt
+include CHANGELOG.md
+include README.md
+include LICENSE.txt
