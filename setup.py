@@ -35,12 +35,6 @@ this_dir = Path(__file__).resolve().parent
 
 packages = setuptools.find_packages()
 
-with (this_dir / "README.md").open(encoding="utf8") as fh:
-    long_description = fh.read()
-
-with (this_dir / "ankipandas" / "version.txt").open(encoding="utf8") as vf:
-    version = vf.read().strip()
-
 with (this_dir / "requirements.txt").open(encoding="utf8") as rf:
     requirements = [
         req.strip()
@@ -51,7 +45,6 @@ with (this_dir / "requirements.txt").open(encoding="utf8") as rf:
 
 setuptools.setup(
     name="ankipandas",
-    version=version,
     packages=packages,
     url="https://github.com/klieret/ankipandas",
     project_urls={
@@ -59,13 +52,10 @@ setuptools.setup(
         "Documentation": "https://ankipandas.readthedocs.io/",
         "Source Code": "https://github.com/klieret/ankipandas/",
     },
-    package_data={"ankipandas": ["anki_fields.csv", "data/*"]},
     install_requires=requirements,
     license="MIT",
     keywords=keywords,
     description=description,
-    long_description=long_description,
-    long_description_content_type="text/markdown",
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
