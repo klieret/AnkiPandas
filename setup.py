@@ -9,7 +9,6 @@ you will need administrator rights).
 """
 
 # std
-from distutils.core import setup
 import site
 import sys
 
@@ -50,7 +49,7 @@ with (this_dir / "requirements.txt").open(encoding="utf8") as rf:
     ]
 
 
-setup(
+setuptools.setup(
     name="ankipandas",
     version=version,
     packages=packages,
@@ -80,5 +79,5 @@ setup(
         "Topic :: Utilities",
     ],
     python_requires=">=3.6",
-    include_package_data=True,
+    include_package_data=True
 )
