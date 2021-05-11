@@ -11,63 +11,22 @@ you will need administrator rights).
 # std
 import site
 import sys
-
-# noinspection PyUnresolvedReferences
-import setuptools  # see below (1)
 from pathlib import Path
 
-# (1) see https://stackoverflow.com/questions/8295644/
-# Without this import, install_requires won't work.
+# noinspection PyUnresolvedReferences
+import setuptools
 
 # Sometimes editable install fails with an error message about user site
 # being not writeable. The following line can fix that, see
 # https://github.com/pypa/pip/issues/7953
 site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
-keywords = ["anki", "pandas", "dataframe"]
-
-description = (
-    "Load your anki database as a pandas DataFrame with just one "
-    "line of code!"
-)
-
 this_dir = Path(__file__).resolve().parent
 
-packages = setuptools.find_packages()
-
-with (this_dir / "requirements.txt").open(encoding="utf8") as rf:
-    requirements = [
+setuptools.setup(
+    install_requires=[
         req.strip()
-        for req in rf.readlines()
+        for req in (this_dir / "requirements.txt").read_text().splitlines()
         if req.strip() and not req.startswith("#")
     ]
-
-
-setuptools.setup(
-    name="ankipandas",
-    packages=packages,
-    url="https://github.com/klieret/ankipandas",
-    project_urls={
-        "Bug Tracker": "https://github.com/klieret/ankipandas/issues",
-        "Documentation": "https://ankipandas.readthedocs.io/",
-        "Source Code": "https://github.com/klieret/ankipandas/",
-    },
-    install_requires=requirements,
-    license="MIT",
-    keywords=keywords,
-    description=description,
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Topic :: Database",
-        "Topic :: Education",
-        "Topic :: Utilities",
-    ],
-    python_requires=">=3.6",
-    include_package_data=True
 )
