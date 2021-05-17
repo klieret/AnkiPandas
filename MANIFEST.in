@@ -4,3 +4,4 @@ include CHANGELOG.md
 include README.md
 include LICENSE.txt
 recursive-include ankipandas/test/data/few_basic_cards *.anki2
+recursive-include ankipandas/data *.csv

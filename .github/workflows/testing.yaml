@@ -4,32 +4,93 @@ on: [push, pull_request]
 
 jobs:
   build:
+    runs-on: ubuntu-latest
 
-    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install prerequisites
+        run: |
+          python3 -m pip install -U pip wheel setuptools
+      - name: Build distribution
+        run: |
+          python3 setup.py sdist bdist_wheel
+          cd dist && sha256sum * | tee SHA256SUMS
+      - name: Install lint/test dependencies
+        run: |
+          python3 -m pip install flake8 pytest pytest-cover pytest-subtests
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --ignore F821 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Install test dependencies
+        run: |
+          python3 -m pip install -e .
+      - name: Test with pytest
+        run: |
+          pytest
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ankipandas dist ${{ github.run_number }}
+          path: ./dist
+      - name: Coveralls
+        uses: AndreMiras/coveralls-python-action@develop
+
+  test:
+    needs: [build]
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        os:  [ubuntu-latest, windows-latest, macos-latest]
+        os:  [ubuntu, windows, macos]
         python-version: [3.6, 3.7, 3.8, 3.9]
+        include:
+          - python-version: 3.6
+            artifact: ankipandas-*.tar.gz
+          - python-version: 3.7
+            artifact: ankipandas-*.whl
+          - python-version: 3.8
+            artifact: ankipandas-*.whl
+          - python-version: 3.9
+            artifact: ankipandas-*.tar.gz
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: ankipandas dist ${{ github.run_number }}
+        path: ./dist
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install prerequisites
       run: |
-        python -m pip install .
-        pip install flake8 pytest pytest-cover pytest-subtests
-    - name: Lint with flake8
+        python3 -m pip install -U pip wheel
+    - name: Get artifact path
+      id: artifact
+      shell: bash -l {0}
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --ignore F821 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        cd dist
+        echo "::set-output name=path::$(ls ${{ matrix.artifact }})"
+    - name: Install package
+      run: |
+        cd dist
+        python3 -m pip install ${{ steps.artifact.outputs.path }}
+    - name: Smoke test
+      run: |
+        cd dist
+        python3 -m pip list
+        python3 -m pip check
+        python3 -c "import ankipandas"
+    - name: Install test dependencies
+      run: |
+        python3 -m pip install pytest pytest-cover pytest-subtests
     - name: Test with pytest
       run: |
-        pytest
-    - name: Coveralls
-      uses: AndreMiras/coveralls-python-action@develop
-      if: ${{ matrix.os  == 'ubuntu-latest' && matrix.python-version == 3.8 }}
+        cd dist
+        pytest --pyargs ankipandas --cov ankipandas --cov-report term-missing:skip-covered
