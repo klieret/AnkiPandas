@@ -1,5 +1,5 @@
 AnkiDataFrame
-=============
+^^^^^^^^^^^^^
 
 The class :class:`~ankipandas.ankidf.AnkiDataFrame` is the central data
 structure in which we provide the notes, cards and review tables.

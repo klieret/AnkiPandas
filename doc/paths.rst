@@ -1,5 +1,5 @@
 Paths and Searching
-===================
+^^^^^^^^^^^^^^^^^^^
 
 
 .. automodule:: ankipandas.paths

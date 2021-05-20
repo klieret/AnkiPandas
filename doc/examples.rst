@@ -1,5 +1,5 @@
 Analysis
-========
+--------
 
 .. note::
 
@@ -12,7 +12,7 @@ Analysis
     Or ``col = Collection("/path/to/col.anki2")``, etc.
 
 In which deck are the most leeches?
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. literalinclude:: examples/examples/leeches_per_deck.py
     :linenos:
@@ -20,7 +20,7 @@ In which deck are the most leeches?
 .. image:: examples/plots/leeches_per_deck.png
 
 Which deck has the longest average retention rates?
----------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. literalinclude:: examples/examples/retention_rate_per_deck.py
     :linenos:
@@ -28,7 +28,7 @@ Which deck has the longest average retention rates?
 .. image:: examples/plots/retention_rate_per_deck.png
 
 Repetitions vs type
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Minimal:
 
@@ -44,7 +44,7 @@ Prettier:
 .. image:: examples/plots/repetitions_per_type.png
 
 Repetitions vs deck
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 One liner:
 
@@ -60,7 +60,7 @@ Prettier:
 .. image:: examples/plots/repetitions_per_deck.png
 
 Retention distribution vs deck
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. literalinclude:: examples/examples/retention_distribution_vs_deck.py
     :linenos:
@@ -68,7 +68,7 @@ Retention distribution vs deck
 .. image:: examples/plots/retention_distribution_vs_deck.png
 
 Reviews vs retention length vs deck
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. literalinclude:: examples/examples/reviews_vs_ease.py
     :linenos:

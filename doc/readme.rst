@@ -1,4 +1,8 @@
+------
 Readme
-======
+------
 
-Read the readme on `github <https://github.com/klieret/AnkiPandas/>`_.
+.. toctree::
+    :maxdepth: 2
+
+    README

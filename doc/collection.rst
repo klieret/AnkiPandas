@@ -1,5 +1,5 @@
 Collection
-==========
+^^^^^^^^^^
 
 This is the starting point for most end-users.
 The :class:`~ankipandas.collection.Collection` class loads the Anki collection

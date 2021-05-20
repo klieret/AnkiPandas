@@ -2,6 +2,8 @@ todo.txt
 *.swp
 .idea/**
 doc/_build/**
+# gets copied:
+doc/README.md
 .~*
 
 examples/**

@@ -1,5 +1,5 @@
 Utilities
-=========
+^^^^^^^^^
 
 .. automodule:: ankipandas.util
 

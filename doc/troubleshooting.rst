@@ -1,8 +1,8 @@
 Troubleshooting
-===============
+---------------
 
 Getting help
-------------
+^^^^^^^^^^^^
 
 Submit an `issue on github`_ or write in the `gitter community`_. Thank you for
 improving this toolkit with me!
@@ -11,7 +11,7 @@ improving this toolkit with me!
 .. _gitter community: https://gitter.im/AnkiPandas/community
 
 Common problems
----------------
+^^^^^^^^^^^^^^^
 
 * **Locked database**: While Anki is running, your database will be locked and
   you might not be able to access it. Simply close Anki and try again. Similarly
@@ -27,7 +27,7 @@ Common problems
 
 
 Debugging
----------
+^^^^^^^^^
 
 For better debugging, you can increase the log level of ``ankipandas``:
 
