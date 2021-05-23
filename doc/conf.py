@@ -1,14 +1,33 @@
 import sys
 import os
 import pathlib
-import shutil
+from pathlib import Path
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath("../"))
 
-shutil.copy("../README.md", ".")
+readme_path = Path(__file__).parent.resolve().parent / "README.md"
+readme_target = Path(__file__).parent / "readme.md"
+
+with readme_target.open("w") as outf:
+    outf.write(
+        "\n".join(
+            [
+                "Readme",
+                "======",
+            ]
+        )
+    )
+    lines = []
+    for line in readme_path.read_text().split("\n"):
+        if line.startswith("# "):
+            # Skip title, because we now use "Readme"
+            continue
+        lines.append(line)
+    outf.write("\n".join(lines))
+
 
 # -- General configuration ------------------------------------------------
 
