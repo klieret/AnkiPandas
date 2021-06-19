@@ -70,6 +70,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "eshrh",
+      "name": "eshrh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16175276?v=4",
+      "profile": "http://esrh.sdf.org",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
