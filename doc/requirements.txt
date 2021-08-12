@@ -1,1 +1,2 @@
 sphinx_book_theme
+git+git://github.com/klieret/ankipandas@master#egg=ankipandas
