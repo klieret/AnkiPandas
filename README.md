@@ -1,21 +1,20 @@
-# Analyze and manipulate your Anki collection using pandas!
+# Analyze and manipulate your Anki collection using pandas! 📇📈
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/klieret/AnkiPandas.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/klieret/AnkiPandas/context:python)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/klieret/AnkiPandas/master.svg)](https://results.pre-commit.ci/latest/github/klieret/AnkiPandas/master)
 [![gh actions](https://github.com/klieret/AnkiPandas/workflows/testing/badge.svg)](https://github.com/klieret/AnkiPandas/actions)
 [![Coveralls](https://coveralls.io/repos/github/klieret/AnkiPandas/badge.svg?branch=master)](https://coveralls.io/github/klieret/AnkiPandas?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/klieret/AnkiPandas.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/klieret/AnkiPandas/context:python)
+[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![Pypi status](https://badge.fury.io/py/ankipandas.svg)](https://pypi.org/project/ankipandas/)
 [![Gitter](https://img.shields.io/gitter/room/ankipandas/community.svg)](https://gitter.im/ankipandas/community)
 [![License](https://img.shields.io/github/license/klieret/ankipandas.svg)](https://github.com/klieret/ankipandas/blob/master/LICENSE.txt)
-[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+[![PR welcome](https://img.shields.io/badge/PR-Welcome-%23FF8300.svg)](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project)
 
-**NOTE: THIS PROJECT IS STILL RATHER FRESH. TRY OUT WITH CARE AND GIVE
-FEEDBACK!**
-
-## Description
+## 📝 Description
 
 ![image](https://raw.githubusercontent.com/klieret/AnkiPandas/master/misc/logo/logo_github.png)
 
@@ -66,7 +65,7 @@ Alternatives: If your main goal is to add new cards, models and more,
 you can also take a look at the
 [genanki](https://github.com/kerrickstaley/genanki) project.
 
-## Installation
+## 📦 Installation
 
 `AnkiPandas` is available as [pypi
 package](https://pypi.org/project/ankipandas/) and can be installed or
@@ -86,7 +85,7 @@ cd ankipandas
 pip3 install --user --upgrade .
 ```
 
-## Usage
+## 🔥 Let's get started!
 
 Starting up is as easy as this:
 
@@ -115,7 +114,7 @@ to find out more about more about the available methods!
 
 Some basic examples:
 
-## Analysis
+## 📈 Analysis
 
 **More examples**: [Analysis
 documentation](https://ankipandas.readthedocs.io/en/latest/examples.html)
@@ -142,7 +141,7 @@ notes = col.notes.fields_as_columns()
 notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
 ```
 
-## Manipulations
+## 🛠️ Manipulations
 
 **Please be careful and test this well!** Ankipandas will create a backup of your database before writing, so you can always restore the previous state. Please make sure that everything is working before continuing to use Anki normally!
 
@@ -179,12 +178,12 @@ col.cards.update(selection)
 col.write(modify=True)
 ```
 
-## Troubleshooting
+## 🐞 Troubleshooting
 
 See the [troubleshooting section in the
 documentation](https://ankipandas.readthedocs.io/en/latest/troubleshooting.html).
 
-## Contributing
+## 💖 Contributing
 
 Your help is greatly appreciated! Suggestions, bug reports and feature
 requests are best opened as [github
@@ -196,7 +195,7 @@ request](https://github.com/klieret/AnkiPandas/pulls)!
 
 Bug reports and pull requests are credited with the help of the [allcontributors bot](https://allcontributors.org/).
 
-## License & Disclaimer
+## 📃 License & Disclaimer
 
 This software is licenced under the [MIT
 license](https://github.com/klieret/ankipandas/blob/master/LICENSE.txt)
@@ -210,7 +209,7 @@ package](https://github.com/pandas-dev/pandas/blob/master/doc/logo/pandas_logo.s
 This library and its author(s) are not affiliated/associated with the
 main Anki or pandas project in any way.
 
-## Contributors ✨
+## ✨ Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
