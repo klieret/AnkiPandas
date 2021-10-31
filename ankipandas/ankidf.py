@@ -46,7 +46,8 @@ class AnkiDataFrame(pd.DataFrame):
 
             It is recommended to directly initialize this class with the notes,
             cards or revs table, using one of the methods
-            :meth:`.notes`, :meth:`.cards` or :meth:`.revs` instead!
+            :meth:`.notes`, :meth:`.cards` or :meth:`.revs` of the
+            :class:`~ankipandas.collection.Collection` class instead!
 
         Args:
             *args: Internal use only. See arguments of
