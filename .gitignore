@@ -3,7 +3,7 @@ todo.txt
 .idea/**
 doc/_build/**
 # gets copied:
-doc/README.md
+doc/readme.md
 .~*
 
 examples/**
