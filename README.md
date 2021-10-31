@@ -1,4 +1,4 @@
-# Analyze and manipulate your Anki collection using pandas! 📇📈
+# Analyze and manipulate your Anki collection using pandas! 📇📈🐼
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
@@ -8,6 +8,7 @@
 [![Coveralls](https://coveralls.io/repos/github/klieret/AnkiPandas/badge.svg?branch=master)](https://coveralls.io/github/klieret/AnkiPandas?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/klieret/AnkiPandas.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/klieret/AnkiPandas/context:python)
+[![gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg)](https://gitmoji.dev)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![Pypi status](https://badge.fury.io/py/ankipandas.svg)](https://pypi.org/project/ankipandas/)
 [![Gitter](https://img.shields.io/gitter/room/ankipandas/community.svg)](https://gitter.im/ankipandas/community)
@@ -76,13 +77,23 @@ manager](https://pip.pypa.io/en/stable/):
 pip3 install --user --upgrade ankipandas
 ```
 
+### Development installation
+
 For the latest development version you can also work from a cloned
 version of this repository:
 
 ```sh
 git clone https://github.com/klieret/ankipandas/
 cd ankipandas
-pip3 install --user --upgrade .
+pip3 install --user --upgrade --editable .
+```
+
+If you want to help develop this package further, please also install the
+[pre-commit](https://pre-commit.ci/) hooks and use [gitmoji](https://gitmoji.dev/):
+
+```sh
+pre-commit install
+gitmoji -i
 ```
 
 ## 🔥 Let's get started!
