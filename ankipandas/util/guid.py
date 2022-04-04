@@ -25,7 +25,7 @@ def _base91(num):
 
 def _guid64():
     """Return a base91-encoded 64bit random number."""
-    return _base91(random.randint(0, 2 ** 64 - 1))
+    return _base91(random.randint(0, 2**64 - 1))
 
 
 def guid():
