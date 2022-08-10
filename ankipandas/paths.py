@@ -57,7 +57,7 @@ def _find_db(
                 filename,
             )
             return collections.defaultdict(list)
-    found = collections.defaultdict(list)  # type: DefaultDict[str, List[Path]]
+    found: DefaultDict[str, List[Path]] = collections.defaultdict(list)
     for root, dirs, files in os.walk(str(search_path)):
         if filename in files:
             _user = os.path.basename(root)
@@ -128,7 +128,7 @@ def find_db(
         )
     if isinstance(search_paths, (str, PurePath)):
         search_paths = [search_paths]
-    found = {}  # type: Dict[str, List[Path]]
+    found: Dict[str, List[Path]] = {}
     for search_path in search_paths:
         found = {
             **found,

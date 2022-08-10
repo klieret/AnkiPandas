@@ -71,7 +71,7 @@ class AnkiDataFrame(pd.DataFrame):
         # gets set by _get_table
         #: Type of anki table: 'notes', 'cards' or 'revlog'. This corresponds to
         #: the meaning of the ID row.
-        self._anki_table = None  # type: str
+        self._anki_table: str = None
 
         #: Prefix for fields as columns. Default is ``nfld_``.
         self.fields_as_columns_prefix = "nfld_"
@@ -83,7 +83,7 @@ class AnkiDataFrame(pd.DataFrame):
         # gets set by _get_table
         # noinspection PyTypeChecker
         #: Overal structure of the dataframe ``anki``, ``ours``, ``in_progress``
-        self._df_format = None  # type: str
+        self._df_format: str = None
 
     @property
     def _constructor(self):
@@ -826,9 +826,9 @@ class AnkiDataFrame(pd.DataFrame):
             self._check_our_format()
 
         if other is None:
-            _other = self.col._get_original_item(
+            _other: AnkiDataFrame = self.col._get_original_item(
                 self._anki_table
-            )  # type: AnkiDataFrame
+            )
         else:
             _other = other
         del other  # avoid confusion
@@ -1587,7 +1587,7 @@ class AnkiDataFrame(pd.DataFrame):
         Args:
             n: Number of IDs to generate
         """
-        indices = []  # type: List[int]
+        indices: List[int] = []
         for _ in range(n):
             indices.append(self._get_id(others=indices))
         return indices
@@ -1882,7 +1882,7 @@ class AnkiDataFrame(pd.DataFrame):
             new note ID (``int``)
 
         """
-        _nflds = []  # type: Union[List[List[str]], Dict[str, List[str]]]
+        _nflds: Union[List[List[str]], Dict[str, List[str]]] = []
         if is_list_like(nflds):
             _nflds = [nflds]  # type: ignore
         elif isinstance(nflds, dict):

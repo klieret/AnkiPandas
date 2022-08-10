@@ -49,21 +49,21 @@ class Collection:
         path = ankipandas.paths.db_path_input(path, user=user)
 
         #: Path to currently loaded database
-        self._path = path  # type: Path
+        self._path: Path = path
 
         #: Should be accessed with _get_item!
-        self.__items = {
+        self.__items: Dict[str, Optional[AnkiDataFrame]] = {
             "notes": None,
             "cards": None,
             "revs": None,
-        }  # type: Dict[str, Optional[AnkiDataFrame]]
+        }
 
         #: Should be accessed with _get_original_item!
-        self.__original_items = {
+        self.__original_items: Dict[str, Optional[AnkiDataFrame]] = {
             "notes": None,
             "cards": None,
             "revs": None,
-        }  # type: Dict[str, Optional[AnkiDataFrame]]
+        }
 
     @property
     def path(self) -> Path:
