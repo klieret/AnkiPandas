@@ -1,14 +1,17 @@
 # std
+from __future__ import annotations
+
 import unittest
+
+from ankipandas.util.log import set_debug_log_level
 
 # ours
 from ankipandas.util.types import (
-    is_list_like,
-    is_list_dict_like,
     is_dict_list_like,
+    is_list_dict_like,
+    is_list_like,
     is_list_list_like,
 )
-from ankipandas.util.log import set_debug_log_level
 
 
 class TestTypes(unittest.TestCase):

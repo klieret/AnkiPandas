@@ -1,6 +1,8 @@
 # std
-from typing import List, Any
+from __future__ import annotations
+
 import collections
+from typing import Any, List
 
 
 def invert_dict(dct: dict) -> dict:

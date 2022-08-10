@@ -2,6 +2,8 @@
 come back later.
 """
 
+from __future__ import annotations
+
 # ours
 from ankipandas.collection import Collection
 from ankipandas.test.util import parameterized_paths

@@ -1,16 +1,20 @@
 # std
+from __future__ import annotations
+
 import copy
-from typing import Dict, Any
 from pathlib import Path
+from typing import Any, Dict
+
+import numpy as np
 
 # 3rd
 import pandas as pd
-import numpy as np
-
-# todo: Docstrings, cleanup
 
 # ours
 from ankipandas.util.misc import invert_dict
+
+# todo: Docstrings, cleanup
+
 
 tables_ours2anki = {"revs": "revlog", "cards": "cards", "notes": "notes"}
 tables_anki2ours = invert_dict(tables_ours2anki)

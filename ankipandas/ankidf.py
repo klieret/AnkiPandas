@@ -1,28 +1,31 @@
 # std
+from __future__ import annotations
+
 import copy
+import pathlib
 import time
 from contextlib import closing
+from sqlite3 import Connection
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
 
 # 3rd
 import numpy as np
 import pandas as pd
-import pathlib
-from typing import Union, List, Dict, Optional, Iterable, Sequence, Any
-from sqlite3 import Connection
+
+import ankipandas._columns as _columns
 
 # ours
 import ankipandas.raw as raw
-from ankipandas.util.dataframe import replace_df_inplace, merge_dfs
-import ankipandas._columns as _columns
-from ankipandas.util.misc import invert_dict, flatten_list_list
-from ankipandas.util.log import log
 from ankipandas.util.checksum import field_checksum
+from ankipandas.util.dataframe import merge_dfs, replace_df_inplace
 from ankipandas.util.guid import guid as generate_guid
+from ankipandas.util.log import log
+from ankipandas.util.misc import flatten_list_list, invert_dict
 from ankipandas.util.types import (
-    is_list_list_like,
-    is_list_like,
-    is_list_dict_like,
     is_dict_list_like,
+    is_list_dict_like,
+    is_list_like,
+    is_list_list_like,
 )
 
 

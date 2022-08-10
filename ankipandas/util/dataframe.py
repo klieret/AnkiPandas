@@ -1,6 +1,8 @@
 """ DataFrame utilities. """
 
 # std
+from __future__ import annotations
+
 from typing import Optional
 
 # 3rd

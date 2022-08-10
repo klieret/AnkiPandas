@@ -1,27 +1,29 @@
 # std
+from __future__ import annotations
+
 import copy
-import unittest
+import pathlib
 import shutil
 import tempfile
-import pathlib
+import unittest
 
 # 3rd
 import pandas as pd
 
 # ours
 from ankipandas.raw import (
-    load_db,
-    get_db_version,
     close_db,
+    get_db_version,
     get_deck_info,
     get_did2deck,
-    get_model_info,
-    get_mid2model,
-    set_table,
-    set_info,
     get_info,
-    get_table,
     get_mid2fields,
+    get_mid2model,
+    get_model_info,
+    get_table,
+    load_db,
+    set_info,
+    set_table,
 )
 from ankipandas.util.dataframe import merge_dfs
 from ankipandas.util.log import set_debug_log_level

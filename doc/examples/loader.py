@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 # std
-import os
-from pathlib import Path
-import sys
+from __future__ import annotations
+
 import logging
+import os
+import sys
+from pathlib import Path
 
 # 3rd
 import matplotlib.pyplot as plt

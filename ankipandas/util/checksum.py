@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from hashlib import sha1
 from html.entities import name2codepoint

@@ -7,6 +7,8 @@
 
 """
 
+from __future__ import annotations
+
 import ankipandas.util.checksum
 import ankipandas.util.dataframe
 import ankipandas.util.log
