@@ -1588,7 +1588,7 @@ class AnkiDataFrame(pd.DataFrame):
             n: Number of IDs to generate
         """
         indices = []  # type: List[int]
-        for i in range(n):
+        for _ in range(n):
             indices.append(self._get_id(others=indices))
         return indices
 
