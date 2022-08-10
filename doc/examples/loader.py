@@ -28,7 +28,7 @@ class Loader(object):
 
     def get_examples(self):
         examples = []
-        for root, dirs, files in os.walk(str(self.examples_dir)):
+        for root, _, files in os.walk(str(self.examples_dir)):
             for file in files:
                 examples.append(Path(root) / file)
         return examples
