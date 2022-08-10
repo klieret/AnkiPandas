@@ -22,7 +22,6 @@ import sqlite3
 # std
 from collections import defaultdict
 from functools import lru_cache
-from typing import Dict, List, Union
 
 import numpy as np
 
@@ -42,7 +41,7 @@ CACHE_SIZE = 32
 # ==============================================================================
 
 
-def load_db(path: Union[str, pathlib.PurePath]) -> sqlite3.Connection:
+def load_db(path: str | pathlib.PurePath) -> sqlite3.Connection:
     """
     Load database from path.
 
@@ -85,9 +84,7 @@ def get_table(db: sqlite3.Connection, table: str) -> pd.DataFrame:
         :class:`pandas.DataFrame`
     """
 
-    df = pd.read_sql_query(
-        "SELECT * FROM {}".format(tables_ours2anki[table]), db
-    )
+    df = pd.read_sql_query(f"SELECT * FROM {tables_ours2anki[table]}", db)
     return df
 
 
@@ -336,7 +333,7 @@ def set_info(db: sqlite3.Connection, info: dict) -> None:
 
 
 @lru_cache(CACHE_SIZE)
-def get_ids(db: sqlite3.Connection, table: str) -> List[int]:
+def get_ids(db: sqlite3.Connection, table: str) -> list[int]:
     """Get list of IDs, e.g. note IDs etc.
 
     Args:
@@ -373,7 +370,7 @@ def get_deck_info(db: sqlite3.Connection) -> dict:
 
 
 @lru_cache(CACHE_SIZE)
-def get_did2deck(db: sqlite3.Connection) -> Dict[int, str]:
+def get_did2deck(db: sqlite3.Connection) -> dict[int, str]:
     """Mapping of deck IDs (did) to deck names.
 
     Args:
@@ -388,7 +385,7 @@ def get_did2deck(db: sqlite3.Connection) -> Dict[int, str]:
 
 
 @lru_cache(CACHE_SIZE)
-def get_deck2did(db: sqlite3.Connection) -> Dict[str, int]:
+def get_deck2did(db: sqlite3.Connection) -> dict[str, int]:
     """Mapping of deck names to deck IDs
 
     Args:
@@ -425,7 +422,7 @@ def get_model_info(db: sqlite3.Connection) -> dict:
 
 
 @lru_cache(CACHE_SIZE)
-def get_mid2model(db: sqlite3.Connection) -> Dict[int, str]:
+def get_mid2model(db: sqlite3.Connection) -> dict[int, str]:
     """Mapping of model IDs (mid) to model names.
 
     Args:
@@ -440,7 +437,7 @@ def get_mid2model(db: sqlite3.Connection) -> Dict[int, str]:
 
 
 @lru_cache(CACHE_SIZE)
-def get_model2mid(db: sqlite3.Connection) -> Dict[str, int]:
+def get_model2mid(db: sqlite3.Connection) -> dict[str, int]:
     """Mapping of model name to model ID (mid)
 
     Args:
@@ -455,7 +452,7 @@ def get_model2mid(db: sqlite3.Connection) -> Dict[str, int]:
 
 
 @lru_cache(CACHE_SIZE)
-def get_mid2sortfield(db: sqlite3.Connection) -> Dict[int, int]:
+def get_mid2sortfield(db: sqlite3.Connection) -> dict[int, int]:
     """Mapping of model ID to index of sort field."""
     if get_db_version(db) == 0:
         minfo = get_model_info(db)
@@ -468,7 +465,7 @@ def get_mid2sortfield(db: sqlite3.Connection) -> Dict[int, int]:
 
 
 @lru_cache(CACHE_SIZE)
-def get_mid2fields(db: sqlite3.Connection) -> Dict[int, List[str]]:
+def get_mid2fields(db: sqlite3.Connection) -> dict[int, list[str]]:
     """Get mapping of model ID to field names.
 
     Args:
@@ -495,7 +492,7 @@ def get_mid2fields(db: sqlite3.Connection) -> Dict[int, List[str]]:
 
 
 @lru_cache(CACHE_SIZE)
-def get_mid2templateords(db: sqlite3.Connection) -> Dict[int, List[int]]:
+def get_mid2templateords(db: sqlite3.Connection) -> dict[int, list[int]]:
     """Get mapping of model ID to available templates ids
 
     Args:
@@ -515,7 +512,7 @@ def get_mid2templateords(db: sqlite3.Connection) -> Dict[int, List[int]]:
 
 
 @lru_cache(CACHE_SIZE)
-def get_cid2nid(db: sqlite3.Connection) -> Dict[int, int]:
+def get_cid2nid(db: sqlite3.Connection) -> dict[int, int]:
     """Mapping card ID to note ID.
 
     Args:
@@ -530,7 +527,7 @@ def get_cid2nid(db: sqlite3.Connection) -> Dict[int, int]:
 
 
 @lru_cache(CACHE_SIZE)
-def get_cid2did(db: sqlite3.Connection) -> Dict[int, int]:
+def get_cid2did(db: sqlite3.Connection) -> dict[int, int]:
     """Mapping card ID to deck ID.
 
     Args:
@@ -545,7 +542,7 @@ def get_cid2did(db: sqlite3.Connection) -> Dict[int, int]:
 
 
 @lru_cache(CACHE_SIZE)
-def get_nid2mid(db: sqlite3.Connection) -> Dict[int, int]:
+def get_nid2mid(db: sqlite3.Connection) -> dict[int, int]:
     """Mapping note ID to model ID.
 
     Args:

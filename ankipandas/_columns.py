@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 
@@ -122,14 +122,14 @@ value_maps = {
     "revs": {"rtype": {0: "learning", 1: "review", 2: "relearn", 3: "cram"}},
 }
 
-dtype_casts: Dict[str, Dict[str, Any]] = {
+dtype_casts: dict[str, dict[str, Any]] = {
     "notes": {},
     "cards": {},
     "revs": {},
 }
 
 # todo: more precise?
-dtype_casts_back: Dict[str, Dict[str, Any]] = {
+dtype_casts_back: dict[str, dict[str, Any]] = {
     "notes": {},
     "cards": {},
     "revs": {},

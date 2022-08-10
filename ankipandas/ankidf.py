@@ -6,7 +6,7 @@ import pathlib
 import time
 from contextlib import closing
 from sqlite3 import Connection
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
+from typing import Any, Iterable, Sequence
 
 # 3rd
 import numpy as np
@@ -641,7 +641,7 @@ class AnkiDataFrame(pd.DataFrame):
                 "the notes into your table?"
             )
 
-    def list_tags(self) -> List[str]:
+    def list_tags(self) -> list[str]:
         """Return sorted list of all tags in the current table."""
         if "ntags" not in self.columns:
             raise ValueError(
@@ -653,7 +653,7 @@ class AnkiDataFrame(pd.DataFrame):
                 {item for lst in self["ntags"].tolist() for item in lst}
             )
 
-    def list_decks(self) -> List[str]:
+    def list_decks(self) -> list[str]:
         """Return sorted list of deck names in the current table."""
         if "cdeck" not in self.columns:
             raise ValueError(
@@ -675,7 +675,7 @@ class AnkiDataFrame(pd.DataFrame):
             )
         return sorted(self["nmodel"].unique())
 
-    def has_tag(self, tags: Optional[Union[Iterable[str], str]] = None):
+    def has_tag(self, tags: Iterable[str] | str | None = None):
         """Checks whether row has a certain tag ('ntags' column).
 
         Args:
@@ -716,7 +716,7 @@ class AnkiDataFrame(pd.DataFrame):
         else:
             return self["ntags"].apply(bool)
 
-    def has_tags(self, tags: Optional[Union[Iterable[str], str]] = None):
+    def has_tags(self, tags: Iterable[str] | str | None = None):
         """Checks whether row contains at least the supplied tags.
 
         Args:
@@ -745,7 +745,7 @@ class AnkiDataFrame(pd.DataFrame):
         _has_tags = set(tags).issubset
         return self["ntags"].apply(_has_tags)
 
-    def add_tag(self, tags: Union[Sequence[str], str], inplace=False):
+    def add_tag(self, tags: Sequence[str] | str, inplace=False):
         """Adds tag ('ntags' column).
 
         Args:
@@ -773,7 +773,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         self["ntags"] = self["ntags"].apply(_add_tags)
 
-    def remove_tag(self, tags: Union[Iterable[str], str, None], inplace=False):
+    def remove_tag(self, tags: Iterable[str] | str | None, inplace=False):
         """Removes tag ('ntags' column).
 
         Args:
@@ -807,7 +807,7 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     def was_modified(
-        self, other: Optional[pd.DataFrame] = None, na=True, _force=False
+        self, other: pd.DataFrame | None = None, na=True, _force=False
     ):
         """Compare with original table, show which rows have changed.
         Will only compare columns existing in both dataframes.
@@ -853,7 +853,7 @@ class AnkiDataFrame(pd.DataFrame):
         return result
 
     def modified_columns(
-        self, other: Optional[pd.DataFrame] = None, _force=False, only=True
+        self, other: pd.DataFrame | None = None, _force=False, only=True
     ):
         """Compare with original table, show which columns in which rows
         were modified.
@@ -887,7 +887,7 @@ class AnkiDataFrame(pd.DataFrame):
             columns=cols,
         )
 
-    def was_added(self, other: Optional[pd.DataFrame] = None, _force=False):
+    def was_added(self, other: pd.DataFrame | None = None, _force=False):
         """Compare with original table, show which rows were added.
 
         Args:
@@ -912,8 +912,8 @@ class AnkiDataFrame(pd.DataFrame):
         return self.index.isin(new_indices)
 
     def was_deleted(
-        self, other: Optional[pd.DataFrame] = None, _force=False
-    ) -> List:
+        self, other: pd.DataFrame | None = None, _force=False
+    ) -> list:
         """Compare with original table, return deleted indizes.
 
         Args:
@@ -1206,7 +1206,7 @@ class AnkiDataFrame(pd.DataFrame):
     # Write
     # ==========================================================================
 
-    def summarize_changes(self, output="print") -> Optional[dict]:
+    def summarize_changes(self, output="print") -> dict | None:
         """Summarize changes that were made with respect to the table
         as loaded from the database.
 
@@ -1259,17 +1259,17 @@ class AnkiDataFrame(pd.DataFrame):
         self,
         nid: int,
         cdeck: str,
-        cord: Optional[Union[int, List[int]]] = None,
-        cmod: Optional[int] = None,
-        cusn: Optional[int] = None,
-        cqueue: Optional[str] = None,
-        ctype: Optional[str] = None,
-        civl: Optional[int] = None,
-        cfactor: Optional[int] = None,
-        creps: Optional[int] = None,
-        clapses: Optional[int] = None,
-        cleft: Optional[int] = None,
-        cdue: Optional[int] = None,
+        cord: int | list[int] | None = None,
+        cmod: int | None = None,
+        cusn: int | None = None,
+        cqueue: str | None = None,
+        ctype: str | None = None,
+        civl: int | None = None,
+        cfactor: int | None = None,
+        creps: int | None = None,
+        clapses: int | None = None,
+        cleft: int | None = None,
+        cdue: int | None = None,
         inplace=False,
     ):
         """
@@ -1317,19 +1317,19 @@ class AnkiDataFrame(pd.DataFrame):
     # fixme: This is an absolute mess with the signature and mypy...
     def add_cards(
         self,
-        nid: List[int],
-        cdeck: Union[str, List[str]],
-        cord: Optional[Union[int, List[int]]] = None,
-        cmod: Optional[Union[int, List[int]]] = None,
-        cusn: Optional[Union[int, List[int]]] = None,
-        cqueue: Optional[Union[str, List[str]]] = None,
-        ctype: Optional[Union[str, List[str]]] = None,
-        civl: Optional[Union[int, List[int]]] = None,
-        cfactor: Optional[Union[int, List[int]]] = None,
-        creps: Optional[Union[int, List[int]]] = None,
-        clapses: Optional[Union[int, List[int]]] = None,
-        cleft: Optional[Union[int, List[int]]] = None,
-        cdue: Optional[Union[int, List[int]]] = None,
+        nid: list[int],
+        cdeck: str | list[str],
+        cord: int | list[int] | None = None,
+        cmod: int | list[int] | None = None,
+        cusn: int | list[int] | None = None,
+        cqueue: str | list[str] | None = None,
+        ctype: str | list[str] | None = None,
+        civl: int | list[int] | None = None,
+        cfactor: int | list[int] | None = None,
+        creps: int | list[int] | None = None,
+        clapses: int | list[int] | None = None,
+        cleft: int | list[int] | None = None,
+        cdue: int | list[int] | None = None,
         inplace=False,
     ):
         """
@@ -1423,7 +1423,7 @@ class AnkiDataFrame(pd.DataFrame):
             pass
         else:
             raise ValueError(
-                "Unknown type for cord specifiation: {}".format(type(cord))
+                f"Unknown type for cord specifiation: {type(cord)}"
             )
         not_available = sorted(set(cord) - set(available_ords))
         if not_available:
@@ -1444,7 +1444,7 @@ class AnkiDataFrame(pd.DataFrame):
                     "instead of {}.".format(len(cdeck), len(nid))
                 )
         else:
-            raise ValueError("Unknown format for cdeck: {}".format(type(cdeck)))
+            raise ValueError(f"Unknown format for cdeck: {type(cdeck)}")
         unknown_decks = sorted(
             set(cdeck) - set(raw.get_did2deck(self.db).values())
         )
@@ -1457,7 +1457,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         # --- Rest ---
 
-        def _handle_input(inpt, name, default, typ, options=None) -> List[Any]:
+        def _handle_input(inpt, name, default, typ, options=None) -> list[Any]:
             if inpt is None:
                 inpt = [default] * len(nid)
             elif is_list_like(inpt):
@@ -1538,7 +1538,7 @@ class AnkiDataFrame(pd.DataFrame):
             cdue = [cdue] * len(nid)
         else:
             raise ValueError(
-                "Invalid type of cdue specification: {}".format(type(cdue))
+                f"Invalid type of cdue specification: {type(cdue)}"
             )
 
         # Now we need to decide on contents for EVERY column in the DF
@@ -1581,13 +1581,13 @@ class AnkiDataFrame(pd.DataFrame):
             replace_df_inplace(self, self.append(add))
             return all_cids
 
-    def _get_ids(self, n=1) -> List[int]:
+    def _get_ids(self, n=1) -> list[int]:
         """Generate ID from timestamp and increment if it is already in use.
 
         Args:
             n: Number of IDs to generate
         """
-        indices: List[int] = []
+        indices: list[int] = []
         for _ in range(n):
             indices.append(self._get_id(others=indices))
         return indices
@@ -1596,10 +1596,8 @@ class AnkiDataFrame(pd.DataFrame):
     def add_notes(
         self,
         nmodel: str,
-        nflds: Union[
-            List[List[str]], Dict[str, List[str]], List[Dict[str, str]]
-        ],
-        ntags: List[List[str]] = None,
+        nflds: (list[list[str]] | dict[str, list[str]] | list[dict[str, str]]),
+        ntags: list[list[str]] = None,
         nid=None,
         nguid=None,
         nmod=None,
@@ -1840,7 +1838,7 @@ class AnkiDataFrame(pd.DataFrame):
     def add_note(
         self,
         nmodel: str,
-        nflds: Union[List[str], Dict[str, str]],
+        nflds: list[str] | dict[str, str],
         ntags=None,
         nid=None,
         nguid=None,
@@ -1882,14 +1880,14 @@ class AnkiDataFrame(pd.DataFrame):
             new note ID (``int``)
 
         """
-        _nflds: Union[List[List[str]], Dict[str, List[str]]] = []
+        _nflds: list[list[str]] | dict[str, list[str]] = []
         if is_list_like(nflds):
             _nflds = [nflds]  # type: ignore
         elif isinstance(nflds, dict):
             _nflds = {key: [value] for key, value in nflds.items()}
         else:
             raise ValueError(
-                "Unknown type for fields specification: {}".format(type(nflds))
+                f"Unknown type for fields specification: {type(nflds)}"
             )
         del nflds
 
@@ -1925,7 +1923,7 @@ class AnkiDataFrame(pd.DataFrame):
     # ==========================================================================
 
     # todo: test?
-    def help_col(self, column, ret=False) -> Union[str, None]:
+    def help_col(self, column, ret=False) -> str | None:
         """
         Show description/help about a column. To get information about all
         columns, use the :meth:`.help_cols` method instead.
@@ -2002,7 +2000,7 @@ class AnkiDataFrame(pd.DataFrame):
         return df
 
     @staticmethod
-    def help(ret=False) -> Union[str, None]:
+    def help(ret=False) -> str | None:
         """Display short help text.
 
         Args:

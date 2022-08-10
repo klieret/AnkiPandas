@@ -5,7 +5,7 @@ import sqlite3
 import time
 from contextlib import closing
 from pathlib import Path, PurePath
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 # ours
 import ankipandas.paths
@@ -52,14 +52,14 @@ class Collection:
         self._path: Path = path
 
         #: Should be accessed with _get_item!
-        self.__items: Dict[str, Optional[AnkiDataFrame]] = {
+        self.__items: dict[str, AnkiDataFrame | None] = {
             "notes": None,
             "cards": None,
             "revs": None,
         }
 
         #: Should be accessed with _get_original_item!
-        self.__original_items: Dict[str, Optional[AnkiDataFrame]] = {
+        self.__original_items: dict[str, AnkiDataFrame | None] = {
             "notes": None,
             "cards": None,
             "revs": None,
@@ -135,7 +135,7 @@ class Collection:
         to :attr:`revs`, but without any rows."""
         return AnkiDataFrame.init_with_table(self, "revs", empty=True)
 
-    def summarize_changes(self, output="print") -> Optional[Dict[str, dict]]:
+    def summarize_changes(self, output="print") -> dict[str, dict] | None:
         """Summarize changes that were made with respect to the table
         as loaded from the database.
         If notes/cards/etc. were not loaded at all (and hence also definitely
@@ -167,7 +167,7 @@ class Collection:
 
     def _prepare_write_data(
         self, modify=False, add=False, delete=False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         prepared = {}
         for key, value in self.__items.items():
             if value is None:
@@ -214,7 +214,7 @@ class Collection:
 
         return prepared
 
-    def _get_and_update_info(self) -> Dict[str, Any]:
+    def _get_and_update_info(self) -> dict[str, Any]:
         with closing(self.db) as db:
             info = raw.get_info(db)
 
@@ -250,7 +250,7 @@ class Collection:
         modify=False,
         add=False,
         delete=False,
-        backup_folder: Union[PurePath, str] = None,
+        backup_folder: PurePath | str = None,
     ):
         """Creates a backup of the database and then writes back the new
         data.
