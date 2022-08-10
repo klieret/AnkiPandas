@@ -13,22 +13,27 @@ functionality in :class:`~ankipandas.collection.Collection`,
     change without prior notice.
 """
 
-# std
-from collections import defaultdict
-import sqlite3
+from __future__ import annotations
+
 import json
 import pathlib
+import sqlite3
+
+# std
+from collections import defaultdict
 from functools import lru_cache
 from typing import Dict, List, Union
 
+import numpy as np
+
 # 3rd
 import pandas as pd
-import numpy as np
+
+from ankipandas._columns import anki_columns, tables_ours2anki
 
 # ours
 from ankipandas.util.log import log
-from ankipandas._columns import tables_ours2anki, anki_columns
-from ankipandas.util.misc import nested_dict, defaultdict2dict
+from ankipandas.util.misc import defaultdict2dict, nested_dict
 
 CACHE_SIZE = 32
 

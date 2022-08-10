@@ -1,9 +1,10 @@
 # std
+from __future__ import annotations
+
 import pathlib
 
 # 3rd
 import pytest
-
 
 _test_db_paths = [
     pathlib.Path(__file__).resolve().parent

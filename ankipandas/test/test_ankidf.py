@@ -4,20 +4,24 @@ test_core, because that saves to write a lot of duplicate code.
 Everything else is tested here.
 """
 
+from __future__ import annotations
+
+import copy
+
 # std
 import pathlib
 import unittest
-import copy
 
 # 3rd
 import numpy as np
 
+import ankipandas._columns as _columns
+import ankipandas.raw as raw
+from ankipandas._columns import our_columns
+
 # ours
 from ankipandas.ankidf import AnkiDataFrame as AnkiDF
-from ankipandas._columns import our_columns
-import ankipandas.raw as raw
 from ankipandas.collection import Collection
-import ankipandas._columns as _columns
 from ankipandas.util.log import set_debug_log_level
 
 

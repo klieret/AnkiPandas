@@ -1,8 +1,10 @@
 # std
-import colorlog
+from __future__ import annotations
+
 import logging
 from typing import Union
 
+import colorlog
 
 LOG_DEFAULT_LEVEL = logging.INFO
 

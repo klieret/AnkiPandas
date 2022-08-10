@@ -1,9 +1,11 @@
 # std
-from pathlib import Path, PurePath
+from __future__ import annotations
+
 import sqlite3
-from typing import Optional, Dict, Union, Any
 import time
 from contextlib import closing
+from pathlib import Path, PurePath
+from typing import Any, Dict, Optional, Union
 
 # ours
 import ankipandas.paths

@@ -1,6 +1,8 @@
-import sys
+from __future__ import annotations
+
 import os
 import pathlib
+import sys
 from pathlib import Path
 
 # If extensions (or modules to document with autodoc) are in another directory,

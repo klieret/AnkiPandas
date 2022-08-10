@@ -1,17 +1,19 @@
 # std
+from __future__ import annotations
+
 import collections
-import unittest
 import tempfile
-from typing import List
+import unittest
 from pathlib import Path
+from typing import List
 
 # 3rd
-from randomfiletree import sample_random_elements, iterative_gaussian_tree
+from randomfiletree import iterative_gaussian_tree, sample_random_elements
 
 # ours
 import ankipandas.paths as paths
-from ankipandas.util.misc import flatten_list_list
 from ankipandas.util.log import set_debug_log_level
+from ankipandas.util.misc import flatten_list_list
 
 
 def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:

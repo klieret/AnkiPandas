@@ -1,8 +1,10 @@
 # std
+from __future__ import annotations
+
 import unittest
 
 # ours
-from ankipandas.util.log import log, get_logger, set_log_level
+from ankipandas.util.log import get_logger, log, set_log_level
 
 
 class TestLogging(unittest.TestCase):

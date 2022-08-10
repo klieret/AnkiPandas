@@ -2,14 +2,17 @@
 without the user having to specify full paths.
 """
 
-# std
-import os
+from __future__ import annotations
+
 import collections
 import datetime
-from pathlib import Path, PurePath
-from functools import lru_cache
+
+# std
+import os
 import shutil
-from typing import Union, Optional, DefaultDict, Dict, List
+from functools import lru_cache
+from pathlib import Path, PurePath
+from typing import DefaultDict, Dict, List, Optional, Union
 
 # ours
 from ankipandas.util.log import log
