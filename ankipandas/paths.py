@@ -185,7 +185,7 @@ def find_db(
 
 
 @lru_cache(32)
-def db_path_input(path: str | PurePath = None, user: str = None) -> Path:
+def db_path_input(path: str | PurePath | None = None, user: str = None) -> Path:
     """Helper function to interpret user input of path to database.
 
     1. If no path is given, we search through some default locations
@@ -260,7 +260,7 @@ def get_anki_backup_folder(path: str | PurePath, nexist="raise") -> Path:
 
 def backup_db(
     db_path: str | PurePath,
-    backup_folder: str | PurePath = None,
+    backup_folder: str | PurePath | None = None,
 ) -> Path:
     """
     Back up database file.
