@@ -250,7 +250,7 @@ class Collection:
         modify=False,
         add=False,
         delete=False,
-        backup_folder: PurePath | str = None,
+        backup_folder: PurePath | str | None = None,
     ):
         """Creates a backup of the database and then writes back the new
         data.
