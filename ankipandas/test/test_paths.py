@@ -5,7 +5,6 @@ import collections
 import tempfile
 import unittest
 from pathlib import Path
-from typing import List
 
 # 3rd
 from randomfiletree import iterative_gaussian_tree, sample_random_elements
@@ -16,7 +15,7 @@ from ankipandas.util.log import set_debug_log_level
 from ankipandas.util.misc import flatten_list_list
 
 
-def touch_file_in_random_folders(basedir, filename: str, n=1) -> List[Path]:
+def touch_file_in_random_folders(basedir, filename: str, n=1) -> list[Path]:
     """Create files in random folders.
 
     Args:

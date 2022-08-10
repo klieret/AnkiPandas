@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import collections
-from typing import Any, List
+from typing import Any
 
 
 def invert_dict(dct: dict) -> dict:
@@ -24,7 +24,7 @@ def invert_dict(dct: dict) -> dict:
     return {value: key for key, value in dct.items()}
 
 
-def flatten_list_list(lst: List[List[Any]]) -> List[Any]:
+def flatten_list_list(lst: list[list[Any]]) -> list[Any]:
     """Takes a list of lists and returns a list of all elements.
 
     Args:

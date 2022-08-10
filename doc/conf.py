@@ -99,7 +99,7 @@ author = "Kilian Lieret"
 this_dir = pathlib.Path(__file__).resolve().parent
 with (this_dir / ".." / "ankipandas" / "version.txt").open() as vf:
     version = vf.read().strip()
-print("Version as read from version.txt: '{}'".format(version))
+print(f"Version as read from version.txt: '{version}'")
 
 # The short X.Y version.
 # version = 'dev'
@@ -171,7 +171,7 @@ except ImportError:
         "sphinx_book_theme is not installed"
     )
     html_theme = "default"
-print("html_theme='{}'".format(html_theme))
+print(f"html_theme='{html_theme}'")
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -182,7 +182,7 @@ if html_theme == "sphinx_rtd_theme":
     html_theme_options = {"logo_only": True}
 else:
     html_theme_options = {}
-print("html_theme_options={}".format(html_theme_options))
+print(f"html_theme_options={html_theme_options}")
 
 if html_theme == "sphinx_rtd_theme":
     html_logo = "../misc/logo/logo_rtd.svg"

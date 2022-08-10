@@ -12,7 +12,7 @@ import os
 import shutil
 from functools import lru_cache
 from pathlib import Path, PurePath
-from typing import DefaultDict, Dict, List, Optional, Union
+from typing import DefaultDict
 
 # ours
 from ankipandas.util.log import log
@@ -24,8 +24,8 @@ def _find_db(
     maxdepth=6,
     filename="collection.anki2",
     break_on_first=False,
-    user: Optional[str] = None,
-) -> DefaultDict[str, List[Path]]:
+    user: str | None = None,
+) -> DefaultDict[str, list[Path]]:
     """
     Like find_database but only for one search path at a time. Also doesn't
     raise any error, even if the search path doesn't exist.
@@ -57,7 +57,7 @@ def _find_db(
                 filename,
             )
             return collections.defaultdict(list)
-    found: DefaultDict[str, List[Path]] = collections.defaultdict(list)
+    found: DefaultDict[str, list[Path]] = collections.defaultdict(list)
     for root, dirs, files in os.walk(str(search_path)):
         if filename in files:
             _user = os.path.basename(root)
@@ -128,7 +128,7 @@ def find_db(
         )
     if isinstance(search_paths, (str, PurePath)):
         search_paths = [search_paths]
-    found: Dict[str, List[Path]] = {}
+    found: dict[str, list[Path]] = {}
     for search_path in search_paths:
         found = {
             **found,
@@ -185,7 +185,7 @@ def find_db(
 
 
 @lru_cache(32)
-def db_path_input(path: Union[str, PurePath] = None, user: str = None) -> Path:
+def db_path_input(path: str | PurePath = None, user: str = None) -> Path:
     """Helper function to interpret user input of path to database.
 
     1. If no path is given, we search through some default locations
@@ -209,7 +209,7 @@ def db_path_input(path: Union[str, PurePath] = None, user: str = None) -> Path:
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(
-                "db_path_input: File '{}' does not exist.".format(str(path))
+                f"db_path_input: File '{str(path)}' does not exist."
             )
         if path.is_file():
             log.debug(
@@ -234,7 +234,7 @@ def db_backup_file_name() -> str:
     )
 
 
-def get_anki_backup_folder(path: Union[str, PurePath], nexist="raise") -> Path:
+def get_anki_backup_folder(path: str | PurePath, nexist="raise") -> Path:
     """Return path to Anki backup folder.
 
     Args:
@@ -259,8 +259,8 @@ def get_anki_backup_folder(path: Union[str, PurePath], nexist="raise") -> Path:
 
 
 def backup_db(
-    db_path: Union[str, PurePath],
-    backup_folder: Union[str, PurePath] = None,
+    db_path: str | PurePath,
+    backup_folder: str | PurePath = None,
 ) -> Path:
     """
     Back up database file.

@@ -3,8 +3,6 @@
 # std
 from __future__ import annotations
 
-from typing import Optional
-
 # 3rd
 import pandas as pd
 
@@ -69,7 +67,7 @@ def merge_dfs(
     prepend_clash_only=True,
     columns=None,
     drop_columns=None,
-) -> Optional[pd.DataFrame]:
+) -> pd.DataFrame | None:
     """
     Merge information from two dataframes.
     If the dataframe has a `_metadata` field, containing a list of attribute

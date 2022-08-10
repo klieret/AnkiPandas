@@ -17,7 +17,7 @@ import ankipandas  # noqa E402
 from ankipandas.util.log import get_logger  # noqa E402
 
 
-class Loader(object):
+class Loader:
     def __init__(self):
         this_dir = Path(__file__).parent
         self.col_path = this_dir / "col.anki2"
