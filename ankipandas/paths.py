@@ -101,7 +101,7 @@ def find_db(
             multiple databases matching your criteria.
 
     Raises:
-        If none ore more than one result is found: :class:`ValueError`
+        If none or more than one result is found: :class:`ValueError`
 
     Returns:
         Path to the anki2 database
