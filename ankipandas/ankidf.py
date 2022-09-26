@@ -82,7 +82,7 @@ class AnkiDataFrame(pd.DataFrame):
 
         # gets set by _get_table
         # noinspection PyTypeChecker
-        #: Overal structure of the dataframe ``anki``, ``ours``, ``in_progress``
+        #: Overall structure of the dataframe ``anki``, ``ours``, ``in_progress``
         self._df_format: str = None
 
     @property
