@@ -33,7 +33,7 @@ repos:
       - id: flake8
         additional_dependencies: ["flake8-bugbear"]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v0.971" # Use the sha / tag you want to point at
+    rev: "v0.981" # Use the sha / tag you want to point at
     hooks:
       - id: mypy
         exclude: "conftest.py|^doc/examples/examples/|^doc/conf.py"
@@ -43,7 +43,7 @@ repos:
       - id: codespell
         args: ["-I", "codespell.txt"]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.37.3
+    rev: v2.38.2
     hooks:
       - id: pyupgrade
         args: ["--py37-plus"]
