@@ -19,14 +19,12 @@ with readme_target.open("w") as outf:
             [
                 "Readme",
                 "======",
+                "",
             ]
         )
     )
     lines = []
     for line in readme_path.read_text().split("\n"):
-        if line.startswith("# "):
-            # Skip title, because we now use "Readme"
-            continue
         lines.append(line)
     outf.write("\n".join(lines))
 
