@@ -217,11 +217,10 @@ This software is licenced under the [MIT
 license](https://github.com/klieret/ankipandas/blob/master/LICENSE.txt)
 and (despite best testing efforts) comes **without any warranty**. The
 logo is inspired by the [Anki
-logo](https://github.com/dae/anki/blob/master/web/imgs/anki-logo-thin.png)
-([license](https://github.com/dae/anki/blob/master/LICENSE.logo)) and
-the [logo of the pandas
-package](https://github.com/pandas-dev/pandas/blob/master/doc/logo/pandas_logo.svg)
-([license2](https://github.com/pandas-dev/pandas/blob/master/LICENSE)).
+logo](https://github.com/ankitects/anki/blob/main/qt/aqt/data/web/imgs/anki-logo-thin.png)
+([license](https://github.com/ankitects/anki/blob/main/LICENSE)) and
+the logo of the pandas package
+([license2](https://github.com/pandas-dev/pandas/blob/main/LICENSE)).
 This library and its author(s) are not affiliated/associated with the
 main Anki or pandas project in any way.
 
