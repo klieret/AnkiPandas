@@ -10,6 +10,7 @@ line of code!
 
     readme
     troubleshooting
+    faq
 
 .. toctree::
     :maxdepth: 2
