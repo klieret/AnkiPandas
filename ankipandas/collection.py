@@ -337,10 +337,10 @@ class Collection:
                     )
                     log.debug("Setting table %s successful.", table)
 
-                    if table == 'cards':
+                    if table == "cards":
                         raw.update_card_indices(db)
 
-                    elif table == 'notes':
+                    elif table == "notes":
                         raw.update_note_indices(db)
 
             # log.debug("Now setting info")
