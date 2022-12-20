@@ -232,19 +232,22 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
-  <tr>
-    <td align="center"><a href="https://github.com/Blocked"><img src="https://avatars.githubusercontent.com/u/4366503?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Blocked</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3ABlocked" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/CalculusAce"><img src="https://avatars3.githubusercontent.com/u/42630988?v=4?s=100" width="100px;" alt=""/><br /><sub><b>CalculusAce</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3ACalculusAce" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/khughitt"><img src="https://avatars.githubusercontent.com/u/125001?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Keith Hughitt</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Akhughitt" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/eumiro"><img src="https://avatars0.githubusercontent.com/u/6774676?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Miroslav Šedivý</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Tests">⚠️</a> <a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/bollwyvl"><img src="https://avatars.githubusercontent.com/u/45380?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicholas Bollweg</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=bollwyvl" title="Code">💻</a></td>
-    <td align="center"><a href="http://thomasbrownback.com/"><img src="https://avatars2.githubusercontent.com/u/26754?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thomas Brownback</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Abrownbat" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="http://esrh.sdf.org"><img src="https://avatars.githubusercontent.com/u/16175276?v=4?s=100" width="100px;" alt=""/><br /><sub><b>eshrh</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=eshrh" title="Documentation">📖</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/exc4l"><img src="https://avatars3.githubusercontent.com/u/74188442?v=4?s=100" width="100px;" alt=""/><br /><sub><b>exc4l</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Aexc4l" title="Bug reports">🐛</a> <a href="https://github.com/klieret/AnkiPandas/commits?author=exc4l" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/p4nix"><img src="https://avatars1.githubusercontent.com/u/7038116?v=4?s=100" width="100px;" alt=""/><br /><sub><b>p4nix</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Ap4nix" title="Bug reports">🐛</a></td>
-  </tr>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://github.com/Blocked"><img src="https://avatars.githubusercontent.com/u/4366503?v=4?s=100" width="100px;" alt="Blocked"/><br /><sub><b>Blocked</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3ABlocked" title="Bug reports">🐛</a></td>
+      <td align="center"><a href="https://github.com/CalculusAce"><img src="https://avatars3.githubusercontent.com/u/42630988?v=4?s=100" width="100px;" alt="CalculusAce"/><br /><sub><b>CalculusAce</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3ACalculusAce" title="Bug reports">🐛</a></td>
+      <td align="center"><a href="http://frnsys.com"><img src="https://avatars.githubusercontent.com/u/1059947?v=4?s=100" width="100px;" alt="Francis Tseng"/><br /><sub><b>Francis Tseng</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Afrnsys" title="Bug reports">🐛</a></td>
+      <td align="center"><a href="https://github.com/khughitt"><img src="https://avatars.githubusercontent.com/u/125001?v=4?s=100" width="100px;" alt="Keith Hughitt"/><br /><sub><b>Keith Hughitt</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Akhughitt" title="Bug reports">🐛</a></td>
+      <td align="center"><a href="https://github.com/eumiro"><img src="https://avatars0.githubusercontent.com/u/6774676?v=4?s=100" width="100px;" alt="Miroslav Šedivý"/><br /><sub><b>Miroslav Šedivý</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Tests">⚠️</a> <a href="https://github.com/klieret/AnkiPandas/commits?author=eumiro" title="Code">💻</a></td>
+      <td align="center"><a href="https://github.com/bollwyvl"><img src="https://avatars.githubusercontent.com/u/45380?v=4?s=100" width="100px;" alt="Nicholas Bollweg"/><br /><sub><b>Nicholas Bollweg</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=bollwyvl" title="Code">💻</a></td>
+      <td align="center"><a href="http://thomasbrownback.com/"><img src="https://avatars2.githubusercontent.com/u/26754?v=4?s=100" width="100px;" alt="Thomas Brownback"/><br /><sub><b>Thomas Brownback</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Abrownbat" title="Bug reports">🐛</a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="http://esrh.sdf.org"><img src="https://avatars.githubusercontent.com/u/16175276?v=4?s=100" width="100px;" alt="eshrh"/><br /><sub><b>eshrh</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/commits?author=eshrh" title="Documentation">📖</a></td>
+      <td align="center"><a href="https://github.com/exc4l"><img src="https://avatars3.githubusercontent.com/u/74188442?v=4?s=100" width="100px;" alt="exc4l"/><br /><sub><b>exc4l</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Aexc4l" title="Bug reports">🐛</a> <a href="https://github.com/klieret/AnkiPandas/commits?author=exc4l" title="Code">💻</a></td>
+      <td align="center"><a href="https://github.com/p4nix"><img src="https://avatars1.githubusercontent.com/u/7038116?v=4?s=100" width="100px;" alt="p4nix"/><br /><sub><b>p4nix</b></sub></a><br /><a href="https://github.com/klieret/AnkiPandas/issues?q=author%3Ap4nix" title="Bug reports">🐛</a></td>
+    </tr>
+  </tbody>
 </table>
 
 <!-- markdownlint-restore -->
