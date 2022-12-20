@@ -6,19 +6,20 @@
 </p>
 </a>
 <p>
-<a href="https://ankipandas.readthedocs.io/"><img src="https://readthedocs.org/projects/ankipandas/badge/?version=latest" alt="Documentation Status"></a>
-<a href="https://gitter.im/ankipandas/community"><img src="https://img.shields.io/gitter/room/ankipandas/community.svg" alt="Gitter"></a>
-<a href="https://github.com/klieret/ankipandas/blob/master/LICENSE.txt"><img src="https://img.shields.io/github/license/klieret/ankipandas.svg" alt="License"></a>
-<a href="https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project"><img src="https://img.shields.io/badge/PR-Welcome-%23FF8300.svg" alt="PR welcome"></a></p>
+
+[![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/) [![Gitter](https://img.shields.io/gitter/room/ankipandas/community.svg)](https://gitter.im/ankipandas/community) 
+[![License](https://img.shields.io/github/license/klieret/ankipandas.svg)](https://github.com/klieret/ankipandas/blob/master/LICENSE.txt) 
+[![PR welcome](https://img.shields.io/badge/PR-Welcome-%23FF8300.svg)](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project)
+
 </p>
 <p>
-<a href="https://results.pre-commit.ci/latest/github/klieret/AnkiPandas/master"><img src="https://results.pre-commit.ci/badge/github/klieret/AnkiPandas/master.svg" alt="pre-commit.ci status"></a>
-<a href="https://github.com/klieret/AnkiPandas/actions"><img src="https://github.com/klieret/AnkiPandas/workflows/testing/badge.svg" alt="gh actions"></a>
-<a href="https://coveralls.io/github/klieret/AnkiPandas?branch=master"><img src="https://coveralls.io/repos/github/klieret/AnkiPandas/badge.svg?branch=master" alt="Coveralls"></a>
-<a href="https://lgtm.com/projects/g/klieret/AnkiPandas/context:python"><img src="https://img.shields.io/lgtm/grade/python/g/klieret/AnkiPandas.svg?logo=lgtm&amp;logoWidth=18" alt="Language grade: Python"></a>
-<a href="https://gitmoji.dev"><img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg" alt="gitmoji"></a>
-<a href="https://github.com/python/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Black"></a>
-<a href="https://pypi.org/project/ankipandas/"><img src="https://badge.fury.io/py/ankipandas.svg" alt="Pypi status"></a>
+
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/klieret/AnkiPandas/master.svg)](https://results.pre-commit.ci/latest/github/klieret/AnkiPandas/master) 
+[![gh actions](https://github.com/klieret/AnkiPandas/workflows/testing/badge.svg)](https://github.com/klieret/AnkiPandas/actions) [![Coveralls](https://coveralls.io/repos/github/klieret/AnkiPandas/badge.svg?branch=master)](https://coveralls.io/github/klieret/AnkiPandas?branch=master)
+[![CodeQL](https://github.com/klieret/AnkiPandas/actions/workflows/codeql.yml/badge.svg)](https://github.com/klieret/AnkiPandas/actions/workflows/codeql.yml)
+[![gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg)](https://gitmoji.dev) [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black) 
+[![Pypi status](https://badge.fury.io/py/ankipandas.svg)](https://pypi.org/project/ankipandas/)
+
 </p>
 </div>
 
