@@ -185,7 +185,9 @@ def find_db(
 
 
 @lru_cache(32)
-def db_path_input(path: str | PurePath | None = None, user: str = None) -> Path:
+def db_path_input(
+    path: str | PurePath | None = None, user: str | None = None
+) -> Path:
     """Helper function to interpret user input of path to database.
 
     1. If no path is given, we search through some default locations

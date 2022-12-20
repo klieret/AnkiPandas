@@ -809,7 +809,7 @@ class AnkiDataFrame(pd.DataFrame):
     def was_modified(
         self, other: pd.DataFrame | None = None, na=True, _force=False
     ):
-        """Compare with original table, show which rows have changed.
+        """Compare with original table; show which rows have changed.
         Will only compare columns existing in both dataframes.
 
         Args:
@@ -1597,7 +1597,7 @@ class AnkiDataFrame(pd.DataFrame):
         self,
         nmodel: str,
         nflds: (list[list[str]] | dict[str, list[str]] | list[dict[str, str]]),
-        ntags: list[list[str]] = None,
+        ntags: list[list[str]] | None = None,
         nid=None,
         nguid=None,
         nmod=None,
