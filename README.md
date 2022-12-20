@@ -7,17 +7,17 @@
 </a>
 <p>
 
-[![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/) [![Gitter](https://img.shields.io/gitter/room/ankipandas/community.svg)](https://gitter.im/ankipandas/community) 
-[![License](https://img.shields.io/github/license/klieret/ankipandas.svg)](https://github.com/klieret/ankipandas/blob/master/LICENSE.txt) 
+[![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/) [![Gitter](https://img.shields.io/gitter/room/ankipandas/community.svg)](https://gitter.im/ankipandas/community)
+[![License](https://img.shields.io/github/license/klieret/ankipandas.svg)](https://github.com/klieret/ankipandas/blob/master/LICENSE.txt)
 [![PR welcome](https://img.shields.io/badge/PR-Welcome-%23FF8300.svg)](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project)
 
 </p>
 <p>
 
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/klieret/AnkiPandas/master.svg)](https://results.pre-commit.ci/latest/github/klieret/AnkiPandas/master) 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/klieret/AnkiPandas/master.svg)](https://results.pre-commit.ci/latest/github/klieret/AnkiPandas/master)
 [![gh actions](https://github.com/klieret/AnkiPandas/workflows/testing/badge.svg)](https://github.com/klieret/AnkiPandas/actions) [![Coveralls](https://coveralls.io/repos/github/klieret/AnkiPandas/badge.svg?branch=master)](https://coveralls.io/github/klieret/AnkiPandas?branch=master)
 [![CodeQL](https://github.com/klieret/AnkiPandas/actions/workflows/codeql.yml/badge.svg)](https://github.com/klieret/AnkiPandas/actions/workflows/codeql.yml)
-[![gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg)](https://gitmoji.dev) [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black) 
+[![gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg)](https://gitmoji.dev) [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![Pypi status](https://badge.fury.io/py/ankipandas.svg)](https://pypi.org/project/ankipandas/)
 
 </p>
