@@ -336,6 +336,13 @@ class Collection:
                         db, values["raw"], table=table, mode=values["mode"]
                     )
                     log.debug("Setting table %s successful.", table)
+
+                    if table == "cards":
+                        raw.update_card_indices(db)
+
+                    elif table == "notes":
+                        raw.update_note_indices(db)
+
             # log.debug("Now setting info")
             # raw.set_info(self.db, info)
             # log.debug("Setting info successful.")

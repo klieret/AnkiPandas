@@ -325,6 +325,25 @@ def set_info(db: sqlite3.Connection, info: dict) -> None:
     df.to_sql("col", db, if_exists="replace", index=False)
 
 
+def update_note_indices(db: sqlite3.Connection):
+    cur = db.cursor()
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_notes_mid ON notes (mid)")
+    cur.execute("CREATE INDEX IF NOT EXISTS ix_notes_csum on notes (csum)")
+    cur.execute("CREATE INDEX IF NOT EXISTS ix_notes_usn on notes (usn)")
+
+
+def update_card_indices(db: sqlite3.Connection):
+    cur = db.cursor()
+    cur.execute(
+        "CREATE INDEX IF NOT EXISTS idx_cards_odid ON cards (odid) WHERE odid != 0"
+    )
+    cur.execute("CREATE INDEX IF NOT EXISTS ix_cards_nid on cards (nid)")
+    cur.execute(
+        "CREATE INDEX IF NOT EXISTS ix_cards_sched on cards (did, queue, due)"
+    )
+    cur.execute("CREATE INDEX IF NOT EXISTS ix_cards_usn on cards (usn)")
+
+
 # Trivially derived getters
 # ==============================================================================
 
