@@ -325,14 +325,22 @@ def set_info(db: sqlite3.Connection, info: dict) -> None:
     df.to_sql("col", db, if_exists="replace", index=False)
 
 
-def update_note_indices(db: sqlite3.Connection):
+def update_note_indices(db: sqlite3.Connection) -> None:
+    """Update search indices for 'notes' table. This does not modify any information
+    in the table itself.
+    See https://github.com/klieret/AnkiPandas/issues/124 for more informationl
+    """
     cur = db.cursor()
     cur.execute("CREATE INDEX IF NOT EXISTS idx_notes_mid ON notes (mid)")
     cur.execute("CREATE INDEX IF NOT EXISTS ix_notes_csum on notes (csum)")
     cur.execute("CREATE INDEX IF NOT EXISTS ix_notes_usn on notes (usn)")
 
 
-def update_card_indices(db: sqlite3.Connection):
+def update_card_indices(db: sqlite3.Connection) -> None:
+    """Update search indices for 'cards' table. This does not modify any information
+    in the table itself.
+    See https://github.com/klieret/AnkiPandas/issues/124 for more informationl
+    """
     cur = db.cursor()
     cur.execute(
         "CREATE INDEX IF NOT EXISTS idx_cards_odid ON cards (odid) WHERE odid != 0"
