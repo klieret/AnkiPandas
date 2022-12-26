@@ -1,0 +1,35 @@
+{% raw -%}
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Build sdist and wheel
+        run: pipx run build
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist
+
+      - name: Check products
+        run: pipx run twine check dist/*
+
+      - uses: pypa/gh-action-pypi-publish@v1.6.1
+        if: github.event_name == 'release' && github.event.action == 'published'
+        with:
+          # Remember to generate this and set it in "GitHub Secrets"
+          password: ${{ secrets.pypi_password }}
+          repository_url: https://pypi.org/legacy/
+          verbose: true
+{% endraw -%}
