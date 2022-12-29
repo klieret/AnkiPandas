@@ -10,16 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Wait for all other checks to complete
-      - name: Wait for other checks to succeed
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          check-name: test
-          ref: ${{ github.ref }}
-          running-workflow-name: 'Publish the package'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
