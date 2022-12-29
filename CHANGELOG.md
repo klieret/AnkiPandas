@@ -3,6 +3,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.11 -- 2022-12-29
+
+### Removed
+
+- Python 3.6 has reached its end of life and is no longer supported. This is to
+  ensure that we can keep the code base modern and developers happy.
+
+### Fixed
+
+- When updating cards or notes, certain SQL search indices that are usually
+  automatically created by Anki could be left missing. While these do not
+  change any of the information in the database and can be created trivially,
+  this caused Anki to refuse to load the database.
+
+### Documentation and developer happiness
+
+- Various improvements to the documentation
+- Work on modernizing the code base
+
 ## 0.3.10 -- 2021-05-07
 
 ### Fixed
