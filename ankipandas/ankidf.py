@@ -840,7 +840,7 @@ class AnkiDataFrame(pd.DataFrame):
         cols = sorted(set(self_sf.columns) & set(_other.columns))
 
         other_nids = set(_other.index)
-        inters = set(self_sf.index & other_nids)
+        inters = set(self_sf.index) & other_nids
         result = pd.Series(na, index=self_sf.index)
         new_bools = np.any(
             _other.loc[_other.index.isin(inters), cols].values
