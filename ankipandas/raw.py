@@ -208,7 +208,6 @@ def get_db_version(db: sqlite3.Connection) -> int:
 def _consolidate_tables(
     df: pd.DataFrame, df_old: pd.DataFrame, mode: str, id_column="id"
 ):
-
     if not list(df.columns) == list(df_old.columns):
         raise ValueError(
             "Columns do not match: Old: {}, New: {}".format(
