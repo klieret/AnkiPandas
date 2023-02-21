@@ -21,9 +21,11 @@ Common problems
 .. note::
 
     Any unlisted problem that you ran into (and solved)? Help others by bringing
-    it to my attention_.
+    it to my attention_. Please check if there is already an issue created for
+    it by going through this list_.
 
 .. _attention: https://github.com/klieret/ankipandas/issues
+.. _list: https://github.com/klieret/AnkiPandas/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Abug
 
 
 Debugging
