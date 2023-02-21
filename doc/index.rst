@@ -17,6 +17,7 @@ line of code!
     :caption: Examples
 
     examples
+    projects_with_ap
 
 .. toctree::
     :maxdepth: 2
