@@ -1,7 +1,10 @@
 # std
 from __future__ import annotations
 
+import os
+import shutil
 import sqlite3
+import tempfile
 import time
 from contextlib import closing
 from pathlib import Path, PurePath
@@ -12,6 +15,52 @@ import ankipandas.paths
 import ankipandas.raw as raw
 from ankipandas.ankidf import AnkiDataFrame
 from ankipandas.util.log import log
+
+
+def extract_apkg(path: os.PathLike | str, target: os.PathLike | str):
+    """Extract apkg file to target directory for read/write access.
+
+    .. note::
+
+        If you do not need to write changes, you can directly open the ``.apkg``
+        file with ``ankipandas.Collection(path_to_apkg)``.
+
+    Example:
+
+    .. code-block:: python
+
+        import ankipandas as ap
+        # extracted the apkg file to a directory called "extracted_deck"
+        ap.collection.extract_apkg("deck.apkg", "extracted_deck")
+        # Open the collection in the extracted directory
+        col = ap.Collection("extracted_deck")
+        # Recompress the extracted directory to a new apkg file
+        ap.collection.compress_apkg("extracted_deck", "new_deck.apkg")
+    """
+    path = Path(path)
+    target = Path(target)
+    if target.is_file() or target.is_dir() and list(target.iterdir()):
+        raise FileExistsError(
+            f"Extraction target directory {target} already exists. Please delete it"
+            f" or choose a new name."
+        )
+    target.mkdir(parents=True, exist_ok=True)
+    shutil.unpack_archive(path, target, format="zip")
+
+
+def compress_apkg(path: os.PathLike | str, target: os.PathLike | str):
+    """Compress extracted apkg files back to a ``.apkg`` file."""
+    target = Path(target)
+    path = Path(path)
+    if target.exists():
+        raise FileExistsError(
+            f"Target file {target} already exists. Please delete it"
+            f" or choose a new name."
+        )
+    shutil.make_archive(
+        base_name=str(target), root_dir=path, base_dir=path, format="zip"
+    )
+    shutil.move(target.parent / (target.name + ".zip"), target)
 
 
 class Collection:
@@ -48,6 +97,18 @@ class Collection:
         """
         path = ankipandas.paths.db_path_input(path, user=user)
 
+        #: Temporary directory created to read apkg files
+        self._tmpdir = None
+        if path.name.endswith(".apkg"):
+            log.warning(
+                "Extracting .apkg file to temporary directory. You will not be able to"
+                " save changes to this file. If you want to save changes, use the "
+                "extract_apkg function to extract the file to a directory first."
+            )
+            self._tmpdir = tempfile.TemporaryDirectory()
+            extract_apkg(path, self._tmpdir.name)
+            path = Path(self._tmpdir.name) / "collection.anki2"
+
         #: Path to currently loaded database
         self._path: Path = path
 
@@ -64,6 +125,10 @@ class Collection:
             "cards": None,
             "revs": None,
         }
+
+    def __del__(self):
+        if self._tmpdir is not None:
+            self._tmpdir.cleanup()
 
     @property
     def path(self) -> Path:
