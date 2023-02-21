@@ -134,7 +134,8 @@ Some basic examples:
 ## 📈 Analysis
 
 **More examples**: [Analysis
-documentation](https://ankipandas.readthedocs.io/en/latest/examples.html)
+documentation](https://ankipandas.readthedocs.io/en/latest/examples.html),
+[projects that use `AnkiPandas`](https://ankipandas.readthedocs.io/en/latest/projects_with_ap.html).
 
 Show a histogram of the number of reviews (repetitions) of each card for
 all decks:
