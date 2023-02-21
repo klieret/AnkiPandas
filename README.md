@@ -182,7 +182,7 @@ notes = col.notes
 selection = notes[notes.has_tag(["English"])].query("model=='LanguageModel'").copy()
 selection.fields_as_columns(inplace=True)
 selection["language"] = "English"
-col.notes.update(selection.fields_as_list())
+col.notes.update(selection)
 col.write(modify=True)
 ```
 
