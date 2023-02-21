@@ -7,7 +7,7 @@
 </a>
 <p>
 
-[![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/) [![Gitter](https://img.shields.io/gitter/room/ankipandas/community.svg)](https://gitter.im/ankipandas/community)
+[![Documentation Status](https://readthedocs.org/projects/ankipandas/badge/?version=latest)](https://ankipandas.readthedocs.io/) [![Gitter](https://img.shields.io/gitter/room/ankipandas/community.svg)](https://matrix.to/#/#AnkiPandas_community:gitter.im)
 [![License](https://img.shields.io/github/license/klieret/ankipandas.svg)](https://github.com/klieret/ankipandas/blob/master/LICENSE.txt)
 [![PR welcome](https://img.shields.io/badge/PR-Welcome-%23FF8300.svg)](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project)
 
@@ -207,7 +207,7 @@ Your help is greatly appreciated! Suggestions, bug reports and feature
 requests are best opened as [github
 issues](https://github.com/klieret/ankipandas/issues). You could also
 first discuss in the [gitter
-community](https://gitter.im/ankipandas/community). If you want to code
+community](https://matrix.to/#/#AnkiPandas_community:gitter.im). If you want to code
 something yourself, you are very welcome to submit a [pull
 request](https://github.com/klieret/AnkiPandas/pulls)!
 
