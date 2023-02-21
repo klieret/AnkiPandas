@@ -4,11 +4,10 @@ Troubleshooting
 Getting help
 ^^^^^^^^^^^^
 
-Submit an `issue on github`_ or write in the `gitter community`_. Thank you for
+Submit an `issue on github`_. Thank you for
 improving this toolkit with me!
 
 .. _issue on github: https://github.com/klieret/ankipandas/issues
-.. _gitter community: https://gitter.im/AnkiPandas/community
 
 Common problems
 ^^^^^^^^^^^^^^^
