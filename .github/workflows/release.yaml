@@ -29,5 +29,4 @@ jobs:
         with:
           # Remember to generate this and set it in "GitHub Secrets"
           password: ${{ secrets.pypi_password }}
-          repository_url: https://pypi.org/legacy/
           verbose: true
