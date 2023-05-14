@@ -244,7 +244,7 @@ def _consolidate_tables(
         df_new = df_old.copy()
         df_new.update(df)
     elif mode == "append":
-        df_new = df_old.append(df, verify_integrity=True)
+        df_new = pd.concat([df_old, df], verify_integrity=True)
     elif mode == "replace":
         df_new = df.copy()
     else:

@@ -121,8 +121,15 @@ class AnkiDataFrame(pd.DataFrame):
     def equals(self, other):
         return pd.DataFrame(self).equals(other)
 
-    def append(self, *args, **kwargs):
-        ret = pd.DataFrame.append(self, *args, **kwargs)
+    def append(
+        self, other, ignore_index=False, verify_integrity=False, sort=False
+    ):
+        ret = pd.concat(
+            [self, other],
+            ignore_index=False,
+            verify_integrity=False,
+            sort=False,
+        )
         ret.astype(_columns.dtype_casts2[self._anki_table])
         return ret
 
