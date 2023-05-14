@@ -253,9 +253,9 @@ def get_anki_backup_folder(path: str | PurePath, nexist="raise") -> Path:
     backup_folder = path.parent / "backups"
     if nexist == "raise" and not backup_folder.is_dir():
         raise ValueError(
-            "Anki backup folder corresponding to database at {} doesn't seem"
-            " to exist. Perhaps you can specify a custom back "
-            "folder?".format(path)
+            f"Anki backup folder corresponding to database at {path} doesn't seem"
+            " to exist. Perhaps you can specify a custom backup "
+            "folder?"
         )
     return backup_folder
 
