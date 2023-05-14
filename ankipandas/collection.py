@@ -95,10 +95,13 @@ class Collection:
             col = Collection("/partial/path/to/collection", user="User 1")
 
         """
-        path = ankipandas.paths.db_path_input(path, user=user)
-
+        # Must come first, because it's referenced in __del__, so it's being used
+        # even if we hit an exception in the constructor.
         #: Temporary directory created to read apkg files
         self._tmpdir = None
+
+        path = ankipandas.paths.db_path_input(path, user=user)
+
         if path.name.endswith(".apkg"):
             log.warning(
                 "Extracting .apkg file to temporary directory. You will not be able to"
