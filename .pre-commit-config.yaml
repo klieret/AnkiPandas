@@ -43,10 +43,10 @@ repos:
       - id: codespell
         args: ["-I", "codespell.txt"]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.4.0
+    rev: v3.7.0
     hooks:
       - id: pyupgrade
-        args: ["--py37-plus"]
+        args: ["--py38-plus"]
 
 
 
