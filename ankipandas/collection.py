@@ -251,9 +251,16 @@ class Collection:
         add=False,
         delete=False,
         backup_folder: PurePath | str | None = None,
+        _override_exception=False,
     ):
         """Creates a backup of the database and then writes back the new
         data.
+
+        .. danger::
+
+            The write capabilities of ``AnkiPandas`` have currently been disabled
+            because of `#137 <https://github.com/klieret/AnkiPandas/issues/137/>`_.
+            Help in fixing this issue would be greatly appreciated!
 
         .. danger::
 
@@ -280,6 +287,13 @@ class Collection:
         Returns:
             None
         """
+        if not _override_exception:
+            raise NotImplementedError(
+                "The write capabilities of AnkiPandas have currently been disabled"
+                " because of https://github.com/klieret/AnkiPandas/issues/137/. "
+                "Help in fixing this issue would be greatly appreciated!"
+            )
+
         if not modify and not add and not delete:
             log.warning(
                 "Please set modify=True, add=True or delete=True, you're"
