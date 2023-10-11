@@ -46,9 +46,10 @@ your Anki flashcards.
     or switch to the even more versatile
     [seaborn](https://seaborn.pydata.org/) (statistical analysis) or
     [matplotlib](https://matplotlib.org/) libraries
--   **Manipulate & adding notes and cards**: Apply fast bulk operations to the table (e.g. add
+-   **Manipulate**: Apply fast bulk operations to the table (e.g. add
     tags, change decks, set field contents, suspend cards, \...) or
-    iterate over the table and perform these manipulations step by step. **This is still in alpha/beta! Proceed with care and please report bugs!** (but ankipandas will always create a backup of your database before changing something).
+    iterate over the table and perform these manipulations step by step.
+    **⚠️ This functionality is currently disabled until [#137](https://github.com/klieret/AnkiPandas/issues/137) has been resolved! ⚠️**
 -   **Import and Export**: Pandas can export to (and import from) csv,
     MS Excel, HTML, JSON, \... ([io
     documentation](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html))
@@ -161,7 +162,14 @@ notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
 
 ## 🛠️ Manipulations
 
-**Please be careful and test this well!** Ankipandas will create a backup of your database before writing, so you can always restore the previous state. Please make sure that everything is working before continuing to use Anki normally!
+> **Danger**
+> Writing the database has currently been disabled until
+> [#137](https://github.com/klieret/AnkiPandas/issues/137) has been resolved.
+> Help is much appreviated!
+
+> **Warning**
+> **Please be careful and test this well!**
+> Ankipandas will create a backup of your database before writing, so you can always restore the previous state. Please make sure that everything is working before continuing to use Anki normally!
 
 Add the `difficult-japanese` and `marked` tag to all notes that contain
 the tags `Japanese` and `leech`:

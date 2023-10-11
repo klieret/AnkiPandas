@@ -63,7 +63,7 @@ def test_read_write_identical_trivial(db_path, tmpdir):
     (pathlib.Path(str(tmpdir)) / "backups").mkdir()
     col = Collection(db_path)
     _init_all_tables(col)
-    col.write(modify=True, delete=True, add=True)
+    col.write(modify=True, delete=True, add=True, _override_exception=True)
     col_rel = Collection(db_path)
     assert col.notes.equals(col_rel.notes)
     assert col.cards.equals(col_rel.cards)
@@ -84,7 +84,7 @@ def test_write_raises_delete(db_path, tmpdir):
     ]
     for case in cases:
         with pytest.raises(ValueError, match=".*would be deleted.*"):
-            col.write(**case, delete=False)
+            col.write(**case, delete=False, _override_exception=True)
 
 
 @parameterized_paths()
@@ -101,7 +101,7 @@ def test_write_raises_modified(db_path, tmpdir):
     ]
     for case in cases:
         with pytest.raises(ValueError, match=".*would be modified.*"):
-            col.write(**case, modify=False)
+            col.write(**case, modify=False, _override_exception=True)
 
 
 @parameterized_paths()
@@ -118,7 +118,7 @@ def test_write_raises_added(db_path, tmpdir):
     ]
     for case in cases:
         with pytest.raises(ValueError, match=".*would be modified.*"):
-            col.write(**case, add=False)
+            col.write(**case, add=False, _override_exception=True)
 
 
 @parameterized_paths()
@@ -128,4 +128,4 @@ def test_write_added(db_path, tmpdir):
     col = Collection(db_path)
     _init_all_tables(col)
     col.notes.add_note("Basic", ["test", "back"], inplace=True)
-    col.write(add=True)
+    col.write(add=True, _override_exception=True)

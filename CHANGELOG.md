@@ -3,6 +3,14 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.15 -- 2023-10-11
+
+### Removed
+
+- `Collection.write` now raises a `NotImplementedError` because
+  https://github.com/klieret/AnkiPandas/issues/137 has so far not been
+  resolved and has caused numerous problems.
+
 ## 0.3.14 -- 2023-05-14
 
 ### Fixed
