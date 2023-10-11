@@ -25,6 +25,12 @@
 
 ## 📝 Description
 
+> **Note**
+> This package needs a new maintainer, as I currently do not have enough time to continue development
+> of this package. Writing modifications back into the Anki database is currently disabled,
+> in particular because of issue [#137](https://github.com/klieret/AnkiPandas/issues/137).
+> Please reach out to me if you are interested in getting involved!
+
 [Anki](https://apps.ankiweb.net/) is one of the most popular flashcard
 system for spaced repetition learning,
 [pandas](https://pandas.pydata.org/) is the most popular python package
@@ -162,7 +168,7 @@ notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
 
 ## 🛠️ Manipulations
 
-> **Danger**
+> **Warning**
 > Writing the database has currently been disabled until
 > [#137](https://github.com/klieret/AnkiPandas/issues/137) has been resolved.
 > Help is much appreviated!
