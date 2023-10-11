@@ -171,7 +171,7 @@ notes.query("model=='MnemoticModel' and 'Mnemotic'==''")
 > **Warning**
 > Writing the database has currently been disabled until
 > [#137](https://github.com/klieret/AnkiPandas/issues/137) has been resolved.
-> Help is much appreviated!
+> Help is much appreciated!
 
 > **Warning**
 > **Please be careful and test this well!**
