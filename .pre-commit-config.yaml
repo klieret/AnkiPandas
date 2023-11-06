@@ -1,11 +1,11 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 23.10.1
     hooks:
       - id: black
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -33,17 +33,17 @@ repos:
       - id: flake8
         additional_dependencies: ["flake8-bugbear"]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.5.1" # Use the sha / tag you want to point at
+    rev: "v1.6.1" # Use the sha / tag you want to point at
     hooks:
       - id: mypy
         exclude: "conftest.py|^doc/examples/examples/|^doc/conf.py"
   - repo: https://github.com/codespell-project/codespell
-    rev: "v2.2.5"
+    rev: "v2.2.6"
     hooks:
       - id: codespell
         args: ["-I", "codespell.txt"]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.10.1
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
         args: ["--py37-plus"]
