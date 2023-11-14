@@ -1430,7 +1430,7 @@ class AnkiDataFrame(pd.DataFrame):
             pass
         else:
             raise ValueError(
-                f"Unknown type for cord specifiation: {type(cord)}"
+                f"Unknown type for cord specification: {type(cord)}"
             )
         not_available = sorted(set(cord) - set(available_ords))
         if not_available:
