@@ -1603,7 +1603,7 @@ class AnkiDataFrame(pd.DataFrame):
     def add_notes(
         self,
         nmodel: str,
-        nflds: (list[list[str]] | dict[str, list[str]] | list[dict[str, str]]),
+        nflds: list[list[str]] | dict[str, list[str]] | list[dict[str, str]],
         ntags: list[list[str]] | None = None,
         nid=None,
         nguid=None,

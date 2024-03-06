@@ -152,9 +152,9 @@ class TestRawWrite(unittest.TestCase):
         for mode in ["update", "replace", "append"]:
             with self.subTest(mode=mode):
                 self._reset()
-                notes2.loc[
-                    notes2["id"] == 1555579337683, "tags"
-                ] = "definitelynew!"
+                notes2.loc[notes2["id"] == 1555579337683, "tags"] = (
+                    "definitelynew!"
+                )
                 set_table(self.db_write, notes2, "notes", mode)
                 if mode == "append":
                     self._check_db_equal()

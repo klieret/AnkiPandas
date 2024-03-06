@@ -53,8 +53,10 @@ def nested_dict():
 
 def defaultdict2dict(defdict: collections.defaultdict) -> dict:
     return {
-        key: defaultdict2dict(value)
-        if isinstance(value, collections.defaultdict)
-        else value
+        key: (
+            defaultdict2dict(value)
+            if isinstance(value, collections.defaultdict)
+            else value
+        )
         for key, value in defdict.items()
     }
