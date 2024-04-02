@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 24.1.1
+    rev: 24.3.0
     hooks:
       - id: black
 
@@ -33,7 +33,7 @@ repos:
       - id: flake8
         additional_dependencies: ["flake8-bugbear"]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.8.0" # Use the sha / tag you want to point at
+    rev: "v1.9.0" # Use the sha / tag you want to point at
     hooks:
       - id: mypy
         exclude: "conftest.py|^doc/examples/examples/|^doc/conf.py"
@@ -43,7 +43,7 @@ repos:
       - id: codespell
         args: ["-I", "codespell.txt"]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
+    rev: v3.15.2
     hooks:
       - id: pyupgrade
         args: ["--py37-plus"]
