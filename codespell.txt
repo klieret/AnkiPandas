@@ -1,1 +1,3 @@
 hist
+inpt
+assertIn
