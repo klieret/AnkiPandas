@@ -1,12 +1,13 @@
 version: 2
 
 build:
+    os: ubuntu-22.04
     image: latest
+    python: "3.10"
 
 sphinx:
   configuration: doc/conf.py
 
 python:
-  version: 3.8
   install:
     - requirements: doc/requirements.txt
