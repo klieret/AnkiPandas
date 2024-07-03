@@ -1,2 +1,3 @@
+recommonmark
 sphinx_book_theme
 git+https://github.com/klieret/AnkiPandas.git
