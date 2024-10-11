@@ -34,7 +34,7 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ankipandas dist ${{ github.run_number }}
           path: ./dist
@@ -58,7 +58,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v4
       with:
         name: ankipandas dist ${{ github.run_number }}
         path: ./dist
