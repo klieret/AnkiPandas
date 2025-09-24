@@ -278,7 +278,9 @@ def set_table(
     df_new = _consolidate_tables(
         df=df, df_old=df_old, mode=mode, id_column=id_column
     )
-    df_new.to_sql(tables_ours2anki[table], db, if_exists="replace", index=False)
+    
+    dtype = {id_column: 'INTEGER PRIMARY KEY'} # set id_column as primary key using dtype
+    df_new.to_sql(tables_ours2anki[table], db, if_exists="replace", index=False, dtype=dtype)
 
 
 class NumpyJSONEncoder(json.JSONEncoder):
