@@ -1,4 +1,4 @@
-""" Various utilities of this package.
+"""Various utilities of this package.
 
 .. warning::
 

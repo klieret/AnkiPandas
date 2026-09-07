@@ -1,4 +1,4 @@
-""" DataFrame utilities. """
+"""DataFrame utilities."""
 
 # std
 from __future__ import annotations
