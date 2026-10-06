@@ -1,4 +1,4 @@
-""" These tests are created from issues that we fixed to avoid that they might
+"""These tests are created from issues that we fixed to avoid that they might
 come back later.
 """
 
