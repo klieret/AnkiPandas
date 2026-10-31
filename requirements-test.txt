@@ -1,0 +1,2 @@
+# Test-only dependencies (installed via tests_require / dev installs).
+# randomfiletree was removed; path tests use stdlib helpers in test_paths.py.

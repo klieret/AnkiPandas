@@ -2,17 +2,53 @@
 from __future__ import annotations
 
 import collections
+import random
 import tempfile
 import unittest
 from pathlib import Path
-
-# 3rd
-from randomfiletree import iterative_gaussian_tree, sample_random_elements
 
 # ours
 import ankipandas.paths as paths
 from ankipandas.util.log import set_debug_log_level
 from ankipandas.util.misc import flatten_list_list
+
+
+def _iterative_gaussian_tree(
+    root: str,
+    *,
+    repeat: int,
+    nfolders: int,
+    min_folders: int,
+    nfiles: int,
+    min_files: int,
+    maxdepth: int,
+) -> None:
+    """Create a random directory tree under ``root`` (test helper)."""
+    root_path = Path(root)
+    root_path.mkdir(parents=True, exist_ok=True)
+    for _ in range(repeat):
+        current = root_path
+        depth = random.randint(1, maxdepth)
+        for _ in range(depth):
+            n_sub = max(min_folders, int(random.gauss(nfolders, 1)))
+            for _ in range(n_sub):
+                sub = current / f"d{random.randint(0, 10**9)}"
+                sub.mkdir(exist_ok=True)
+                n_f = max(min_files, int(random.gauss(nfiles, 1)))
+                for _ in range(n_f):
+                    (sub / f"f{random.randint(0, 10**9)}").touch()
+                if random.random() < 0.5:
+                    current = sub
+
+
+def _sample_random_dirs(basedir: str, n_dirs: int) -> list[str]:
+    """Return up to ``n_dirs`` directory paths under ``basedir``."""
+    root = Path(basedir)
+    dirs = [str(p) for p in root.rglob("*") if p.is_dir()]
+    if not dirs:
+        dirs = [str(root)]
+    random.shuffle(dirs)
+    return dirs[:n_dirs]
 
 
 def touch_file_in_random_folders(basedir, filename: str, n=1) -> list[Path]:
@@ -27,9 +63,7 @@ def touch_file_in_random_folders(basedir, filename: str, n=1) -> list[Path]:
         List of files that were created.
     """
     files = set()
-    for d in sample_random_elements(
-        basedir, n_dirs=n, n_files=0, onfail="ignore"
-    )[0]:
+    for d in _sample_random_dirs(basedir, n_dirs=n):
         p = Path(d) / filename
         p.touch()
         files.add(p)
@@ -45,7 +79,7 @@ class TestFindDatabase(unittest.TestCase):
             "perfect": tempfile.TemporaryDirectory(),
         }
         for d in self.dirs.values():
-            iterative_gaussian_tree(
+            _iterative_gaussian_tree(
                 d.name,
                 repeat=5,
                 nfolders=3,
