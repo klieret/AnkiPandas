@@ -10,6 +10,8 @@ import string
 def _base62(num, extra=""):
     s = string
     table = s.ascii_letters + s.digits + extra
+    if num == 0:
+        return table[0]
     buf = ""
     while num:
         num, i = divmod(num, len(table))
